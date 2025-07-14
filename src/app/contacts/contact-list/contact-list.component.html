@@ -1,0 +1,11 @@
+<div class="container">
+  <h2>Kontakty</h2>
+  <button routerLink="new">Dodaj kontakt</button>
+  <ul>
+    <li *ngFor="let c of contacts$ | async">
+      {{ c.firstName }} {{ c.lastName }} ({{ c.company }})
+      <button [routerLink]="[c.id]">Edytuj</button>
+      <button (click)="onDelete(c.id)">Usuń</button>
+    </li>
+  </ul>
+</div>

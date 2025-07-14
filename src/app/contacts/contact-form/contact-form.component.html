@@ -1,0 +1,59 @@
+<div class="container">
+  <h2>{{ editId ? 'Edycja kontaktu' : 'Nowy kontakt' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div>
+      <label>Imię</label>
+      <input formControlName="firstName">
+      <div *ngIf="form.get('firstName')?.errors?.['required'] && form.get('firstName')?.touched">
+        Pole jest wymagane
+      </div>
+    </div>
+
+    <div>
+      <label>Nazwisko</label>
+      <input formControlName="lastName">
+      <div *ngIf="form.get('lastName')?.errors?.['required'] && form.get('lastName')?.touched">
+        Pole jest wymagane
+      </div>
+    </div>
+
+    <div>
+      <label>Firma</label>
+      <input formControlName="company">
+    </div>
+
+    <div>
+      <label>Stanowisko</label>
+      <input formControlName="position">
+    </div>
+
+    <div>
+      <label>Telefon</label>
+      <input formControlName="phone">
+    </div>
+
+    <div>
+      <label>Email</label>
+      <input type="email" formControlName="email">
+      <div *ngIf="form.get('email')?.errors?.['required'] && form.get('email')?.touched">
+        Pole jest wymagane
+      </div>
+      <div *ngIf="form.get('email')?.errors?.['email'] && form.get('email')?.touched">
+        Nieprawidłowy format adresu email
+      </div>
+    </div>
+
+    <div>
+      <label>Adres</label>
+      <input formControlName="address">
+    </div>
+
+    <div>
+      <label>Notatki</label>
+      <textarea formControlName="notes"></textarea>
+    </div>
+
+    <button type="submit" [disabled]="form.invalid">Zapisz</button>
+    <button type="button" (click)="router.navigate(['/contacts'])">Anuluj</button>
+  </form>
+</div>
