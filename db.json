@@ -1,0 +1,15 @@
+{
+  "contacts": [
+    {
+      "id": "faaf",
+      "firstName": "Mariusz2",
+      "lastName": "Rodzic",
+      "company": "",
+      "position": "",
+      "phone": "693559906",
+      "email": "mariuszrodzic08@gmail.com",
+      "address": "Szarych Szeregów, 19, 33",
+      "notes": ""
+    }
+  ]
+}

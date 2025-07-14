@@ -1,32 +1,33 @@
 import {Component, OnInit} from '@angular/core';
-import {Observable} from 'rxjs';
 import {Contact} from '../contact.model';
 import {ContactService} from '../contact.service';
-import {Router, RouterLink} from '@angular/router';
+import {RouterLink} from '@angular/router';
 import {AsyncPipe, NgForOf} from '@angular/common';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-contact-list',
-  imports: [
-    RouterLink,
-    NgForOf,
-    AsyncPipe
-  ],
+  standalone: true,
+  imports: [RouterLink, NgForOf, AsyncPipe],
   templateUrl: './contact-list.component.html'
 })
 export class ContactListComponent implements OnInit {
   contacts$!: Observable<Contact[]>;
 
-  constructor(private contactService: ContactService, private router: Router) {
+  constructor(private contactService: ContactService) {
   }
 
   ngOnInit() {
-    this.contacts$ = this.contactService.contacts$;
+    this.loadContacts();
   }
 
-  onDelete(id: number) {
+  loadContacts() {
+    this.contacts$ = this.contactService.getAll();
+  }
+
+  onDelete(id: string) {
     if (confirm('Usunąć ten kontakt?')) {
-      this.contactService.delete(id);
+      this.contactService.delete(id).subscribe(() => this.loadContacts());
     }
   }
 }
