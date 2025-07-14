@@ -7,10 +7,8 @@ import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-contact-form',
-  imports: [
-    ReactiveFormsModule,
-    NgIf
-  ],
+  standalone: true,
+  imports: [ReactiveFormsModule, NgIf],
   templateUrl: './contact-form.component.html'
 })
 export class ContactFormComponent implements OnInit {
@@ -18,7 +16,7 @@ export class ContactFormComponent implements OnInit {
   editId?: number;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private fb: FormBuilder,
     private contactService: ContactService,
     private route: ActivatedRoute,
     protected router: Router
@@ -26,7 +24,7 @@ export class ContactFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.form = this.formBuilder.group({
+    this.form = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       company: [''],
@@ -40,21 +38,20 @@ export class ContactFormComponent implements OnInit {
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.editId = +params['id'];
-        const contact = this.contactService.getById(this.editId);
-        if (contact) this.form.patchValue(contact);
+        this.contactService.getById(this.editId).subscribe(contact => {
+          this.form.patchValue(contact);
+        });
       }
     });
   }
 
   onSubmit() {
     if (this.form.invalid) return;
-
     const data = this.form.value as Omit<Contact, 'id'>;
-    if (this.editId) {
-      this.contactService.update({id: this.editId, ...data});
-    } else {
-      this.contactService.create(data);
-    }
-    this.router.navigate(['/contacts']);
+    const op$ = this.editId
+      ? this.contactService.update({id: this.editId, ...data})
+      : this.contactService.create(data);
+
+    op$.subscribe(() => this.router.navigate(['/contacts']));
   }
 }
