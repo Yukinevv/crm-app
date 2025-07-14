@@ -25,7 +25,7 @@ export class ContactListComponent implements OnInit {
     this.contacts$ = this.contactService.getAll();
   }
 
-  onDelete(id: number) {
+  onDelete(id: string) {
     if (confirm('Usunąć ten kontakt?')) {
       this.contactService.delete(id).subscribe(() => this.loadContacts());
     }

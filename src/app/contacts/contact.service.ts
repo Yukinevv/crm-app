@@ -14,7 +14,7 @@ export class ContactService {
     return this.http.get<Contact[]>(this.baseUrl);
   }
 
-  getById(id: number): Observable<Contact> {
+  getById(id: string): Observable<Contact> {
     return this.http.get<Contact>(`${this.baseUrl}/${id}`);
   }
 
@@ -26,7 +26,7 @@ export class ContactService {
     return this.http.put<Contact>(`${this.baseUrl}/${contact.id}`, contact);
   }
 
-  delete(id: number): Observable<void> {
+  delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

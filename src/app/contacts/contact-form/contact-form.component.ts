@@ -13,7 +13,7 @@ import {NgIf} from '@angular/common';
 })
 export class ContactFormComponent implements OnInit {
   form!: FormGroup;
-  editId?: number;
+  editId?: string;
 
   constructor(
     private fb: FormBuilder,
@@ -35,18 +35,20 @@ export class ContactFormComponent implements OnInit {
       notes: ['']
     });
 
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.editId = +params['id'];
-        this.contactService.getById(this.editId).subscribe(contact => {
-          this.form.patchValue(contact);
-        });
+    this.route.paramMap.subscribe(pm => {
+      const id = pm.get('id');
+      if (id) {
+        this.editId = id;
+        console.log('Ładowanie kontaktu o id =', id);
+        this.contactService.getById(id)
+          .subscribe(contact => this.form.patchValue(contact));
       }
     });
   }
 
   onSubmit() {
     if (this.form.invalid) return;
+
     const data = this.form.value as Omit<Contact, 'id'>;
     const op$ = this.editId
       ? this.contactService.update({id: this.editId, ...data})
