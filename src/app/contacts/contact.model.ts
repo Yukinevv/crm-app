@@ -8,4 +8,6 @@ export interface Contact {
   email: string;
   address: string;
   notes?: string;
+  tags?: string[];
+  status?: string;
 }

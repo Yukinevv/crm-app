@@ -3,12 +3,12 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {ActivatedRoute, Router} from '@angular/router';
 import {ContactService} from '../contact.service';
 import {Contact} from '../contact.model';
-import {NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-contact-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf],
+  imports: [ReactiveFormsModule, NgIf, NgForOf],
   templateUrl: './contact-form.component.html'
 })
 export class ContactFormComponent implements OnInit {
@@ -32,7 +32,9 @@ export class ContactFormComponent implements OnInit {
       phone: [''],
       email: ['', [Validators.required, Validators.email]],
       address: [''],
-      notes: ['']
+      notes: [''],
+      tags: [''],
+      status: ['']
     });
 
     this.route.paramMap.subscribe(pm => {
@@ -48,8 +50,23 @@ export class ContactFormComponent implements OnInit {
 
   onSubmit() {
     if (this.form.invalid) return;
+    const raw = this.form.value;
+    const data: Omit<Contact, 'id'> = {
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      company: raw.company,
+      position: raw.position,
+      phone: raw.phone,
+      email: raw.email,
+      address: raw.address,
+      notes: raw.notes,
+      tags: raw.tags
+        .split(',')
+        .map((t: string) => t.trim())
+        .filter((t: string) => !!t),
+      status: raw.status
+    };
 
-    const data = this.form.value as Omit<Contact, 'id'>;
     const op$ = this.editId
       ? this.contactService.update({id: this.editId, ...data})
       : this.contactService.create(data);
