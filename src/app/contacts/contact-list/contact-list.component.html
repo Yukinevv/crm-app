@@ -10,9 +10,22 @@
     <button (click)="fileInput.click()">Import CSV/XLSX</button>
   </div>
 
+  <form [formGroup]="filterForm" class="filters">
+    <label>Filtruj po tagach:</label>
+    <input formControlName="tags" placeholder="VIP, Prospekt…">
+
+    <label>Filtruj po statusie:</label>
+    <select formControlName="status">
+      <option value="">Wszystkie</option>
+      <option *ngFor="let s of availableStatuses" [value]="s">
+        {{ s }}
+      </option>
+    </select>
+  </form>
+
   <button routerLink="new">Dodaj kontakt</button>
   <ul>
-    <li *ngFor="let c of contacts$ | async">
+    <li *ngFor="let c of filteredContacts$ | async">
       {{ c.firstName }} {{ c.lastName }} ({{ c.company }})
       <button [routerLink]="[c.id]">Edytuj</button>
       <button (click)="onDelete(c.id)">Usuń</button>

@@ -1,18 +1,7 @@
 {
   "contacts": [
     {
-      "id": "faaf",
-      "firstName": "Mariusz2",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "693559906",
-      "email": "mariuszrodzic08@gmail.com",
-      "address": "Szarych Szeregów, 19, 33",
-      "notes": ""
-    },
-    {
-      "id": "8a55",
+      "id": "4157",
       "firstName": "Adrian",
       "lastName": "Rodzic",
       "company": "",
@@ -20,7 +9,26 @@
       "phone": "883640881",
       "email": "adrianrodzic33@gmail.com",
       "address": "Szarych Szeregów 19/33",
-      "notes": ""
+      "notes": "",
+      "tags": [
+        "VIP"
+      ],
+      "status": "Nowy"
+    },
+    {
+      "id": "0862",
+      "firstName": "Mariusz",
+      "lastName": "Rodzic",
+      "company": "",
+      "position": "",
+      "phone": "693559906",
+      "email": "mariuszrodzic08@gmail.com",
+      "address": "Szarych Szeregów, 19, 33",
+      "notes": "",
+      "tags": [
+        "Prospekt"
+      ],
+      "status": "Klient"
     }
   ]
 }

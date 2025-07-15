@@ -53,6 +53,21 @@
       <textarea formControlName="notes"></textarea>
     </div>
 
+    <div>
+      <label>Tagi (oddzielaj przecinkami)</label>
+      <input formControlName="tags" placeholder="VIP, Prospekt, …">
+    </div>
+
+    <div>
+      <label>Status</label>
+      <select formControlName="status">
+        <option value="">-- wybierz --</option>
+        <option *ngFor="let s of ['Nowy','Kontaktowany','Klient','Nieaktywny']" [value]="s">
+          {{ s }}
+        </option>
+      </select>
+    </div>
+
     <button type="submit" [disabled]="form.invalid">Zapisz</button>
     <button type="button" (click)="router.navigate(['/contacts'])">Anuluj</button>
   </form>
