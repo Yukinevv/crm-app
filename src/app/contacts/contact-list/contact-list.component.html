@@ -1,5 +1,15 @@
 <div class="container">
   <h2>Kontakty</h2>
+  <div class="actions">
+    <button (click)="exportAll('csv')">Eksport CSV</button>
+    <button (click)="exportAll('xlsx')">Eksport XLSX</button>
+    <button (click)="exportAll('pdf')">Eksport PDF</button>
+    <!-- input typu file ukryty, podłączony do metody import -->
+    <input type="file" #fileInput style="display:none"
+           (change)="importFile($event)"/>
+    <button (click)="fileInput.click()">Import CSV/XLSX</button>
+  </div>
+
   <button routerLink="new">Dodaj kontakt</button>
   <ul>
     <li *ngFor="let c of contacts$ | async">
