@@ -1,41 +1,58 @@
-<div class="container">
-  <h2>Kontakty</h2>
+<div class="container mt-4">
+  <h2 class="mb-3">Kontakty</h2>
 
-  <div class="actions d-flex gap-2 mb-3">
-    <button (click)="exportAll('csv')">Eksport CSV</button>
-    <button (click)="exportAll('xlsx')">Eksport XLSX</button>
-    <button (click)="exportAll('pdf')">Eksport PDF</button>
+  <div class="actions mb-3">
+    <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('csv')">Eksport CSV</button>
+    <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('xlsx')">Eksport XLSX</button>
+    <button class="btn btn-outline-primary btn-sm mr-3" (click)="exportAll('pdf')">Eksport PDF</button>
     <input type="file" #fileInput hidden (change)="importFile($event)"/>
-    <button (click)="fileInput.click()">Import CSV/XLSX</button>
+    <button class="btn btn-outline-secondary btn-sm" (click)="fileInput.click()">Import CSV/XLSX</button>
   </div>
 
-  <form [formGroup]="filterForm" class="filters d-flex gap-2 mb-3">
-    <input formControlName="q" placeholder="Szukaj…">
-    <input formControlName="tags" placeholder="Filtruj tagi">
-    <select formControlName="status">
-      <option value="">Wszystkie statusy</option>
-      <option *ngFor="let s of availableStatuses" [value]="s">{{ s }}</option>
-    </select>
-    <input type="date" formControlName="dateFrom">
-    <input type="date" formControlName="dateTo">
-    <input formControlName="source" placeholder="Źródło lejka">
-    <input formControlName="region" placeholder="Region">
+  <form [formGroup]="filterForm" class="form-inline mb-3">
+    <div class="form-group mr-2">
+      <input formControlName="q" class="form-control form-control-sm" placeholder="Szukaj…">
+    </div>
+    <div class="form-group mr-2">
+      <input formControlName="tags" class="form-control form-control-sm" placeholder="Filtruj tagi">
+    </div>
+    <div class="form-group mr-2">
+      <select formControlName="status" class="form-control form-control-sm">
+        <option value="">Wszystkie statusy</option>
+        <option *ngFor="let s of availableStatuses" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+    <div class="form-group mr-2">
+      <input type="date" formControlName="dateFrom" class="form-control form-control-sm">
+    </div>
+    <div class="form-group mr-2">
+      <input type="date" formControlName="dateTo" class="form-control form-control-sm">
+    </div>
+    <div class="form-group mr-2">
+      <input formControlName="source" class="form-control form-control-sm" placeholder="Źródło lejka">
+    </div>
+    <div class="form-group mr-2">
+      <input formControlName="region" class="form-control form-control-sm" placeholder="Region">
+    </div>
+    <button routerLink="new" class="btn btn-primary btn-sm ml-auto">Dodaj kontakt</button>
   </form>
 
-  <button routerLink="new">Dodaj kontakt</button>
-
-  <ul>
-    <li *ngFor="let c of filteredContacts">
-      {{ c.firstName }} {{ c.lastName }} —
-      {{ c.company }} —
-      {{ c.createdAt | date:'short' }} —
-      {{ c.source }} —
-      {{ c.region }} —
-      Firma powiązana: {{ getContactName(c.companyId) }} —
-      Przełożony: {{ getContactName(c.managerId) }} —
-      Decydent: {{ getContactName(c.decisionMakerId) }}
-      <button [routerLink]="[c.id]">Edytuj</button>
-      <button (click)="onDelete(c.id)">Usuń</button>
+  <ul class="list-group">
+    <li *ngFor="let c of filteredContacts"
+        class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+      <div>
+        <strong>{{ c.firstName }} {{ c.lastName }}</strong><br>
+        {{ c.company }}<br>
+        <small>{{ c.createdAt | date:'short' }}</small>
+      </div>
+      <div class="text-right">
+        <div>
+          Firma: {{ getContactName(c.companyId) }}<br>
+          Przeł.: {{ getContactName(c.managerId) }}, Decydent: {{ getContactName(c.decisionMakerId) }}
+        </div>
+        <button [routerLink]="[c.id]" class="btn btn-sm btn-outline-secondary mr-1 mt-2">Edytuj</button>
+        <button (click)="onDelete(c.id)" class="btn btn-sm btn-outline-danger mt-2">Usuń</button>
+      </div>
     </li>
   </ul>
 </div>
