@@ -1,7 +1,7 @@
 {
   "contacts": [
     {
-      "id": "4157",
+      "id": "2d05",
       "firstName": "Adrian",
       "lastName": "Rodzic",
       "company": "",
@@ -10,13 +10,14 @@
       "email": "adrianrodzic33@gmail.com",
       "address": "Szarych Szeregów 19/33",
       "notes": "",
-      "tags": [
-        "VIP"
-      ],
-      "status": "Nowy"
+      "tags": [],
+      "status": "",
+      "createdAt": "2025-07-16T13:56:00.000Z",
+      "source": "",
+      "region": "Kujawsko-Pomorskie"
     },
     {
-      "id": "0862",
+      "id": "3ba8",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",
@@ -25,10 +26,11 @@
       "email": "mariuszrodzic08@gmail.com",
       "address": "Szarych Szeregów, 19, 33",
       "notes": "",
-      "tags": [
-        "Prospekt"
-      ],
-      "status": "Klient"
+      "tags": [],
+      "status": "Klient",
+      "createdAt": "2025-07-16T13:56:00.000Z",
+      "source": "",
+      "region": ""
     }
   ]
 }

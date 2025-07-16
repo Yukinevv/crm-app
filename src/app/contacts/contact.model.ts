@@ -10,4 +10,7 @@ export interface Contact {
   notes?: string;
   tags?: string[];
   status?: string;
+  createdAt: string;
+  source?: string;
+  region?: string;
 }

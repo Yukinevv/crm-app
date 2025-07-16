@@ -34,16 +34,25 @@ export class ContactFormComponent implements OnInit {
       address: [''],
       notes: [''],
       tags: [''],
-      status: ['']
+      status: [''],
+      createdAt: [''],
+      source: [''],
+      region: ['']
     });
 
     this.route.paramMap.subscribe(pm => {
       const id = pm.get('id');
       if (id) {
         this.editId = id;
-        console.log('Ładowanie kontaktu o id =', id);
-        this.contactService.getById(id)
-          .subscribe(contact => this.form.patchValue(contact));
+        this.contactService.getById(id).subscribe(contact => {
+          this.form.patchValue({
+            ...contact,
+            createdAt: contact.createdAt.substring(0, 16)
+          });
+        });
+      } else {
+        const now = new Date().toISOString();
+        this.form.get('createdAt')!.setValue(now.substring(0, 16));
       }
     });
   }
@@ -64,7 +73,10 @@ export class ContactFormComponent implements OnInit {
         .split(',')
         .map((t: string) => t.trim())
         .filter((t: string) => !!t),
-      status: raw.status
+      status: raw.status,
+      createdAt: new Date(raw.createdAt).toISOString(),
+      source: raw.source,
+      region: raw.region
     };
 
     const op$ = this.editId

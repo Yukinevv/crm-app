@@ -2,79 +2,121 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Contact} from '../contact.model';
 import {ContactService} from '../contact.service';
 import {RouterLink} from '@angular/router';
-import {AsyncPipe, NgForOf} from '@angular/common';
-import {combineLatest, map, Observable, startWith} from 'rxjs';
+import {DatePipe, NgForOf} from '@angular/common';
+import {debounceTime} from 'rxjs';
 import {ImportExportService} from '../import-export.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-contact-list',
   standalone: true,
-  imports: [RouterLink, NgForOf, AsyncPipe, ReactiveFormsModule],
+  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe],
   templateUrl: './contact-list.component.html'
 })
 export class ContactListComponent implements OnInit {
-  contacts$!: Observable<Contact[]>;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
-  filteredContacts$!: Observable<Contact[]>;
   filterForm: FormGroup;
-
+  contacts: Contact[] = [];
+  filteredContacts: Contact[] = [];
   availableStatuses = ['Nowy', 'Kontaktowany', 'Klient', 'Nieaktywny'];
 
   constructor(
-    private contactService: ContactService,
+    private cs: ContactService,
     private ie: ImportExportService,
     private fb: FormBuilder
   ) {
     this.filterForm = this.fb.group({
+      q: [''],
       tags: [''],
-      status: ['']
+      status: [''],
+      dateFrom: [''],
+      dateTo: [''],
+      source: [''],
+      region: ['']
     });
   }
 
   ngOnInit() {
-    this.loadContacts();
+    this.cs.getAll().subscribe(list => {
+      this.contacts = list;
+      this.applyFilters();
+    });
 
-    this.filteredContacts$ = combineLatest([
-      this.contacts$,
-      this.filterForm.valueChanges.pipe(startWith(this.filterForm.value))
-    ]).pipe(
-      map(([list, filters]) => this.applyFilters(list, filters))
-    );
+    this.filterForm.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(() => this.applyFilters());
   }
 
-  loadContacts() {
-    this.contacts$ = this.contactService.getAll();
+  private applyFilters() {
+    const f = this.filterForm.value;
+    this.filteredContacts = this.applyClientFilters(this.contacts, f);
   }
 
-  private applyFilters(list: Contact[], filters: any): Contact[] {
-    let result = list;
-    const status = filters.status;
-    const tagsRaw = filters.tags as string;
-    if (status) {
-      result = result.filter(c => c.status === status);
-    }
-    const tags = tagsRaw
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => !!t);
-    if (tags.length) {
-      result = result.filter(c =>
-        tags.every(tag => c.tags?.includes(tag))
+  private applyClientFilters(list: Contact[], f: any): Contact[] {
+    let res = list;
+
+    // pełnotekstowe wyszukiwanie (firstName, lastName, company, notes)
+    if (f.q) {
+      const q = f.q.toLowerCase();
+      res = res.filter(c =>
+        c.firstName?.toLowerCase().includes(q) ||
+        c.lastName?.toLowerCase().includes(q) ||
+        c.company?.toLowerCase().includes(q) ||
+        c.notes?.toLowerCase().includes(q)
       );
     }
-    return result;
+
+    // status (dokładne dopasowanie)
+    if (f.status) {
+      res = res.filter(c => c.status === f.status);
+    }
+
+    // źródło lejka (częściowe, case-insensitive)
+    if (f.source) {
+      const src = f.source.toLowerCase();
+      res = res.filter(c => c.source?.toLowerCase().includes(src));
+    }
+
+    // region (częściowe, case-insensitive)
+    if (f.region) {
+      const reg = f.region.toLowerCase();
+      res = res.filter(c => c.region?.toLowerCase().includes(reg));
+    }
+
+    // data dodania
+    if (f.dateFrom) {
+      const from = new Date(f.dateFrom);
+      res = res.filter(c => new Date(c.createdAt) >= from);
+    }
+    if (f.dateTo) {
+      const to = new Date(f.dateTo);
+      to.setHours(23, 59, 59, 999);
+      res = res.filter(c => new Date(c.createdAt) <= to);
+    }
+
+    // tagi (wszystkie muszą wystąpić)
+    const tags = f.tags
+      .split(',')
+      .map((t: string) => t.trim())
+      .filter((t: any) => !!t);
+    if (tags.length) {
+      res = res.filter(c => tags.every((tag: string) => c.tags?.includes(tag)));
+    }
+
+    return res;
   }
 
   onDelete(id: string) {
-    if (confirm('Usunąć ten kontakt?')) {
-      this.contactService.delete(id).subscribe(() => this.loadContacts());
-    }
+    if (!confirm('Usunąć ten kontakt?')) return;
+    this.cs.delete(id).subscribe(() => {
+      this.contacts = this.contacts.filter(c => c.id !== id);
+      this.applyFilters();
+    });
   }
 
   exportAll(format: 'csv' | 'xlsx' | 'pdf') {
-    this.contactService.getAll().subscribe(list => {
+    this.cs.getAll().subscribe(list => {
       switch (format) {
         case 'csv':
           this.ie.exportCSV(list);
@@ -89,21 +131,19 @@ export class ContactListComponent implements OnInit {
     });
   }
 
-  importFile(event: Event) {
-    const input = event.target as HTMLInputElement;
+  importFile(e: Event) {
+    const input = e.target as HTMLInputElement;
     if (!input.files?.length) return;
     const file = input.files[0];
     const ext = file.name.split('.').pop()?.toLowerCase();
-    const fn = ext === 'csv'
-      ? this.ie.importCSV(file)
-      : this.ie.importXLSX(file);
+    const fn = ext === 'csv' ? this.ie.importCSV(file) : this.ie.importXLSX(file);
     fn.then(() => {
-      alert('Import zakończony pomyślnie');
-      this.loadContacts();
+      alert('Import zakończony');
+      this.cs.getAll().subscribe(list => {
+        this.contacts = list;
+        this.applyFilters();
+      });
       this.fileInput.nativeElement.value = '';
-    }).catch(err => {
-      console.error(err);
-      alert('Błąd podczas importu');
-    });
+    }).catch(() => alert('Błąd importu'));
   }
 }
