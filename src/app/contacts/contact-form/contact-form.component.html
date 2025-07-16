@@ -68,6 +68,19 @@
       </select>
     </div>
 
+    <div>
+      <label>Data dodania</label>
+      <input type="datetime-local" formControlName="createdAt">
+    </div>
+    <div>
+      <label>Źródło lejka</label>
+      <input formControlName="source" placeholder="np. Rekomendacja">
+    </div>
+    <div>
+      <label>Region</label>
+      <input formControlName="region" placeholder="np. Europa">
+    </div>
+
     <button type="submit" [disabled]="form.invalid">Zapisz</button>
     <button type="button" (click)="router.navigate(['/contacts'])">Anuluj</button>
   </form>
