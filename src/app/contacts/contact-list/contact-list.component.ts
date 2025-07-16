@@ -107,6 +107,11 @@ export class ContactListComponent implements OnInit {
     return res;
   }
 
+  getContactName(id?: string) {
+    const c = this.contacts.find(x => x.id === id);
+    return c ? `${c.firstName} ${c.lastName}` : '—';
+  }
+
   onDelete(id: string) {
     if (!confirm('Usunąć ten kontakt?')) return;
     this.cs.delete(id).subscribe(() => {

@@ -3,6 +3,7 @@ export interface Contact {
   firstName: string;
   lastName: string;
   company: string;
+  companyId?: string;        // powiązanie z innym kontaktem-firmą
   position: string;
   phone: string;
   email: string;
@@ -13,4 +14,6 @@ export interface Contact {
   createdAt: string;
   source?: string;
   region?: string;
+  managerId?: string;        // przełożony (contact.id)
+  decisionMakerId?: string;  // decydent (contact.id)
 }

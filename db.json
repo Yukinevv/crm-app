@@ -1,7 +1,7 @@
 {
   "contacts": [
     {
-      "id": "2d05",
+      "id": "4242",
       "firstName": "Adrian",
       "lastName": "Rodzic",
       "company": "",
@@ -10,14 +10,20 @@
       "email": "adrianrodzic33@gmail.com",
       "address": "Szarych Szeregów 19/33",
       "notes": "",
-      "tags": [],
+      "tags": [
+        [
+          "VIP"
+        ]
+      ],
       "status": "",
-      "createdAt": "2025-07-16T13:56:00.000Z",
+      "createdAt": "2025-07-16T12:15:00.000Z",
       "source": "",
-      "region": "Kujawsko-Pomorskie"
+      "region": "Kujawsko-Pomorskie",
+      "managerId": "b756",
+      "decisionMakerId": "a01c"
     },
     {
-      "id": "3ba8",
+      "id": "a01c",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",
@@ -26,11 +32,14 @@
       "email": "mariuszrodzic08@gmail.com",
       "address": "Szarych Szeregów, 19, 33",
       "notes": "",
-      "tags": [],
-      "status": "Klient",
-      "createdAt": "2025-07-16T13:56:00.000Z",
+      "tags": [
+        []
+      ],
+      "status": "",
+      "createdAt": "2025-07-16T14:21:00.000Z",
       "source": "",
-      "region": ""
+      "region": "",
+      "managerId": "4242"
     }
   ]
 }

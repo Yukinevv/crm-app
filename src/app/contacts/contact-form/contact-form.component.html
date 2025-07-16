@@ -81,6 +81,36 @@
       <input formControlName="region" placeholder="np. Europa">
     </div>
 
+    <div>
+      <label>Firma (powiązana)</label>
+      <select formControlName="companyId">
+        <option value="">-- brak --</option>
+        <option *ngFor="let c of contactsList" [value]="c.id" [disabled]="c.id === editId">
+          {{ c.firstName }} {{ c.lastName }}<span *ngIf="c.company"> – {{ c.company }}</span>
+        </option>
+      </select>
+    </div>
+    
+    <div>
+      <label>Przełożony</label>
+      <select formControlName="managerId">
+        <option value="">-- brak --</option>
+        <option *ngFor="let c of contactsList" [value]="c.id" [disabled]="c.id === editId">
+          {{ c.firstName }} {{ c.lastName }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label>Decydent</label>
+      <select formControlName="decisionMakerId">
+        <option value="">-- brak --</option>
+        <option *ngFor="let c of contactsList" [value]="c.id" [disabled]="c.id === editId">
+          {{ c.firstName }} {{ c.lastName }}
+        </option>
+      </select>
+    </div>
+
     <button type="submit" [disabled]="form.invalid">Zapisz</button>
     <button type="button" (click)="router.navigate(['/contacts'])">Anuluj</button>
   </form>

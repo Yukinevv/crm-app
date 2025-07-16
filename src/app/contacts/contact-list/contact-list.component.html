@@ -30,7 +30,10 @@
       {{ c.company }} —
       {{ c.createdAt | date:'short' }} —
       {{ c.source }} —
-      {{ c.region }}
+      {{ c.region }} —
+      Firma powiązana: {{ getContactName(c.companyId) }} —
+      Przełożony: {{ getContactName(c.managerId) }} —
+      Decydent: {{ getContactName(c.decisionMakerId) }}
       <button [routerLink]="[c.id]">Edytuj</button>
       <button (click)="onDelete(c.id)">Usuń</button>
     </li>
