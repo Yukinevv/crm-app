@@ -1,87 +1,120 @@
-<div class="container">
-  <h2>{{ editId ? 'Edycja kontaktu' : 'Nowy kontakt' }}</h2>
+<div class="container mt-4">
+  <h2 class="mb-4">{{ editId ? 'Edycja kontaktu' : 'Nowy kontakt' }}</h2>
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div>
-      <label>Imię</label>
-      <input formControlName="firstName">
-      <div *ngIf="form.get('firstName')?.errors?.['required'] && form.get('firstName')?.touched">
-        Pole jest wymagane
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label>Imię</label>
+        <input formControlName="firstName" class="form-control">
+        <div *ngIf="form.get('firstName')?.errors?.['required'] && form.get('firstName')?.touched"
+             class="text-danger small">
+          Pole jest wymagane
+        </div>
+      </div>
+      <div class="form-group col-md-6">
+        <label>Nazwisko</label>
+        <input formControlName="lastName" class="form-control">
+        <div *ngIf="form.get('lastName')?.errors?.['required'] && form.get('lastName')?.touched"
+             class="text-danger small">
+          Pole jest wymagane
+        </div>
       </div>
     </div>
 
-    <div>
-      <label>Nazwisko</label>
-      <input formControlName="lastName">
-      <div *ngIf="form.get('lastName')?.errors?.['required'] && form.get('lastName')?.touched">
-        Pole jest wymagane
-      </div>
-    </div>
-
-    <div>
+    <div class="form-group">
       <label>Firma</label>
-      <input formControlName="company">
+      <input formControlName="company" class="form-control">
     </div>
-
-    <div>
+    <div class="form-group">
       <label>Stanowisko</label>
-      <input formControlName="position">
+      <input formControlName="position" class="form-control">
     </div>
-
-    <div>
+    <div class="form-group">
       <label>Telefon</label>
-      <input formControlName="phone">
+      <input formControlName="phone" class="form-control">
     </div>
-
-    <div>
+    <div class="form-group">
       <label>Email</label>
-      <input type="email" formControlName="email">
-      <div *ngIf="form.get('email')?.errors?.['required'] && form.get('email')?.touched">
+      <input type="email" formControlName="email" class="form-control">
+      <div *ngIf="form.get('email')?.errors?.['required'] && form.get('email')?.touched"
+           class="text-danger small">
         Pole jest wymagane
       </div>
-      <div *ngIf="form.get('email')?.errors?.['email'] && form.get('email')?.touched">
+      <div *ngIf="form.get('email')?.errors?.['email'] && form.get('email')?.touched"
+           class="text-danger small">
         Nieprawidłowy format adresu email
       </div>
     </div>
-
-    <div>
+    <div class="form-group">
       <label>Adres</label>
-      <input formControlName="address">
+      <input formControlName="address" class="form-control">
     </div>
-
-    <div>
+    <div class="form-group">
       <label>Notatki</label>
-      <textarea formControlName="notes"></textarea>
+      <textarea formControlName="notes" rows="3" class="form-control"></textarea>
     </div>
-
-    <div>
+    <div class="form-group">
       <label>Tagi (oddzielaj przecinkami)</label>
-      <input formControlName="tags" placeholder="VIP, Prospekt, …">
+      <input formControlName="tags" placeholder="VIP, Prospekt, …" class="form-control">
     </div>
 
-    <div>
-      <label>Status</label>
-      <select formControlName="status">
-        <option value="">-- wybierz --</option>
-        <option *ngFor="let s of ['Nowy','Kontaktowany','Klient','Nieaktywny']" [value]="s">
-          {{ s }}
-        </option>
-      </select>
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label>Status</label>
+        <select formControlName="status" class="form-control">
+          <option value="">-- wybierz --</option>
+          <option *ngFor="let s of ['Nowy','Kontaktowany','Klient','Nieaktywny']" [value]="s">
+            {{ s }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group col-md-4">
+        <label>Data dodania</label>
+        <input type="datetime-local" formControlName="createdAt" class="form-control">
+      </div>
+      <div class="form-group col-md-4">
+        <label>Region</label>
+        <input formControlName="region" placeholder="np. Europa" class="form-control">
+      </div>
     </div>
 
-    <div>
-      <label>Data dodania</label>
-      <input type="datetime-local" formControlName="createdAt">
-    </div>
-    <div>
+    <div class="form-group">
       <label>Źródło lejka</label>
-      <input formControlName="source" placeholder="np. Rekomendacja">
-    </div>
-    <div>
-      <label>Region</label>
-      <input formControlName="region" placeholder="np. Europa">
+      <input formControlName="source" placeholder="np. Rekomendacja" class="form-control">
     </div>
 
-    <button type="submit" [disabled]="form.invalid">Zapisz</button>
-    <button type="button" (click)="router.navigate(['/contacts'])">Anuluj</button>
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label>Firma (powiązana)</label>
+        <select formControlName="companyId" class="form-control">
+          <option value="">-- brak --</option>
+          <option *ngFor="let c of contactsList" [value]="c.id" [disabled]="c.id === editId">
+            {{ c.firstName }} {{ c.lastName }}<span *ngIf="c.company"> – {{ c.company }}</span>
+          </option>
+        </select>
+      </div>
+      <div class="form-group col-md-4">
+        <label>Przełożony</label>
+        <select formControlName="managerId" class="form-control">
+          <option value="">-- brak --</option>
+          <option *ngFor="let c of contactsList" [value]="c.id" [disabled]="c.id === editId">
+            {{ c.firstName }} {{ c.lastName }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group col-md-4">
+        <label>Decydent</label>
+        <select formControlName="decisionMakerId" class="form-control">
+          <option value="">-- brak --</option>
+          <option *ngFor="let c of contactsList" [value]="c.id" [disabled]="c.id === editId">
+            {{ c.firstName }} {{ c.lastName }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Zapisz</button>
+    <button type="button" class="btn btn-secondary ml-2" (click)="router.navigate(['/contacts'])">
+      Anuluj
+    </button>
   </form>
 </div>

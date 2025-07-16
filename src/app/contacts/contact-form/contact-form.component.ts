@@ -14,6 +14,7 @@ import {NgForOf, NgIf} from '@angular/common';
 export class ContactFormComponent implements OnInit {
   form!: FormGroup;
   editId?: string;
+  contactsList: Contact[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -24,10 +25,15 @@ export class ContactFormComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.contactService.getAll().subscribe(list => {
+      this.contactsList = list;
+    });
+
     this.form = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       company: [''],
+      companyId: [''],
       position: [''],
       phone: [''],
       email: ['', [Validators.required, Validators.email]],
@@ -37,7 +43,9 @@ export class ContactFormComponent implements OnInit {
       status: [''],
       createdAt: [''],
       source: [''],
-      region: ['']
+      region: [''],
+      managerId: [''],
+      decisionMakerId: ['']
     });
 
     this.route.paramMap.subscribe(pm => {
@@ -64,19 +72,19 @@ export class ContactFormComponent implements OnInit {
       firstName: raw.firstName,
       lastName: raw.lastName,
       company: raw.company,
+      companyId: raw.companyId || undefined,
       position: raw.position,
       phone: raw.phone,
       email: raw.email,
       address: raw.address,
       notes: raw.notes,
-      tags: raw.tags
-        .split(',')
-        .map((t: string) => t.trim())
-        .filter((t: string) => !!t),
+      tags: this.tagsSplit(raw.tags),
       status: raw.status,
       createdAt: new Date(raw.createdAt).toISOString(),
       source: raw.source,
-      region: raw.region
+      region: raw.region,
+      managerId: raw.managerId || undefined,
+      decisionMakerId: raw.decisionMakerId || undefined
     };
 
     const op$ = this.editId
@@ -84,5 +92,14 @@ export class ContactFormComponent implements OnInit {
       : this.contactService.create(data);
 
     op$.subscribe(() => this.router.navigate(['/contacts']));
+  }
+
+  tagsSplit(tags: string): string[] {
+    if (!tags) return [];
+    if (!tags.includes(',')) return [tags];
+    return tags
+      .split(',')
+      .map((t: string) => t.trim())
+      .filter((t: string) => !!t)
   }
 }

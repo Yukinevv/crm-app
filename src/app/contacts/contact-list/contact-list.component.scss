@@ -1,0 +1,11 @@
+.container {
+  max-width: 900px;
+}
+
+.actions button {
+  min-width: 80px;
+}
+
+.list-group-item + .list-group-item {
+  margin-top: 0.5rem;
+}
