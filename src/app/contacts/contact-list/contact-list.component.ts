@@ -6,11 +6,12 @@ import {DatePipe, NgForOf} from '@angular/common';
 import {debounceTime} from 'rxjs';
 import {ImportExportService} from '../import-export.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {PaginationComponent} from '../pagination.component';
 
 @Component({
   selector: 'app-contact-list',
   standalone: true,
-  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe],
+  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe, PaginationComponent],
   templateUrl: './contact-list.component.html'
 })
 export class ContactListComponent implements OnInit {
@@ -19,6 +20,15 @@ export class ContactListComponent implements OnInit {
   filterForm: FormGroup;
   contacts: Contact[] = [];
   filteredContacts: Contact[] = [];
+
+  currentPage = 1;
+  pageSize = 5;
+
+  get pagedContacts(): Contact[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredContacts.slice(start, start + this.pageSize);
+  }
+
   availableStatuses = ['Nowy', 'Kontaktowany', 'Klient', 'Nieaktywny'];
 
   constructor(
@@ -51,6 +61,8 @@ export class ContactListComponent implements OnInit {
   private applyFilters() {
     const f = this.filterForm.value;
     this.filteredContacts = this.applyClientFilters(this.contacts, f);
+    // po zmianie filtrów wracamy na stronę 1
+    this.currentPage = 1;
   }
 
   private applyClientFilters(list: Contact[], f: any): Contact[] {
