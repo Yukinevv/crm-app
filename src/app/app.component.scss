@@ -1,0 +1,29 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 250px;
+  background-color: #f8f9fa;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 1040;
+
+  &.open {
+    transform: translateX(0);
+  }
+}
+
+/* gdy sidebar jest otwarte, przesuwamy zawartość */
+.sidebar.open + .flex-fill {
+  margin-left: 250px;
+}
+
+/* upewniamy się, że kontener główny flex działa */
+.d-flex {
+  height: 100vh;
+}
+
+.flex-fill {
+  overflow: auto;
+}

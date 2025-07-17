@@ -1,2 +1,16 @@
-<router-outlet>
-</router-outlet>
+<div class="d-flex">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.open]="sidebarOpen">
+    <!--    <button class="btn-close m-2" aria-label="Zamknij menu" (click)="toggleSidebar()"></button>-->
+    <nav class="nav flex-column p-2">
+      <a routerLink="/contacts" class="nav-link" (click)="toggleSidebar()">Kontakty</a>
+      <a routerLink="/test" class="nav-link" (click)="toggleSidebar()">Testowy moduł</a>
+    </nav>
+  </div>
+
+  <!-- Główna zawartość -->
+  <div class="flex-fill">
+    <button class="btn btn-primary m-2" aria-label="Otwórz menu" (click)="toggleSidebar()">☰</button>
+    <router-outlet></router-outlet>
+  </div>
+</div>
