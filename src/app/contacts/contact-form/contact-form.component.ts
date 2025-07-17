@@ -4,6 +4,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ContactService} from '../contact.service';
 import {Contact} from '../contact.model';
 import {NgForOf, NgIf} from '@angular/common';
+import {AuthService} from '../../auth/auth.service';
+import {take} from 'rxjs';
 
 @Component({
   selector: 'app-contact-form',
@@ -20,7 +22,8 @@ export class ContactFormComponent implements OnInit {
     private fb: FormBuilder,
     private contactService: ContactService,
     private route: ActivatedRoute,
-    protected router: Router
+    protected router: Router,
+    private auth: AuthService
   ) {
   }
 
@@ -67,31 +70,41 @@ export class ContactFormComponent implements OnInit {
 
   onSubmit() {
     if (this.form.invalid) return;
-    const raw = this.form.value;
-    const data: Omit<Contact, 'id'> = {
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      company: raw.company,
-      companyId: raw.companyId || undefined,
-      position: raw.position,
-      phone: raw.phone,
-      email: raw.email,
-      address: raw.address,
-      notes: raw.notes,
-      tags: this.tagsSplit(raw.tags),
-      status: raw.status,
-      createdAt: new Date(raw.createdAt).toISOString(),
-      source: raw.source,
-      region: raw.region,
-      managerId: raw.managerId || undefined,
-      decisionMakerId: raw.decisionMakerId || undefined
-    };
 
-    const op$ = this.editId
-      ? this.contactService.update({id: this.editId, ...data})
-      : this.contactService.create(data);
+    // bierzemy aktualnie zalogowanego użytkownika raz
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      if (!user) {
+        alert('Musisz być zalogowany, aby zapisać kontakt');
+        return;
+      }
 
-    op$.subscribe(() => this.router.navigate(['/contacts']));
+      const raw = this.form.value;
+      const data: Omit<Contact, 'id'> & { userId: string } = {
+        firstName: raw.firstName,
+        lastName: raw.lastName,
+        company: raw.company,
+        companyId: raw.companyId || undefined,
+        position: raw.position,
+        phone: raw.phone,
+        email: raw.email,
+        address: raw.address,
+        notes: raw.notes,
+        tags: this.tagsSplit(raw.tags),
+        status: raw.status,
+        createdAt: new Date(raw.createdAt).toISOString(),
+        source: raw.source,
+        region: raw.region,
+        managerId: raw.managerId || undefined,
+        decisionMakerId: raw.decisionMakerId || undefined,
+        userId: user.uid
+      };
+
+      const op$ = this.editId
+        ? this.contactService.update({id: this.editId, ...data})
+        : this.contactService.create(data);
+
+      op$.subscribe(() => this.router.navigate(['/contacts']));
+    });
   }
 
   tagsSplit(tags: string): string[] {
