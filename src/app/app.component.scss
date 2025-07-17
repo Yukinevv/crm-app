@@ -1,4 +1,3 @@
-// wysokość navbaru
 $navbar-height: 80px;
 
 .navbar {
@@ -8,20 +7,16 @@ $navbar-height: 80px;
   right: 0;
   height: $navbar-height;
   z-index: 1100;
-
-  // wycentrowanie vertical
   display: flex;
   align-items: center;
 }
 
-// wrapper całego contentu pod navbar
 .content-wrapper {
   margin-top: $navbar-height;
   display: flex;
   height: calc(100vh - #{$navbar-height});
 }
 
-// sidebar pod navbar
 .sidebar {
   position: fixed;
   top: $navbar-height;
@@ -38,7 +33,6 @@ $navbar-height: 80px;
   }
 }
 
-// gdy sidebar otwarte, przesuwamy główną zawartość
 .sidebar.open + .flex-fill {
   margin-left: 250px;
 }
