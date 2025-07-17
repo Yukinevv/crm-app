@@ -2,16 +2,18 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Contact} from '../contact.model';
 import {ContactService} from '../contact.service';
 import {RouterLink} from '@angular/router';
-import {DatePipe, NgForOf} from '@angular/common';
+import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {debounceTime} from 'rxjs';
 import {ImportExportService} from '../import-export.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {PaginationComponent} from '../pagination.component';
+import {AuthService} from '../../auth/auth.service';
+import {User} from 'firebase/auth';
 
 @Component({
   selector: 'app-contact-list',
   standalone: true,
-  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe, PaginationComponent],
+  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe, PaginationComponent, NgIf],
   templateUrl: './contact-list.component.html'
 })
 export class ContactListComponent implements OnInit {
@@ -29,12 +31,15 @@ export class ContactListComponent implements OnInit {
     return this.filteredContacts.slice(start, start + this.pageSize);
   }
 
+  user: User | null = null;
+
   availableStatuses = ['Nowy', 'Kontaktowany', 'Klient', 'Nieaktywny'];
 
   constructor(
     private cs: ContactService,
     private ie: ImportExportService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private auth: AuthService
   ) {
     this.filterForm = this.fb.group({
       q: [''],
@@ -48,9 +53,17 @@ export class ContactListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.cs.getAll().subscribe(list => {
-      this.contacts = list;
-      this.applyFilters();
+    this.auth.user$.subscribe(user => {
+      this.user = user;
+      if (user) {
+        this.cs.getAll().subscribe(list => {
+          this.contacts = list.filter(c => c.userId === user.uid);
+          this.applyFilters();
+        });
+      } else {
+        this.contacts = [];
+        this.applyFilters();
+      }
     });
 
     this.filterForm.valueChanges

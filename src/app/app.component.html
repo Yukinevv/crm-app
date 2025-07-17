@@ -1,41 +1,42 @@
 <nav class="navbar navbar-light bg-light fixed-top">
   <div class="container-fluid">
-    <!-- toggle sidebar -->
     <button class="btn btn-outline-primary me-2"
             aria-label="Otwórz menu"
             (click)="toggleSidebar()">☰
     </button>
 
-    <!-- tytuł -->
     <a class="navbar-brand" href="#">CRM-APP</a>
 
-    <!-- przyciski logowania -->
     <div class="d-flex ms-auto">
-      <button type="button" class="btn btn-outline-primary me-2">
-        <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
-      </button>
-      <button type="button" class="btn btn-outline-secondary">
-        <i class="bi bi-person-plus"></i> Rejestracja
-      </button>
+      <!-- jeśli user$ zwróci User: pokaż email i wyloguj -->
+      <ng-container *ngIf="user$ | async as user; else guestLinks">
+        <span class="navbar-text me-3">{{ user.email }}</span>
+        <button class="btn btn-outline-danger" (click)="logout()">
+          <i class="bi bi-box-arrow-right"></i> Wyloguj
+        </button>
+      </ng-container>
+
+      <!-- gdy null: pokaż linki logowania/rejestracji -->
+      <ng-template #guestLinks>
+        <button routerLink="/login" class="btn btn-outline-primary me-2">
+          <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+        </button>
+        <button routerLink="/register" class="btn btn-outline-secondary">
+          <i class="bi bi-person-plus"></i> Rejestracja
+        </button>
+      </ng-template>
     </div>
   </div>
 </nav>
 
-<!-- cała reszta aplikacji -->
 <div class="content-wrapper">
-  <!-- sidebar -->
   <div class="sidebar" [class.open]="sidebarOpen">
-    <!--    <button class="btn-close m-2"-->
-    <!--            aria-label="Zamknij menu"-->
-    <!--            (click)="toggleSidebar()"><- -->
-    <!--    </button>-->
+    <!--    <button class="btn-close m-2" aria-label="Zamknij menu" (click)="toggleSidebar()"></button>-->
     <nav class="nav flex-column p-2">
       <a routerLink="/contacts" class="nav-link" (click)="toggleSidebar()">Kontakty</a>
       <a routerLink="/test" class="nav-link" (click)="toggleSidebar()">Testowy moduł</a>
     </nav>
   </div>
-
-  <!-- główna zawartość -->
   <div class="flex-fill">
     <router-outlet></router-outlet>
   </div>

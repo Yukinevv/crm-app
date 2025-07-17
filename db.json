@@ -2,6 +2,7 @@
   "contacts": [
     {
       "id": "4242",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Adrian",
       "lastName": "Rodzic",
       "company": "",
@@ -24,6 +25,7 @@
     },
     {
       "id": "a01c",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",
@@ -43,6 +45,7 @@
     },
     {
       "id": "654b",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Adrian",
       "lastName": "Rodzic",
       "company": "",
@@ -59,6 +62,7 @@
     },
     {
       "id": "1211",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",
@@ -75,6 +79,7 @@
     },
     {
       "id": "524e",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Adrian",
       "lastName": "Rodzic",
       "company": "",
@@ -91,6 +96,7 @@
     },
     {
       "id": "4b0e",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",

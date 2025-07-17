@@ -1,70 +1,80 @@
 <div class="container mt-4">
   <h2 class="mb-3">Kontakty</h2>
 
-  <div class="actions mb-3">
-    <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('csv')">Eksport CSV</button>
-    <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('xlsx')">Eksport XLSX</button>
-    <button class="btn btn-outline-primary btn-sm mr-3" (click)="exportAll('pdf')">Eksport PDF</button>
-    <input type="file" #fileInput hidden (change)="importFile($event)"/>
-    <button class="btn btn-outline-secondary btn-sm" (click)="fileInput.click()">Import CSV/XLSX</button>
-  </div>
+  <ng-container *ngIf="user; else loginNotice">
 
-  <form [formGroup]="filterForm" class="form-inline mb-3">
-    <div class="form-group mr-2">
-      <input formControlName="q" class="form-control form-control-sm" placeholder="Szukaj…">
+    <div class="actions mb-3">
+      <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('csv')">Eksport CSV</button>
+      <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('xlsx')">Eksport XLSX</button>
+      <button class="btn btn-outline-primary btn-sm mr-3" (click)="exportAll('pdf')">Eksport PDF</button>
+      <input type="file" #fileInput hidden (change)="importFile($event)"/>
+      <button class="btn btn-outline-secondary btn-sm" (click)="fileInput.click()">Import CSV/XLSX</button>
     </div>
-    <div class="form-group mr-2">
-      <input formControlName="tags" class="form-control form-control-sm" placeholder="Filtruj tagi">
-    </div>
-    <div class="form-group mr-2">
-      <select formControlName="status" class="form-control form-control-sm">
-        <option value="">Wszystkie statusy</option>
-        <option *ngFor="let s of availableStatuses" [value]="s">{{ s }}</option>
-      </select>
-    </div>
-    <div class="form-group mr-2">
-      <input type="date" formControlName="dateFrom" class="form-control form-control-sm">
-    </div>
-    <div class="form-group mr-2">
-      <input type="date" formControlName="dateTo" class="form-control form-control-sm">
-    </div>
-    <div class="form-group mr-2">
-      <input formControlName="source" class="form-control form-control-sm" placeholder="Źródło lejka">
-    </div>
-    <div class="form-group mr-2">
-      <input formControlName="region" class="form-control form-control-sm" placeholder="Region">
-    </div>
-    <button routerLink="new" class="btn btn-primary btn-sm ml-auto">Dodaj kontakt</button>
-  </form>
 
-  <app-pagination
-    [totalItems]="filteredContacts.length"
-    [pageSize]="pageSize"
-    [(currentPage)]="currentPage">
-  </app-pagination>
-
-  <ul class="list-group">
-    <li *ngFor="let c of pagedContacts"
-        class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-      <div>
-        <strong>{{ c.firstName }} {{ c.lastName }}</strong><br>
-        {{ c.company }}<br>
-        <small>{{ c.createdAt | date:'short' }}</small>
+    <form [formGroup]="filterForm" class="form-inline mb-3">
+      <div class="form-group mr-2">
+        <input formControlName="q" class="form-control form-control-sm" placeholder="Szukaj…">
       </div>
-      <div class="text-right">
+      <div class="form-group mr-2">
+        <input formControlName="tags" class="form-control form-control-sm" placeholder="Filtruj tagi">
+      </div>
+      <div class="form-group mr-2">
+        <select formControlName="status" class="form-control form-control-sm">
+          <option value="">Wszystkie statusy</option>
+          <option *ngFor="let s of availableStatuses" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+      <div class="form-group mr-2">
+        <input type="date" formControlName="dateFrom" class="form-control form-control-sm">
+      </div>
+      <div class="form-group mr-2">
+        <input type="date" formControlName="dateTo" class="form-control form-control-sm">
+      </div>
+      <div class="form-group mr-2">
+        <input formControlName="source" class="form-control form-control-sm" placeholder="Źródło lejka">
+      </div>
+      <div class="form-group mr-2">
+        <input formControlName="region" class="form-control form-control-sm" placeholder="Region">
+      </div>
+      <button routerLink="new" class="btn btn-primary btn-sm ml-auto">Dodaj kontakt</button>
+    </form>
+
+    <app-pagination
+      [totalItems]="filteredContacts.length"
+      [pageSize]="pageSize"
+      [(currentPage)]="currentPage">
+    </app-pagination>
+
+    <ul class="list-group">
+      <li *ngFor="let c of pagedContacts"
+          class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
         <div>
-          Firma: {{ getContactName(c.companyId) }}<br>
-          Przeł.: {{ getContactName(c.managerId) }}, Decydent: {{ getContactName(c.decisionMakerId) }}
+          <strong>{{ c.firstName }} {{ c.lastName }}</strong><br>
+          {{ c.company }}<br>
+          <small>{{ c.createdAt | date:'short' }}</small>
         </div>
-        <button [routerLink]="[c.id]" class="btn btn-sm btn-outline-secondary mr-1 mt-2">Edytuj</button>
-        <button (click)="onDelete(c.id)" class="btn btn-sm btn-outline-danger mt-2">Usuń</button>
-      </div>
-    </li>
-  </ul>
+        <div class="text-right">
+          <div>
+            Firma: {{ getContactName(c.companyId) }}<br>
+            Przeł.: {{ getContactName(c.managerId) }}, Decydent: {{ getContactName(c.decisionMakerId) }}
+          </div>
+          <button [routerLink]="[c.id]" class="btn btn-sm btn-outline-secondary mr-1 mt-2">Edytuj</button>
+          <button (click)="onDelete(c.id)" class="btn btn-sm btn-outline-danger mt-2">Usuń</button>
+        </div>
+      </li>
+    </ul>
 
-  <app-pagination
-    [totalItems]="filteredContacts.length"
-    [pageSize]="pageSize"
-    [(currentPage)]="currentPage">
-  </app-pagination>
+    <app-pagination
+      [totalItems]="filteredContacts.length"
+      [pageSize]="pageSize"
+      [(currentPage)]="currentPage">
+    </app-pagination>
+
+  </ng-container>
+
+  <ng-template #loginNotice>
+    <div class="alert alert-info text-center">
+      Aby zobaczyć swoje kontakty, musisz się zalogować.
+    </div>
+  </ng-template>
 </div>
