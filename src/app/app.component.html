@@ -1,16 +1,42 @@
-<div class="d-flex">
-  <!-- Sidebar -->
+<nav class="navbar navbar-light bg-light fixed-top">
+  <div class="container-fluid">
+    <!-- toggle sidebar -->
+    <button class="btn btn-outline-primary me-2"
+            aria-label="Otwórz menu"
+            (click)="toggleSidebar()">☰
+    </button>
+
+    <!-- tytuł -->
+    <a class="navbar-brand" href="#">CRM-APP</a>
+
+    <!-- przyciski logowania -->
+    <div class="d-flex ms-auto">
+      <button type="button" class="btn btn-outline-primary me-2">
+        <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+      </button>
+      <button type="button" class="btn btn-outline-secondary">
+        <i class="bi bi-person-plus"></i> Rejestracja
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- cała reszta aplikacji -->
+<div class="content-wrapper">
+  <!-- sidebar -->
   <div class="sidebar" [class.open]="sidebarOpen">
-    <!--    <button class="btn-close m-2" aria-label="Zamknij menu" (click)="toggleSidebar()"></button>-->
+    <!--    <button class="btn-close m-2"-->
+    <!--            aria-label="Zamknij menu"-->
+    <!--            (click)="toggleSidebar()"><- -->
+    <!--    </button>-->
     <nav class="nav flex-column p-2">
       <a routerLink="/contacts" class="nav-link" (click)="toggleSidebar()">Kontakty</a>
       <a routerLink="/test" class="nav-link" (click)="toggleSidebar()">Testowy moduł</a>
     </nav>
   </div>
 
-  <!-- Główna zawartość -->
+  <!-- główna zawartość -->
   <div class="flex-fill">
-    <button class="btn btn-primary m-2" aria-label="Otwórz menu" (click)="toggleSidebar()">☰</button>
     <router-outlet></router-outlet>
   </div>
 </div>

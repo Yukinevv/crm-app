@@ -1,6 +1,30 @@
-.sidebar {
+// wysokość navbaru
+$navbar-height: 80px;
+
+.navbar {
   position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  height: $navbar-height;
+  z-index: 1100;
+
+  // wycentrowanie vertical
+  display: flex;
+  align-items: center;
+}
+
+// wrapper całego contentu pod navbar
+.content-wrapper {
+  margin-top: $navbar-height;
+  display: flex;
+  height: calc(100vh - #{$navbar-height});
+}
+
+// sidebar pod navbar
+.sidebar {
+  position: fixed;
+  top: $navbar-height;
   bottom: 0;
   left: 0;
   width: 250px;
@@ -14,16 +38,13 @@
   }
 }
 
-/* gdy sidebar jest otwarte, przesuwamy zawartość */
+// gdy sidebar otwarte, przesuwamy główną zawartość
 .sidebar.open + .flex-fill {
   margin-left: 250px;
 }
 
-/* upewniamy się, że kontener główny flex działa */
-.d-flex {
-  height: 100vh;
-}
-
 .flex-fill {
+  flex: 1;
   overflow: auto;
+  transition: margin-left 0.3s ease;
 }
