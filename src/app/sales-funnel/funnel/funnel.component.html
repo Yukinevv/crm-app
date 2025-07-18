@@ -1,0 +1,19 @@
+<div class="container mt-4">
+  <h2>Lejek sprzedaży</h2>
+  <div class="d-flex justify-content-between">
+    <div
+      *ngFor="let stage of stages"
+      class="stage-card text-center flex-fill mx-1"
+    >
+      <h5>{{ stage.name }}</h5>
+    </div>
+  </div>
+  <div class="mt-3">
+    <button
+      routerLink="config"
+      class="btn btn-outline-secondary"
+    >
+      Konfiguracja etapów
+    </button>
+  </div>
+</div>

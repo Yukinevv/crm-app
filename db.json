@@ -111,5 +111,27 @@
       "source": "",
       "region": ""
     }
+  ],
+  "stages": [
+    {
+      "id": "a6cc",
+      "name": "Etap drugi",
+      "order": 1
+    },
+    {
+      "id": "b385",
+      "name": "Etap drugi nowy",
+      "order": 2
+    },
+    {
+      "id": "fac8",
+      "name": "Etap trzeci",
+      "order": 4
+    },
+    {
+      "id": "9db2",
+      "name": "Etap czwarty",
+      "order": 3
+    }
   ]
 }

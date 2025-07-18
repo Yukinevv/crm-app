@@ -1,0 +1,61 @@
+<div class="container mt-4">
+  <h2>Konfiguracja etapów lejka</h2>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="addStage()"
+    class="d-flex mb-3"
+  >
+    <input
+      formControlName="name"
+      class="form-control me-2"
+      placeholder="Nazwa etapu"
+    />
+    <button
+      class="btn btn-primary"
+      type="submit"
+      [disabled]="form.invalid"
+    >
+      Dodaj etap
+    </button>
+  </form>
+
+  <ul class="list-group">
+    <li
+      *ngFor="let stage of stages"
+      class="list-group-item d-flex align-items-center"
+    >
+      <span class="me-3">{{ stage.order }}.</span>
+      <input
+        [(ngModel)]="stage.name"
+        class="form-control me-3"
+      />
+      <button
+        class="btn btn-sm btn-outline-secondary me-1"
+        (click)="moveUp(stage)"
+        [disabled]="stage.order === 1"
+      >
+        ↑
+      </button>
+      <button
+        class="btn btn-sm btn-outline-secondary me-1"
+        (click)="moveDown(stage)"
+        [disabled]="stage.order === stages.length"
+      >
+        ↓
+      </button>
+      <button
+        class="btn btn-sm btn-outline-success me-1"
+        (click)="updateStage(stage)"
+      >
+        Zapisz
+      </button>
+      <button
+        class="btn btn-sm btn-outline-danger"
+        (click)="deleteStage(stage.id)"
+      >
+        Usuń
+      </button>
+    </li>
+  </ul>
+</div>

@@ -8,8 +8,16 @@ export const routes: Routes = [
   {path: 'register', component: RegisterComponent},
   {path: 'test', component: TestComponent},
   {
+    path: 'sales-funnel',
+    loadChildren: () =>
+      import('./sales-funnel/sales-funnel.module').then(
+        (m) => m.SalesFunnelModule
+      )
+  },
+  {
     path: 'contacts',
-    loadChildren: () => import('./contacts/contacts.module').then(m => m.ContactsModule)
+    loadChildren: () =>
+      import('./contacts/contacts.module').then((m) => m.ContactsModule)
   },
   {path: '', redirectTo: '/contacts', pathMatch: 'full'}
 ];
