@@ -9,7 +9,7 @@ import {RouterLink} from '@angular/router';
 @Component({
   selector: 'app-funnel',
   standalone: true,
-  imports: [NgForOf, DragDropModule, DatePipe, RouterLink],
+  imports: [NgForOf, DragDropModule, RouterLink, DatePipe],
   templateUrl: './funnel.component.html',
   styleUrls: ['./funnel.component.scss']
 })
@@ -30,19 +30,14 @@ export class FunnelComponent implements OnInit {
       this.stages.forEach(s => (this.leadsByStage[s.id] = []));
       this.service.getLeads().subscribe(leads => {
         leads.forEach(lead => {
-          if (!this.leadsByStage[lead.stageId]) {
-            this.leadsByStage[lead.stageId] = [];
-          }
-          this.leadsByStage[lead.stageId].push(lead);
+          (this.leadsByStage[lead.stageId] ||= []).push(lead);
         });
       });
     });
   }
 
   drop(event: CdkDragDrop<Lead[]>, targetStage: Stage) {
-    if (event.previousContainer === event.container) {
-      return;
-    }
+    if (event.previousContainer === event.container) return;
     const lead = event.previousContainer.data[event.previousIndex];
     const updated: Lead = {
       ...lead,

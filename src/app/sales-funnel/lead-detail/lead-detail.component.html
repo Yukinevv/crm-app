@@ -1,0 +1,94 @@
+<div class="container mt-4" style="max-width: 600px;">
+  <h2>{{ isEdit ? 'Edycja' : 'Nowy' }} lead</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- podstawowe -->
+    <div class="mb-3">
+      <label class="form-label">Tytuł</label>
+      <input formControlName="title" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Opis</label>
+      <textarea formControlName="description" rows="3" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Etap</label>
+      <select formControlName="stageId" class="form-select">
+        <option *ngFor="let s of stages" [value]="s.id">{{ s.name }}</option>
+      </select>
+    </div>
+
+    <!-- dynamiczne -->
+    <ng-container *ngFor="let fld of currentDynamicFieldsConfig">
+      <div class="mb-3">
+        <label class="form-label">{{ fld.label }}</label>
+        <input [type]="fld.type"
+               [formControlName]="fld.controlName"
+               class="form-control">
+      </div>
+    </ng-container>
+
+    <!-- notatki -->
+    <div formArrayName="notes" class="mb-4">
+      <label class="form-label">Notatki</label>
+      <div *ngFor="let _ of notes.controls; let i=index" [formGroupName]="i" class="input-group mb-2">
+        <textarea formControlName="text" rows="2" class="form-control" readonly></textarea>
+        <button type="button" class="btn btn-outline-danger" (click)="removeNote(i)">Usuń</button>
+      </div>
+      <div class="input-group">
+        <input [(ngModel)]="newNoteText"
+               name="newNote"
+               [ngModelOptions]="{standalone: true}"
+               class="form-control"
+               placeholder="Nowa notatka">
+        <button type="button" class="btn btn-primary" (click)="addNote()">Dodaj</button>
+      </div>
+    </div>
+
+    <!-- checklist -->
+    <div formArrayName="checklist" class="mb-4">
+      <label class="form-label">Checklista</label>
+      <div *ngFor="let _ of checklist.controls; let i=index" [formGroupName]="i" class="input-group mb-2">
+        <div class="input-group-text">
+          <input type="checkbox" formControlName="done">
+        </div>
+        <input formControlName="text" class="form-control">
+        <button type="button" class="btn btn-outline-danger" (click)="removeChecklistItem(i)">Usuń</button>
+      </div>
+      <div class="input-group">
+        <input [(ngModel)]="newChecklistText"
+               name="newChk"
+               [ngModelOptions]="{standalone: true}"
+               class="form-control"
+               placeholder="Nowy punkt">
+        <button type="button" class="btn btn-primary" (click)="addChecklistItem()">Dodaj</button>
+      </div>
+    </div>
+
+    <!-- załączniki -->
+    <div formArrayName="attachments" class="mb-4">
+      <label class="form-label">Załączniki</label>
+      <ul class="list-group mb-2">
+        <li *ngFor="let _ of attachments.controls; let i=index" [formGroupName]="i"
+            class="list-group-item d-flex justify-content-between align-items-center">
+          {{ attachments.at(i).value.fileName }}
+          <div>
+            <a [href]="attachments.at(i).value.dataUrl"
+               [attr.download]="attachments.at(i).value.fileName"
+               class="btn btn-sm btn-outline-success me-1">Pobierz</a>
+            <button type="button" class="btn btn-sm btn-outline-danger"
+                    (click)="removeAttachment(i)">Usuń
+            </button>
+          </div>
+        </li>
+      </ul>
+      <input type="file" multiple (change)="onFileSelected($event)" class="form-control">
+    </div>
+
+    <!-- akcje -->
+    <button class="btn btn-success" type="submit" [disabled]="form.invalid">
+      {{ isEdit ? 'Zapisz zmiany' : 'Utwórz lead' }}
+    </button>
+    <a routerLink="/sales-funnel" class="btn btn-secondary ms-2">Anuluj</a>
+  </form>
+</div>

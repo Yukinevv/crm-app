@@ -136,12 +136,27 @@
   ],
   "leads": [
     {
-      "id": "l1",
-      "title": "Lead od Google Ads",
-      "description": "Potencjalny klient z kampanii X",
-      "stageId": "1",
-      "createdAt": "2025-07-17T11:00:00.000Z",
-      "stageChangedAt": "2025-07-17T11:00:00.000Z"
+      "id": "ea59",
+      "title": "Lead 1",
+      "description": "Testowy opis",
+      "stageId": "9db2",
+      "createdAt": "2025-07-18T20:26:07.364Z",
+      "stageChangedAt": "2025-07-18T20:26:20.949Z",
+      "notes": [
+        {
+          "id": "ee587cf3-2d07-4ed6-a1fc-194d3b6793a0",
+          "text": "Testowa notatka",
+          "createdAt": "2025-07-18T20:26:27.360Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "2d570870-10d0-47da-ae7e-edb375d244cd",
+          "text": "Checklista 1",
+          "done": true
+        }
+      ],
+      "attachments": []
     }
   ]
 }

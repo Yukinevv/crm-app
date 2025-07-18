@@ -34,6 +34,10 @@ export class SalesFunnelService {
     return this.http.get<Lead[]>(this.leadUrl);
   }
 
+  getLead(id: string): Observable<Lead> {
+    return this.http.get<Lead>(`${this.leadUrl}/${id}`);
+  }
+
   createLead(lead: Omit<Lead, 'id'>): Observable<Lead> {
     return this.http.post<Lead>(this.leadUrl, lead);
   }
