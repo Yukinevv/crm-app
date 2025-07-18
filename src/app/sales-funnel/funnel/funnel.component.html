@@ -1,18 +1,27 @@
-<div class="container mt-4">
+<div class="container-fluid mt-4">
   <h2>Lejek sprzedaży</h2>
-  <div class="d-flex justify-content-between">
-    <div
-      *ngFor="let stage of stages"
-      class="stage-card text-center flex-fill mx-1"
-    >
-      <h5>{{ stage.name }}</h5>
+  <div class="d-flex overflow-auto stage-row">
+    <div class="stage-column me-3" *ngFor="let stage of stages">
+      <h5 class="text-center">{{ stage.name }}</h5>
+      <div
+        cdkDropList
+        [cdkDropListData]="leadsByStage[stage.id]"
+        class="list-container"
+        (cdkDropListDropped)="drop($event, stage)"
+      >
+        <div
+          class="lead-card mb-2"
+          *ngFor="let lead of leadsByStage[stage.id]"
+          cdkDrag
+        >
+          <strong>{{ lead.title }}</strong>
+          <div><small>Ostatnia zmiana: {{ lead.stageChangedAt | date:'short' }}</small></div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="mt-3">
-    <button
-      routerLink="config"
-      class="btn btn-outline-secondary"
-    >
+    <button routerLink="config" class="btn btn-outline-secondary">
       Konfiguracja etapów
     </button>
   </div>

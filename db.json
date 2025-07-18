@@ -133,5 +133,15 @@
       "name": "Etap czwarty",
       "order": 3
     }
+  ],
+  "leads": [
+    {
+      "id": "l1",
+      "title": "Lead od Google Ads",
+      "description": "Potencjalny klient z kampanii X",
+      "stageId": "1",
+      "createdAt": "2025-07-17T11:00:00.000Z",
+      "stageChangedAt": "2025-07-17T11:00:00.000Z"
+    }
   ]
 }
