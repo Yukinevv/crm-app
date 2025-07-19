@@ -1,0 +1,23 @@
+.stage-row {
+  display: flex;
+}
+
+.stage-column {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.list-container {
+  min-height: 200px;
+  border: 2px dashed #ced4da;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+}
+
+.lead-card {
+  border: 1px solid #adb5bd;
+  padding: 0.5rem;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  cursor: move;
+}
