@@ -139,9 +139,9 @@
       "id": "ea59",
       "title": "Lead 1",
       "description": "Testowy opis",
-      "stageId": "b385",
+      "stageId": "a6cc",
       "createdAt": "2025-07-18T20:26:07.364Z",
-      "stageChangedAt": "2025-07-18T20:43:48.369Z",
+      "stageChangedAt": "2025-07-19T10:25:35.971Z",
       "notes": [
         {
           "id": "ee587cf3-2d07-4ed6-a1fc-194d3b6793a0",
@@ -156,6 +156,17 @@
           "done": true
         }
       ],
+      "attachments": []
+    },
+    {
+      "id": "e0e9",
+      "title": "Lead 2",
+      "description": "Opis 2",
+      "stageId": "b385",
+      "createdAt": "2025-07-19T10:22:35.166Z",
+      "stageChangedAt": "2025-07-19T10:23:00.737Z",
+      "notes": [],
+      "checklist": [],
       "attachments": []
     }
   ]

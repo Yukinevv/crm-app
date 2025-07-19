@@ -3,11 +3,12 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {SalesFunnelService} from '../sales-funnel.service';
 import {Stage} from '../stage.model';
 import {CommonModule} from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-stage-config',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink],
   templateUrl: './stage-config.component.html',
   styleUrls: ['./stage-config.component.scss']
 })
