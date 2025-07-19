@@ -2,8 +2,8 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Contact} from '../contact.model';
 import {ContactService} from '../contact.service';
 import {RouterLink} from '@angular/router';
-import {DatePipe, NgForOf, NgIf} from '@angular/common';
-import {debounceTime} from 'rxjs';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
+import {debounceTime, Observable} from 'rxjs';
 import {ImportExportService} from '../import-export.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {PaginationComponent} from '../pagination.component';
@@ -13,7 +13,7 @@ import {User} from 'firebase/auth';
 @Component({
   selector: 'app-contact-list',
   standalone: true,
-  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe, PaginationComponent, NgIf],
+  imports: [RouterLink, NgForOf, ReactiveFormsModule, DatePipe, PaginationComponent, NgIf, AsyncPipe],
   templateUrl: './contact-list.component.html'
 })
 export class ContactListComponent implements OnInit {
@@ -31,7 +31,7 @@ export class ContactListComponent implements OnInit {
     return this.filteredContacts.slice(start, start + this.pageSize);
   }
 
-  user: User | null = null;
+  user$: Observable<User | null>;
 
   availableStatuses = ['Nowy', 'Kontaktowany', 'Klient', 'Nieaktywny'];
 
@@ -41,6 +41,7 @@ export class ContactListComponent implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService
   ) {
+    this.user$ = this.auth.user$;
     this.filterForm = this.fb.group({
       q: [''],
       tags: [''],
@@ -53,17 +54,9 @@ export class ContactListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.auth.user$.subscribe(user => {
-      this.user = user;
-      if (user) {
-        this.cs.getAll().subscribe(list => {
-          this.contacts = list.filter(c => c.userId === user.uid);
-          this.applyFilters();
-        });
-      } else {
-        this.contacts = [];
-        this.applyFilters();
-      }
+    this.cs.getAll().subscribe(list => {
+      this.contacts = list;
+      this.applyFilters();
     });
 
     this.filterForm.valueChanges

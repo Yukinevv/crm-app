@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <h2 class="mb-3">Kontakty</h2>
 
-  <ng-container *ngIf="user; else loginNotice">
+  <ng-container *ngIf="user$ | async; else loginNotice">
 
     <div class="actions mb-3">
       <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('csv')">Eksport CSV</button>
