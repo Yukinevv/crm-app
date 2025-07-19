@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
-import {Stage} from '../stage.model';
-import {Lead} from '../lead.model';
-import {SalesFunnelService} from '../sales-funnel.service';
-import {CdkDragDrop, DragDropModule, transferArrayItem} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {DatePipe, NgForOf} from '@angular/common';
 import {RouterLink} from '@angular/router';
+
+import {SalesFunnelService} from '../sales-funnel.service';
+import {Stage} from '../stage.model';
+import {Lead} from '../lead.model';
 
 @Component({
   selector: 'app-funnel',
@@ -16,6 +17,7 @@ import {RouterLink} from '@angular/router';
 export class FunnelComponent implements OnInit {
   stages: Stage[] = [];
   leadsByStage: { [stageId: string]: Lead[] } = {};
+  connectedListIds: string[] = [];
 
   constructor(private service: SalesFunnelService) {
   }
@@ -28,6 +30,9 @@ export class FunnelComponent implements OnInit {
     this.service.getStages().subscribe(stages => {
       this.stages = stages.sort((a, b) => a.order - b.order);
       this.stages.forEach(s => (this.leadsByStage[s.id] = []));
+
+      this.connectedListIds = this.stages.map(s => `stageList-${s.id}`);
+
       this.service.getLeads().subscribe(leads => {
         leads.forEach(lead => {
           (this.leadsByStage[lead.stageId] ||= []).push(lead);
@@ -37,20 +42,47 @@ export class FunnelComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<Lead[]>, targetStage: Stage) {
-    if (event.previousContainer === event.container) return;
-    const lead = event.previousContainer.data[event.previousIndex];
-    const updated: Lead = {
-      ...lead,
-      stageId: targetStage.id,
-      stageChangedAt: new Date().toISOString()
-    };
-    this.service.updateLead(updated).subscribe(() => {
-      transferArrayItem(
-        event.previousContainer.data,
+    // jeśli wewnątrz tej samej listy - tylko reorder
+    if (event.previousContainer === event.container) {
+      moveItemInArray(
         event.container.data,
         event.previousIndex,
         event.currentIndex
       );
+      return;
+    }
+
+    // optymistycznie przenosimy w UI
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    // przygotowujemy update
+    const lead = event.container.data[event.currentIndex];
+    const updatedLead: Lead = {
+      ...lead,
+      stageId: targetStage.id,
+      stageChangedAt: new Date().toISOString()
+    };
+
+    // zapis na serwerze
+    this.service.updateLead(updatedLead).subscribe({
+      next: () => {
+        // OK
+      },
+      error: () => {
+        // rollback przy błędzie
+        transferArrayItem(
+          event.container.data,
+          event.previousContainer.data,
+          event.currentIndex,
+          event.previousIndex
+        );
+        console.error('Błąd zapisu etapu leada');
+      }
     });
   }
 }

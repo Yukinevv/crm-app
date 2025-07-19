@@ -121,7 +121,7 @@
     {
       "id": "b385",
       "name": "Etap drugi nowy",
-      "order": 2
+      "order": 3
     },
     {
       "id": "fac8",
@@ -131,7 +131,7 @@
     {
       "id": "9db2",
       "name": "Etap czwarty",
-      "order": 3
+      "order": 2
     }
   ],
   "leads": [
@@ -139,9 +139,9 @@
       "id": "ea59",
       "title": "Lead 1",
       "description": "Testowy opis",
-      "stageId": "9db2",
+      "stageId": "b385",
       "createdAt": "2025-07-18T20:26:07.364Z",
-      "stageChangedAt": "2025-07-18T20:26:20.949Z",
+      "stageChangedAt": "2025-07-18T20:43:48.369Z",
       "notes": [
         {
           "id": "ee587cf3-2d07-4ed6-a1fc-194d3b6793a0",

@@ -9,17 +9,21 @@
       <h5 class="text-center">{{ stage.name }}</h5>
       <div
         cdkDropList
+        id="stageList-{{ stage.id }}"
         [cdkDropListData]="leadsByStage[stage.id]"
+        [cdkDropListConnectedTo]="connectedListIds"
         class="list-container"
         (cdkDropListDropped)="drop($event, stage)"
       >
         <div
           class="lead-card mb-2"
-          *ngFor="let lead of leadsByStage[stage.id]"
+          *ngFor="let lead of leadsByStage[stage.id]; let i = index"
           cdkDrag
         >
           <strong>{{ lead.title }}</strong>
-          <div><small>Ostatnia zmiana: {{ lead.stageChangedAt | date:'short' }}</small></div>
+          <div>
+            <small>Ostatnia zmiana: {{ lead.stageChangedAt | date:'short' }}</small>
+          </div>
           <div class="mt-1 text-end">
             <a [routerLink]="['lead', lead.id]" class="btn btn-sm btn-outline-secondary">
               Szczegóły
