@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, ParamMap, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   FormArray,
   FormBuilder,
@@ -10,13 +10,15 @@ import {
   Validators
 } from '@angular/forms';
 import {CommonModule, NgForOf} from '@angular/common';
-import {forkJoin, of} from 'rxjs';
-import {switchMap, tap} from 'rxjs/operators';
+import {combineLatest, Observable, of} from 'rxjs';
+import {distinctUntilChanged, switchMap, tap} from 'rxjs/operators';
 import {v4 as uuidv4} from 'uuid';
 
 import {SalesFunnelService} from '../sales-funnel.service';
 import {Stage} from '../stage.model';
 import {Lead} from '../lead.model';
+import {User} from 'firebase/auth';
+import {AuthService} from '../../auth/auth.service';
 
 @Component({
   selector: 'app-lead-detail',
@@ -36,6 +38,7 @@ export class LeadDetailComponent implements OnInit {
   stages: Stage[] = [];
   isEdit = false;
   leadId?: string;
+  user$: Observable<User | null>;
 
   dynamicFieldsConfig: {
     [stageName: string]: {
@@ -63,34 +66,41 @@ export class LeadDetailComponent implements OnInit {
   newChecklistText = '';
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private service: SalesFunnelService
+      private fb: FormBuilder,
+      private route: ActivatedRoute,
+      private router: Router,
+      private service: SalesFunnelService,
+      private auth: AuthService
   ) {
+    this.user$ = this.auth.user$;
   }
 
   ngOnInit() {
     this.initForm();
 
     this.route.paramMap.pipe(
-      tap((pm: ParamMap) => {
-        const id = pm.get('id');
-        this.isEdit = !!id;
-        this.leadId = id ?? undefined;
-      }),
-      switchMap((pm: ParamMap) => {
-        const id = pm.get('id');
-        return forkJoin({
-          stages: this.service.getStages(),
-          lead: id ? this.service.getLead(id) : of<Lead | null>(null)
-        });
-      })
-    ).subscribe(({stages, lead}) => {
+        tap(pm => {
+          const id = pm.get('id');
+          this.isEdit = !!id;
+          this.leadId = id ?? undefined;
+        }),
+        switchMap(() => {
+          const stages$ = this.service.getStages();
+          const lead$ = this.isEdit ? this.service.getLead(this.leadId!) : of<Lead | null>(null);
+          return combineLatest([stages$, lead$]);
+        })
+    ).subscribe(([stages, lead]) => {
+      // Załaduj i posortuj etapy
       this.stages = stages.sort((a, b) => a.order - b.order);
 
+      // Dodaj dynamiczne kontrolki wg initial stageId
+      const initialStageId = lead ? lead.stageId : this.stages[0].id;
+      this.setDynamicFields(initialStageId, lead);
+
+      console.log('Kontrolki przed patchValue:', Object.keys(this.form.controls));
+
+      // Wypełnij formularz danymi
       if (lead) {
-        console.log('––– getLead zwróciło:', lead);
         this.form.patchValue({
           title: lead.title,
           description: lead.description,
@@ -101,21 +111,22 @@ export class LeadDetailComponent implements OnInit {
         this.loadArray('notes', lead.notes || []);
         this.loadArray('checklist', lead.checklist || []);
         this.loadArray('attachments', lead.attachments || []);
-        this.setDynamicFields(lead.stageId, lead);
       } else {
-        const now = new Date().toISOString();
         this.form.patchValue({
-          stageId: this.stages[0].id,
-          createdAt: now,
-          stageChangedAt: now
+          stageId: initialStageId,
+          createdAt: new Date().toISOString(),
+          stageChangedAt: new Date().toISOString()
         });
-        this.setDynamicFields(this.stages[0].id);
       }
 
-      this.form.get('stageId')!.valueChanges.subscribe(stageId => {
-        this.setDynamicFields(stageId);
-        this.form.get('stageChangedAt')!.setValue(new Date().toISOString());
-      });
+      // Subskrybuj zmiany etapu tylko raz
+      this.form.get('stageId')!
+          .valueChanges
+          .pipe(distinctUntilChanged())
+          .subscribe(stageId => {
+            this.setDynamicFields(stageId);
+            this.form.get('stageChangedAt')!.setValue(new Date().toISOString());
+          });
     });
   }
 
@@ -138,19 +149,28 @@ export class LeadDetailComponent implements OnInit {
     items.forEach(item => fa.push(this.fb.group(item)));
   }
 
-  private setDynamicFields(stageId: string, lead?: Lead) {
-    this.currentDynamicFieldsConfig.forEach(f => this.form.removeControl(f.controlName));
+  private setDynamicFields(stageId: string, lead?: Lead | null) {
+    console.log('setDynamicFields -> stageId=', stageId, 'lead?', !!lead);
+
+    // Usuń poprzednie
+    this.currentDynamicFieldsConfig.forEach(f =>
+        this.form.removeControl(f.controlName)
+    );
     this.currentDynamicFieldsConfig = [];
 
     const stage = this.stages.find(s => s.id === stageId);
     const cfg = stage && this.dynamicFieldsConfig[stage.name];
-    if (!cfg) return;
+    if (!cfg) {
+      console.log('Brak dynamicFieldsConfig dla etapu:', stage?.name);
+      return;
+    }
 
     cfg.forEach(fld => {
-      const value = lead ? (lead as any)[fld.controlName] ?? '' : '';
+      const initVal = lead ? (lead as any)[fld.controlName] ?? '' : '';
+      console.log('  + addControl(', fld.controlName, ')=', initVal);
       this.form.addControl(
-        fld.controlName,
-        new FormControl(value, fld.validators || [])
+          fld.controlName,
+          new FormControl(initVal, fld.validators || [])
       );
       this.currentDynamicFieldsConfig.push({
         controlName: fld.controlName,
@@ -158,6 +178,8 @@ export class LeadDetailComponent implements OnInit {
         type: fld.type
       });
     });
+
+    console.log('Form.controls po setDynamicFields:', Object.keys(this.form.controls));
   }
 
   get notes() {
@@ -245,7 +267,7 @@ export class LeadDetailComponent implements OnInit {
         ...dynamic
       };
       this.service.updateLead(updated)
-        .subscribe(() => this.router.navigate(['/sales-funnel']));
+          .subscribe(() => this.router.navigate(['/sales-funnel']));
     } else {
       const toCreate: Omit<Lead, 'id'> = {
         title: raw.title,
@@ -259,9 +281,7 @@ export class LeadDetailComponent implements OnInit {
         ...dynamic
       };
       this.service.createLead(toCreate)
-        .subscribe(created => {
-          this.router.navigate(['/sales-funnel', 'lead', created.id]);
-        });
+          .subscribe(created => this.router.navigate(['/sales-funnel', 'lead', created.id]));
     }
   }
 }

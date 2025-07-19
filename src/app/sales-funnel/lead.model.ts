@@ -18,6 +18,7 @@ export interface Attachment {
 
 export interface Lead {
   id: string;
+  userId?: string;
   title: string;
   description?: string;
   stageId: string;

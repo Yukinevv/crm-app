@@ -4,6 +4,9 @@ import {SalesFunnelService} from '../sales-funnel.service';
 import {Stage} from '../stage.model';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {Observable} from "rxjs";
+import {User} from "firebase/auth";
+import {AuthService} from "../../auth/auth.service";
 
 @Component({
   selector: 'app-stage-config',
@@ -15,18 +18,21 @@ import {RouterLink} from '@angular/router';
 export class StageConfigComponent implements OnInit {
   stages: Stage[] = [];
   form: FormGroup;
+  user$: Observable<User | null>;
 
   constructor(
-    private service: SalesFunnelService,
-    private fb: FormBuilder
+      private service: SalesFunnelService,
+      private fb: FormBuilder,
+      private auth: AuthService
   ) {
-    this.form = this.fb.group({
-      name: ['', Validators.required]
-    });
+    this.form = this.fb.group({name: ['', Validators.required]});
+    this.user$ = this.auth.user$;
   }
 
   ngOnInit() {
-    this.loadStages();
+    this.user$.subscribe(u => {
+      if (u) this.loadStages();
+    });
   }
 
   loadStages() {
@@ -38,15 +44,15 @@ export class StageConfigComponent implements OnInit {
   addStage() {
     if (this.form.invalid) return;
     const nextOrder =
-      this.stages.length > 0
-        ? Math.max(...this.stages.map(s => s.order)) + 1
-        : 1;
+        this.stages.length > 0
+            ? Math.max(...this.stages.map(s => s.order)) + 1
+            : 1;
     this.service
-      .createStage({name: this.form.value.name, order: nextOrder})
-      .subscribe(() => {
-        this.form.reset();
-        this.loadStages();
-      });
+        .createStage({name: this.form.value.name, order: nextOrder})
+        .subscribe(() => {
+          this.form.reset();
+          this.loadStages();
+        });
   }
 
   updateStage(stage: Stage) {

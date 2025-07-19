@@ -1,45 +1,54 @@
-<div class="container-fluid mt-4">
-  <div class="d-flex justify-content-between align-items-center">
-    <h2>Lejek sprzedaży</h2>
-    <div>
-      <button routerLink="lead/new" class="btn btn-primary me-2">Nowy lead</button>
-      <button routerLink="kpi" class="btn btn-outline-info">Wskaźniki KPI</button>
+<ng-container *ngIf="user$ | async as user; else loginPrompt">
+  <div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Lejek sprzedaży</h2>
+      <div>
+        <button routerLink="lead/new" class="btn btn-primary me-2">Nowy lead</button>
+        <button routerLink="kpi" class="btn btn-outline-info">Wskaźniki KPI</button>
+      </div>
     </div>
-  </div>
 
-  <div class="d-flex overflow-auto stage-row">
-    <div class="stage-column me-3" *ngFor="let stage of stages">
-      <h5 class="text-center">{{ stage.name }}</h5>
-      <div
-        cdkDropList
-        id="stageList-{{ stage.id }}"
-        [cdkDropListData]="leadsByStage[stage.id]"
-        [cdkDropListConnectedTo]="connectedListIds"
-        class="list-container"
-        (cdkDropListDropped)="drop($event, stage)"
-      >
+    <div class="d-flex overflow-auto stage-row">
+      <div class="stage-column me-3" *ngFor="let stage of stages">
+        <h5 class="text-center">{{ stage.name }}</h5>
         <div
-          class="lead-card mb-2"
-          *ngFor="let lead of leadsByStage[stage.id]; let i = index"
-          cdkDrag
+          cdkDropList
+          id="stageList-{{ stage.id }}"
+          [cdkDropListData]="leadsByStage[stage.id]"
+          [cdkDropListConnectedTo]="connectedListIds"
+          class="list-container"
+          (cdkDropListDropped)="drop($event, stage)"
         >
-          <strong>{{ lead.title }}</strong>
-          <div>
-            <small>Ostatnia zmiana: {{ lead.stageChangedAt | date:'short' }}</small>
-          </div>
-          <div class="mt-1 text-end">
-            <a [routerLink]="['lead', lead.id]" class="btn btn-sm btn-outline-secondary">
-              Szczegóły
-            </a>
+          <div
+            class="lead-card mb-2"
+            *ngFor="let lead of leadsByStage[stage.id]; let i = index"
+            cdkDrag
+          >
+            <strong>{{ lead.title }}</strong>
+            <div>
+              <small>Ostatnia zmiana: {{ lead.stageChangedAt | date:'short' }}</small>
+            </div>
+            <div class="mt-1 text-end">
+              <a [routerLink]="['lead', lead.id]" class="btn btn-sm btn-outline-secondary">
+                Szczegóły
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="mt-3">
-    <button routerLink="config" class="btn btn-outline-secondary">
-      Konfiguracja etapów
-    </button>
+    <div class="mt-3">
+      <button routerLink="config" class="btn btn-outline-secondary">
+        Konfiguracja etapów
+      </button>
+    </div>
   </div>
-</div>
+</ng-container>
+
+<ng-template #loginPrompt>
+  <div class="container mt-4 text-center">
+    <p>Zaloguj się, aby zobaczyć i tworzyć etapy lejka oraz leady.</p>
+    <button routerLink="/login" class="btn btn-primary">Zaloguj się</button>
+  </div>
+</ng-template>
