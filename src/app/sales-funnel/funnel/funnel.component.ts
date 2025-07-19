@@ -1,16 +1,19 @@
 import {Component, OnInit} from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
-import {DatePipe, NgForOf} from '@angular/common';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {RouterLink} from '@angular/router';
 
 import {SalesFunnelService} from '../sales-funnel.service';
 import {Stage} from '../stage.model';
 import {Lead} from '../lead.model';
+import {Observable} from 'rxjs';
+import {User} from 'firebase/auth';
+import {AuthService} from '../../auth/auth.service';
 
 @Component({
   selector: 'app-funnel',
   standalone: true,
-  imports: [NgForOf, DragDropModule, RouterLink, DatePipe],
+  imports: [NgForOf, DragDropModule, RouterLink, DatePipe, NgIf, AsyncPipe],
   templateUrl: './funnel.component.html',
   styleUrls: ['./funnel.component.scss']
 })
@@ -18,8 +21,13 @@ export class FunnelComponent implements OnInit {
   stages: Stage[] = [];
   leadsByStage: { [stageId: string]: Lead[] } = {};
   connectedListIds: string[] = [];
+  user$: Observable<User | null>;
 
-  constructor(private service: SalesFunnelService) {
+  constructor(
+    private service: SalesFunnelService,
+    private auth: AuthService
+  ) {
+    this.user$ = this.auth.user$;
   }
 
   ngOnInit() {

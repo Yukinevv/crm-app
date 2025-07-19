@@ -115,33 +115,38 @@
   "stages": [
     {
       "id": "a6cc",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "name": "Etap drugi",
       "order": 1
     },
     {
       "id": "b385",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "name": "Etap drugi nowy",
-      "order": 3
+      "order": 2
     },
     {
       "id": "fac8",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "name": "Etap trzeci",
       "order": 4
     },
     {
       "id": "9db2",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "name": "Etap czwarty",
-      "order": 2
+      "order": 3
     }
   ],
   "leads": [
     {
       "id": "ea59",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "title": "Lead 1",
       "description": "Testowy opis",
-      "stageId": "a6cc",
+      "stageId": "fac8",
       "createdAt": "2025-07-18T20:26:07.364Z",
-      "stageChangedAt": "2025-07-19T10:25:35.971Z",
+      "stageChangedAt": "2025-07-19T12:23:51.578Z",
       "notes": [
         {
           "id": "ee587cf3-2d07-4ed6-a1fc-194d3b6793a0",
@@ -160,11 +165,12 @@
     },
     {
       "id": "e0e9",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "title": "Lead 2",
       "description": "Opis 2",
       "stageId": "b385",
       "createdAt": "2025-07-19T10:22:35.166Z",
-      "stageChangedAt": "2025-07-19T10:23:00.737Z",
+      "stageChangedAt": "2025-07-19T12:23:36.620Z",
       "notes": [],
       "checklist": [],
       "attachments": []

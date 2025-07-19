@@ -1,63 +1,72 @@
-<div class="container mt-4">
-  <h2>Konfiguracja etapów lejka</h2>
+<ng-container *ngIf="user$ | async; else loginPrompt">
+  <div class="container mt-4">
+    <h2>Konfiguracja etapów lejka</h2>
 
-  <form
-    [formGroup]="form"
-    (ngSubmit)="addStage()"
-    class="d-flex mb-3"
-  >
-    <input
-      formControlName="name"
-      class="form-control me-2"
-      placeholder="Nazwa etapu"
-    />
-    <button
-      class="btn btn-primary"
-      type="submit"
-      [disabled]="form.invalid"
+    <form
+      [formGroup]="form"
+      (ngSubmit)="addStage()"
+      class="d-flex mb-3"
     >
-      Dodaj etap
-    </button>
-  </form>
-
-  <ul class="list-group">
-    <li
-      *ngFor="let stage of stages"
-      class="list-group-item d-flex align-items-center"
-    >
-      <span class="me-3">{{ stage.order }}.</span>
       <input
-        [(ngModel)]="stage.name"
-        class="form-control me-3"
+        formControlName="name"
+        class="form-control me-2"
+        placeholder="Nazwa etapu"
       />
       <button
-        class="btn btn-sm btn-outline-secondary me-1"
-        (click)="moveUp(stage)"
-        [disabled]="stage.order === 1"
+        class="btn btn-primary"
+        type="submit"
+        [disabled]="form.invalid"
       >
-        ↑
+        Dodaj etap
       </button>
-      <button
-        class="btn btn-sm btn-outline-secondary me-1"
-        (click)="moveDown(stage)"
-        [disabled]="stage.order === stages.length"
-      >
-        ↓
-      </button>
-      <button
-        class="btn btn-sm btn-outline-success me-1"
-        (click)="updateStage(stage)"
-      >
-        Zapisz
-      </button>
-      <button
-        class="btn btn-sm btn-outline-danger"
-        (click)="deleteStage(stage.id)"
-      >
-        Usuń
-      </button>
-    </li>
-  </ul>
+    </form>
 
-  <a routerLink="/sales-funnel" class="btn btn-secondary">Powrót do lejka</a>
-</div>
+    <ul class="list-group">
+      <li
+        *ngFor="let stage of stages"
+        class="list-group-item d-flex align-items-center"
+      >
+        <span class="me-3">{{ stage.order }}.</span>
+        <input
+          [(ngModel)]="stage.name"
+          class="form-control me-3"
+        />
+        <button
+          class="btn btn-sm btn-outline-secondary me-1"
+          (click)="moveUp(stage)"
+          [disabled]="stage.order === 1"
+        >
+          ↑
+        </button>
+        <button
+          class="btn btn-sm btn-outline-secondary me-1"
+          (click)="moveDown(stage)"
+          [disabled]="stage.order === stages.length"
+        >
+          ↓
+        </button>
+        <button
+          class="btn btn-sm btn-outline-success me-1"
+          (click)="updateStage(stage)"
+        >
+          Zapisz
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger"
+          (click)="deleteStage(stage.id)"
+        >
+          Usuń
+        </button>
+      </li>
+    </ul>
+
+    <a routerLink="/sales-funnel" class="btn btn-secondary">Powrót do lejka</a>
+  </div>
+</ng-container>
+
+<ng-template #loginPrompt>
+  <div class="container mt-4 text-center">
+    <p>Zaloguj się, aby zarządzać etapami lejka.</p>
+    <button routerLink="/login" class="btn btn-primary">Zaloguj się</button>
+  </div>
+</ng-template>

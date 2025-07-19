@@ -1,21 +1,24 @@
 import {Component, OnInit} from '@angular/core';
-import {forkJoin} from 'rxjs';
-
+import {combineLatest, Observable} from 'rxjs';
 import {SalesFunnelService} from '../sales-funnel.service';
 import {Stage} from '../stage.model';
 import {Lead} from '../lead.model';
-import {DecimalPipe, NgForOf} from '@angular/common';
+import {AsyncPipe, DecimalPipe, NgForOf, NgIf} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {User} from 'firebase/auth';
+import {AuthService} from '../../auth/auth.service';
 
 @Component({
   selector: 'app-kpi',
   standalone: true,
-  templateUrl: './kpi.component.html',
   imports: [
     DecimalPipe,
     RouterLink,
-    NgForOf
+    NgForOf,
+    NgIf,
+    AsyncPipe
   ],
+  templateUrl: './kpi.component.html',
   styleUrls: ['./kpi.component.scss']
 })
 export class KpiComponent implements OnInit {
@@ -26,19 +29,24 @@ export class KpiComponent implements OnInit {
   stageCounts: { name: string; count: number }[] = [];
   conversionRate = 0;             // w %
   averageStageDurations: { name: string; avgDays: number }[] = [];
+  user$: Observable<User | null>;
 
-  constructor(private service: SalesFunnelService) {
+  constructor(
+      private service: SalesFunnelService,
+      private auth: AuthService
+  ) {
+    this.user$ = this.auth.user$;
   }
 
   ngOnInit() {
-    forkJoin({
+    combineLatest({
       stages: this.service.getStages(),
       leads: this.service.getLeads()
     }).subscribe(({stages, leads}) => {
       this.stages = stages.sort((a, b) => a.order - b.order);
       this.leads = leads;
 
-      // grupowanie
+      // Grupowanie
       this.stages.forEach(s => (this.leadsByStage[s.id] = []));
       this.leads.forEach(l => (this.leadsByStage[l.stageId] ||= []).push(l));
 
@@ -76,8 +84,7 @@ export class KpiComponent implements OnInit {
         const entered = new Date(lead.stageChangedAt).getTime();
         return sum + (now - entered);
       }, 0);
-      const avgMs = totalMs / arr.length;
-      const avgDays = avgMs / (1000 * 60 * 60 * 24);
+      const avgDays = totalMs / (1000 * 60 * 60 * 24) / arr.length;
       return {name: s.name, avgDays: Math.round(avgDays * 100) / 100};
     });
   }
