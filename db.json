@@ -136,12 +136,17 @@
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "name": "Etap czwarty",
       "order": 3
+    },
+    {
+      "id": "970a",
+      "name": "Oferta",
+      "order": 5,
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     }
   ],
   "leads": [
     {
       "id": "ea59",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "title": "Lead 1",
       "description": "Testowy opis",
       "stageId": "fac8",
@@ -170,7 +175,7 @@
       "description": "Opis 2",
       "stageId": "b385",
       "createdAt": "2025-07-19T10:22:35.166Z",
-      "stageChangedAt": "2025-07-19T13:18:02.850Z",
+      "stageChangedAt": "2025-07-20T15:07:24.903Z",
       "notes": [],
       "checklist": [],
       "attachments": []

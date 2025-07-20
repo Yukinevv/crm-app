@@ -2,27 +2,26 @@
   <div class="container-fluid">
     <button class="btn btn-outline-primary me-2"
             aria-label="Otwórz menu"
-            (click)="toggleSidebar()">☰
+            (click)="toggleSidebar()">
+      <i class="bi bi-list"></i>
     </button>
 
-    <a class="navbar-brand" href="#">CRM-APP</a>
+    <a class="navbar-brand fw-bold" href="#">CRM-APP</a>
 
-    <div class="d-flex ms-auto">
-      <!-- jeśli user$ zwróci User: pokaż email i wyloguj -->
+    <div class="d-flex ms-auto align-items-center">
       <ng-container *ngIf="user$ | async as user; else guestLinks">
-        <span class="navbar-text me-3">{{ user.email }}</span>
-        <button class="btn btn-outline-danger" (click)="logout()">
-          <i class="bi bi-box-arrow-right"></i> Wyloguj
+        <span class="navbar-text me-3 mr-2">{{ user.email }}</span>
+        <button class="btn btn-outline-danger d-flex align-items-center" (click)="logout()">
+          <i class="bi bi-box-arrow-right me-1 pr-1"></i> Wyloguj
         </button>
       </ng-container>
 
-      <!-- gdy null: pokaż linki logowania/rejestracji -->
       <ng-template #guestLinks>
-        <button routerLink="/login" class="btn btn-outline-primary me-2">
-          <i class="bi bi-box-arrow-in-right"></i> Zaloguj się
+        <button routerLink="/login" class="btn btn-outline-primary me-2 d-flex align-items-center mr-2">
+          <i class="bi bi-box-arrow-in-right me-1 pr-1"></i> Zaloguj się
         </button>
-        <button routerLink="/register" class="btn btn-outline-secondary">
-          <i class="bi bi-person-plus"></i> Rejestracja
+        <button routerLink="/register" class="btn btn-outline-secondary d-flex align-items-center">
+          <i class="bi bi-person-plus me-1 pr-1"></i> Rejestracja
         </button>
       </ng-template>
     </div>
@@ -30,17 +29,28 @@
 </nav>
 
 <div class="content-wrapper">
-  <div class="sidebar" [class.open]="sidebarOpen">
-    <!--    <button class="btn-close m-2" aria-label="Zamknij menu" (click)="toggleSidebar()"></button>-->
-    <nav class="nav flex-column p-2">
-      <a routerLink="/contacts" class="nav-link" (click)="toggleSidebar()">Kontakty</a>
-      <a routerLink="/sales-funnel" class="nav-link" (click)="toggleSidebar()">
-        Lejek sprzedaży
-      </a>
-      <a routerLink="/test" class="nav-link" (click)="toggleSidebar()">Testowy moduł</a>
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <nav class="nav flex-column p-3">
+      <button routerLink="/contacts"
+              class="btn btn-light sidebar-btn mb-2 d-flex align-items-center"
+              (click)="toggleSidebar()">
+        <i class="bi bi-person-lines-fill me-2"></i> Kontakty
+      </button>
+      <button routerLink="/sales-funnel"
+              class="btn btn-light sidebar-btn mb-2 d-flex align-items-center"
+              (click)="toggleSidebar()">
+        <i class="bi bi-bar-chart-line me-2"></i> Lejek sprzedaży
+      </button>
+      <button routerLink="/test"
+              class="btn btn-light sidebar-btn d-flex align-items-center"
+              (click)="toggleSidebar()">
+        <i class="bi bi-tools me-2"></i> Testowy moduł
+      </button>
     </nav>
-  </div>
-  <div class="flex-fill">
+  </aside>
+  <main class="flex-fill p-3">
     <router-outlet></router-outlet>
-  </div>
+  </main>
 </div>
+
+<app-footer></app-footer>
