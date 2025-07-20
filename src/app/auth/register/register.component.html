@@ -1,7 +1,7 @@
 <div class="container mt-4" style="max-width:400px">
-  <h2>Rejestracja</h2>
+  <h2 class="mt-5">Rejestracja</h2>
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="mb-3 mt-3">
+    <div class="mb-3 mt-4">
       <label>Email</label>
       <input type="email" formControlName="email" class="form-control">
       <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
@@ -29,7 +29,7 @@
 
     <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-    <button class="btn btn-primary" type="submit" [disabled]="form.invalid">Zarejestruj się</button>
+    <button class="btn btn-primary mt-2" type="submit" [disabled]="form.invalid">Zarejestruj się</button>
     <a routerLink="/login" class="btn btn-link">Masz już konto? Zaloguj się</a>
   </form>
 </div>

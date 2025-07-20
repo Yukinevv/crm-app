@@ -1,7 +1,13 @@
 <div class="container mt-4">
   <h2 class="mb-4">{{ editId ? 'Edycja kontaktu' : 'Nowy kontakt' }}</h2>
+
+  <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Zapisz</button>
+  <button type="button" class="btn btn-secondary ml-2" (click)="router.navigate(['/contacts'])">
+    Anuluj
+  </button>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="form-row">
+    <div class="form-row mt-4">
       <div class="form-group col-md-6">
         <label>Imię</label>
         <input formControlName="firstName" class="form-control">

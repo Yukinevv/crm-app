@@ -1,48 +1,48 @@
 <ng-container *ngIf="user$ | async; else loginPrompt">
-  <div class="container mt-4">
-    <h2>Wskaźniki KPI</h2>
+    <div class="container mt-4">
+        <h2>Wskaźniki KPI</h2>
 
-    <div class="row mb-4">
-      <!-- Liczba leadów w etapach -->
-      <div class="col">
-        <div class="card p-3">
-          <h5>Liczba leadów w etapach</h5>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item" *ngFor="let sc of stageCounts">
-              {{ sc.name }}: <strong>{{ sc.count }}</strong>
-            </li>
-          </ul>
-        </div>
-      </div>
+        <div class="row mb-4 mt-4">
+            <!-- Liczba leadów w etapach -->
+            <div class="col">
+                <div class="card p-3">
+                    <h5>Liczba leadów w etapach</h5>
+                    <ul class="list-group list-group-flush mt-2">
+                        <li class="list-group-item" *ngFor="let sc of stageCounts">
+                            {{ sc.name }}: <strong>{{ sc.count }}</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
-      <!-- Conversion rate -->
-      <div class="col">
-        <div class="card p-3">
-          <h5>Conversion Rate</h5>
-          <p class="display-6">{{ conversionRate | number:'1.2-2' }}%</p>
-        </div>
-      </div>
+            <!-- Conversion rate -->
+            <div class="col">
+                <div class="card p-3">
+                    <h5>Conversion Rate</h5>
+                    <p class="display-6">{{ conversionRate | number:'1.2-2' }}%</p>
+                </div>
+            </div>
 
-      <!-- Średni czas trwania etapu -->
-      <div class="col">
-        <div class="card p-3">
-          <h5>Średni czas w etapie (dni)</h5>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item" *ngFor="let ad of averageStageDurations">
-              {{ ad.name }}: <strong>{{ ad.avgDays }}</strong>
-            </li>
-          </ul>
+            <!-- Średni czas trwania etapu -->
+            <div class="col">
+                <div class="card p-3">
+                    <h5>Średni czas w etapie (dni)</h5>
+                    <ul class="list-group list-group-flush mt-2">
+                        <li class="list-group-item" *ngFor="let ad of averageStageDurations">
+                            {{ ad.name }}: <strong>{{ ad.avgDays }}</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <a routerLink="/sales-funnel" class="btn btn-secondary">Powrót do lejka</a>
     </div>
-
-    <a routerLink="/sales-funnel" class="btn btn-secondary">Powrót do lejka</a>
-  </div>
 </ng-container>
 
 <ng-template #loginPrompt>
-  <div class="container mt-4 text-center">
-    <p>Zaloguj się, aby zobaczyć wskaźniki KPI.</p>
-    <button routerLink="/login" class="btn btn-primary">Zaloguj się</button>
-  </div>
+    <div class="container mt-4 text-center">
+        <p>Zaloguj się, aby zobaczyć wskaźniki KPI.</p>
+        <button routerLink="/login" class="btn btn-primary">Zaloguj się</button>
+    </div>
 </ng-template>
