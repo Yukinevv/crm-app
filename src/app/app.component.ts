@@ -4,11 +4,12 @@ import {AuthService} from './auth/auth.service';
 import {Observable} from 'rxjs';
 import {User} from 'firebase/auth';
 import {AsyncPipe, NgIf} from '@angular/common';
+import {AppFooterComponent} from './app-footer/app-footer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, NgIf, AsyncPipe],
+  imports: [RouterOutlet, RouterLink, NgIf, AsyncPipe, AppFooterComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
