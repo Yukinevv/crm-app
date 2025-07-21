@@ -39,7 +39,7 @@ import {CommonModule} from '@angular/common';
 })
 export class PaginationComponent {
   @Input() totalItems = 0;
-  @Input() pageSize = 10;
+  @Input() pageSize = 5;
   @Input() currentPage = 1;
   @Output() currentPageChange = new EventEmitter<number>();
 
