@@ -16,9 +16,9 @@ export class LoginComponent {
   error: string | null = null;
 
   constructor(
-      fb: FormBuilder,
-      private auth: AuthService,
-      private router: Router
+    fb: FormBuilder,
+    private auth: AuthService,
+    private router: Router
   ) {
     this.form = fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -31,10 +31,10 @@ export class LoginComponent {
     const {email, password} = this.form.value;
     this.error = null;
     this.auth.login(email, password)
-        .then(() => this.router.navigate(['/contacts']))
-        .catch(err => {
-          this.error = this.getErrorMessage(err);
-        });
+      .then(() => this.router.navigate(['/contacts']))
+      .catch(err => {
+        this.error = this.getErrorMessage(err);
+      });
   }
 
   private getErrorMessage(err: any): string {
