@@ -19,5 +19,10 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./contacts/contacts.module').then((m) => m.ContactsModule)
   },
+  {
+    path: 'calendar',
+    loadChildren: () =>
+      import('./calendar/calendar.module').then(m => m.CalendarModule)
+  },
   {path: '', redirectTo: '/contacts', pathMatch: 'full'}
 ];
