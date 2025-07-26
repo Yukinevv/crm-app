@@ -9,20 +9,22 @@ import {CommonModule} from '@angular/common';
     <nav aria-label="Paginacja">
       <ul class="pagination justify-content-center">
         <li class="page-item" [class.disabled]="currentPage === 1">
-          <button class="page-link" (click)="setPage(1)" [disabled]="currentPage === 1">First</button>
+          <button class="page-link" (click)="setPage(1)" [disabled]="currentPage === 1">Pierwsza</button>
         </li>
         <li class="page-item" [class.disabled]="currentPage === 1">
-          <button class="page-link" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+          <button class="page-link" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Poprzednia
+          </button>
         </li>
         <li class="page-item" *ngFor="let page of pages" [class.active]="page === currentPage">
           <button class="page-link" (click)="setPage(page)">{{ page }}</button>
         </li>
         <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <button class="page-link" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next
+          <button class="page-link" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">Następna
           </button>
         </li>
         <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <button class="page-link" (click)="setPage(totalPages)" [disabled]="currentPage === totalPages">Last</button>
+          <button class="page-link" (click)="setPage(totalPages)" [disabled]="currentPage === totalPages">Ostatnia
+          </button>
         </li>
       </ul>
     </nav>

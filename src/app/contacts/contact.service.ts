@@ -9,6 +9,8 @@ import {AuthService} from '../auth/auth.service';
 export class ContactService {
   private baseUrl = '/api/contacts';
 
+  // private baseUrl = 'http://localhost:8080/api/contacts';
+
   constructor(
     private http: HttpClient,
     private auth: AuthService

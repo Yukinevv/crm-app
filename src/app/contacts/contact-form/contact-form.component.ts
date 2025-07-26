@@ -58,6 +58,8 @@ export class ContactFormComponent implements OnInit {
         this.contactService.getById(id).subscribe(contact => {
           this.form.patchValue({
             ...contact,
+            // zamieniamy tablicę tagów na ciąg "tag1, tag2"
+            tags: contact.tags?.length ? contact.tags.join(', ') : '',
             createdAt: contact.createdAt.substring(0, 16)
           });
         });
@@ -107,12 +109,14 @@ export class ContactFormComponent implements OnInit {
     });
   }
 
-  tagsSplit(tags: string): string[] {
+  tagsSplit(tags: string | string[]): string[] {
     if (!tags) return [];
-    if (!tags.includes(',')) return [tags];
-    return tags
-      .split(',')
-      .map((t: string) => t.trim())
-      .filter((t: string) => !!t)
+    if (Array.isArray(tags)) {
+      return tags;
+    }
+    const tagStr = tags as string;
+    return tagStr.includes(',')
+      ? tagStr.split(',').map(t => t.trim()).filter(t => !!t)
+      : [tagStr.trim()];
   }
 }
