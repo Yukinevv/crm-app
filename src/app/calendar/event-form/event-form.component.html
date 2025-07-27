@@ -1,0 +1,71 @@
+<div class="container mt-4" style="max-width:600px">
+  <h2>{{ editId ? 'Edycja spotkania' : 'Nowe spotkanie' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="mb-3 mt-4">
+      <label>Tytuł</label>
+      <input formControlName="title" class="form-control">
+      <div *ngIf="form.get('title')?.invalid && form.get('title')?.touched"
+           class="text-danger small">Tytuł jest wymagany
+      </div>
+    </div>
+
+    <div class="mb-3 mt-4">
+      <label>Uczestnicy</label>
+      <select class="form-select ml-2" (change)="onParticipantSelect($event)">
+        <option value="">-- wybierz --</option>
+        <option *ngFor="let c of contactsList" [value]="c.id">
+          {{ c.firstName }} {{ c.lastName }}
+        </option>
+      </select>
+      <div class="participants-list">
+        <div *ngFor="let pid of selectedParticipants" class="participant-chip">
+          {{ getContactName(pid) }}
+          <button type="button"
+                  class="btn-remove"
+                  aria-label="Usuń uczestnika"
+                  (click)="removeParticipant(pid)">
+            &times;
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3 mt-4">
+      <label>Lokalizacja</label>
+      <input formControlName="location" class="form-control">
+    </div>
+
+    <div class="mb-3">
+      <label>Wirtualny link</label>
+      <input formControlName="virtualLink" class="form-control" placeholder="https://">
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Start</label>
+        <input type="datetime-local" formControlName="start" class="form-control">
+      </div>
+      <div class="col">
+        <label>End</label>
+        <input type="datetime-local" formControlName="end" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-check mt-2">
+      <input type="checkbox" formControlName="allDay" class="form-check-input" id="allDay">
+      <label for="allDay" class="form-check-label">Cały dzień</label>
+    </div>
+
+    <div class="mb-3 mt-3">
+      <label>Przypomnienie (min przed)</label>
+      <input type="number" formControlName="reminderMinutesBefore" class="form-control">
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
+      Zapisz
+    </button>
+    <button class="btn btn-secondary ms-2 ml-2" (click)="router.navigate(['/calendar'])" type="button">
+      Anuluj
+    </button>
+  </form>
+</div>
