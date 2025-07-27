@@ -181,5 +181,22 @@
       "checklist": [],
       "attachments": []
     }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "title": "Spotkanie 1",
+      "participants": [
+        "a01c",
+        "4242"
+      ],
+      "location": "Lokalizacja 2",
+      "virtualLink": "",
+      "start": "2025-07-03T03:00",
+      "end": "2025-07-04T00:00",
+      "allDay": true,
+      "reminderMinutesBefore": 15,
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
+    }
   ]
 }
