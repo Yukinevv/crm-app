@@ -1,0 +1,23 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Wybierz termin spotkania</h2>
+
+  <div *ngIf="loading">Ładowanie dostępnych terminów...</div>
+  <div *ngIf="error" class="text-danger">{{ error }}</div>
+
+  <ul *ngIf="!loading && slots.length">
+    <li *ngFor="let slot of slots" class="mb-3 row align-items-center bi-arrow-right">
+      <span class="slot-time">
+        {{ slot.start | date:'medium' }} – {{ slot.end | date:'shortTime' }}
+      </span>
+      <button
+        class="btn btn-primary btn-sm ms-2 ml-3"
+        (click)="navigateToForm(slot.id)">
+        Rezerwuj
+      </button>
+    </li>
+  </ul>
+
+  <div *ngIf="!loading && !slots.length">
+    Brak dostępnych terminów.
+  </div>
+</div>

@@ -11,18 +11,23 @@ export const routes: Routes = [
     path: 'sales-funnel',
     loadChildren: () =>
       import('./sales-funnel/sales-funnel.module').then(
-        (m) => m.SalesFunnelModule
+        m => m.SalesFunnelModule
       )
   },
   {
     path: 'contacts',
     loadChildren: () =>
-      import('./contacts/contacts.module').then((m) => m.ContactsModule)
+      import('./contacts/contacts.module').then(m => m.ContactsModule)
   },
   {
     path: 'calendar',
     loadChildren: () =>
       import('./calendar/calendar.module').then(m => m.CalendarModule)
+  },
+  {
+    path: 'booking',
+    loadChildren: () =>
+      import('./booking/booking.module').then(m => m.BookingModule)
   },
   {path: '', redirectTo: '/contacts', pathMatch: 'full'}
 ];
