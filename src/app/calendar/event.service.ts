@@ -10,18 +10,18 @@ export class EventService {
   private baseUrl = '/api/events';
 
   constructor(
-    private http: HttpClient,
-    private auth: AuthService
+      private http: HttpClient,
+      private auth: AuthService
   ) {
   }
 
   getAll(): Observable<CalendarEvent[]> {
     return this.auth.user$.pipe(
-      switchMap(user =>
-        user
-          ? this.http.get<CalendarEvent[]>(`${this.baseUrl}?userId=${user.uid}`)
-          : of([] as CalendarEvent[])
-      )
+        switchMap(user =>
+            user
+                ? this.http.get<CalendarEvent[]>(this.baseUrl)
+                : of([] as CalendarEvent[])
+        )
     );
   }
 
@@ -31,34 +31,34 @@ export class EventService {
 
   create(evt: CreateEvent): Observable<CalendarEvent> {
     return this.auth.user$.pipe(
-      switchMap(user => {
-        if (!user) throw new Error('Nieautoryzowany');
-        return this.http.post<CalendarEvent>(
-          this.baseUrl,
-          {...evt, userId: user.uid}
-        );
-      })
+        switchMap(user => {
+          if (!user) throw new Error('Nieautoryzowany');
+          return this.http.post<CalendarEvent>(
+              this.baseUrl,
+              {...evt, userId: user.uid}
+          );
+        })
     );
   }
 
   update(evt: UpdateEvent): Observable<CalendarEvent> {
     return this.auth.user$.pipe(
-      switchMap(user => {
-        if (!user) throw new Error('Nieautoryzowany');
-        return this.http.put<CalendarEvent>(
-          `${this.baseUrl}/${evt.id}`,
-          {...evt, userId: user.uid}
-        );
-      })
+        switchMap(user => {
+          if (!user) throw new Error('Nieautoryzowany');
+          return this.http.put<CalendarEvent>(
+              `${this.baseUrl}/${evt.id}`,
+              {...evt, userId: user.uid}
+          );
+        })
     );
   }
 
   delete(id: string): Observable<void> {
     return this.auth.user$.pipe(
-      switchMap(user => {
-        if (!user) throw new Error('Nieautoryzowany');
-        return this.http.delete<void>(`${this.baseUrl}/${id}`);
-      })
+        switchMap(user => {
+          if (!user) throw new Error('Nieautoryzowany');
+          return this.http.delete<void>(`${this.baseUrl}/${id}`);
+        })
     );
   }
 }

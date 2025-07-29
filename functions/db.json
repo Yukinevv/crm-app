@@ -197,6 +197,17 @@
       "allDay": true,
       "reminderMinutesBefore": 15,
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
+    },
+    {
+      "title": "Rezerwacja: Jan Polak",
+      "participants": [],
+      "location": "",
+      "virtualLink": "",
+      "start": "2025-07-30T10:00:00.000Z",
+      "end": "2025-07-30T10:30:00.000Z",
+      "allDay": false,
+      "reminderMinutesBefore": 0,
+      "id": 2
     }
   ],
   "slots": [
@@ -210,7 +221,7 @@
       "id": "2",
       "start": "2025-07-30T10:00:00.000Z",
       "end": "2025-07-30T10:30:00.000Z",
-      "booked": false
+      "booked": true
     },
     {
       "id": "3",
