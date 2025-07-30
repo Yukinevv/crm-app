@@ -9,6 +9,7 @@ export interface CalendarEvent {
   end: string;
   allDay: boolean;
   reminderMinutesBefore?: number;
+  invitedUserIds?: string[];
 }
 
 // Typ do tworzenia nowego wydarzenia (bez id i userId)

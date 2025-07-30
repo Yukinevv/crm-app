@@ -78,15 +78,18 @@ export class EventFormComponent implements OnInit {
     if (this.form.invalid) return;
     const raw = this.form.value as CreateEvent;
 
+    // wyciągamy UID zaproszonych na podstawie contact.linkedUid
+    const invitedUserIds = raw.participants
+      .map(pid => this.contactsList.find(c => c.id === pid)?.linkedUid)
+      .filter((uid): uid is string => !!uid);
+
     if (this.editId) {
-      const updateEvt: UpdateEvent = {id: this.editId, ...raw};
-      this.eventService.update(updateEvt)
-        .pipe(take(1))
+      const updateEvt: UpdateEvent = {id: this.editId, ...raw, invitedUserIds};
+      this.eventService.update(updateEvt).pipe(take(1))
         .subscribe(() => this.router.navigate(['/calendar']));
     } else {
-      const createEvt: CreateEvent = raw;
-      this.eventService.create(createEvt)
-        .pipe(take(1))
+      const createEvt: CreateEvent = {...raw, invitedUserIds};
+      this.eventService.create(createEvt).pipe(take(1))
         .subscribe(() => this.router.navigate(['/calendar']));
     }
   }
@@ -107,7 +110,7 @@ export class EventFormComponent implements OnInit {
   get selectedParticipants(): string[] {
     return this.form.get('participants')!.value;
   }
-  
+
   onParticipantSelect(ev: Event): void {
     const select = ev.target as HTMLSelectElement;
     const id = select.value;

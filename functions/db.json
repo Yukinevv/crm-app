@@ -25,7 +25,6 @@
     },
     {
       "id": "a01c",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",
@@ -34,14 +33,14 @@
       "email": "mariuszrodzic08@gmail.com",
       "address": "Szarych Szeregów, 19, 33",
       "notes": "",
-      "tags": [
-        []
-      ],
+      "tags": [],
       "status": "",
-      "createdAt": "2025-07-16T14:21:00.000Z",
+      "createdAt": "2025-07-16T12:21:00.000Z",
       "source": "",
       "region": "",
-      "managerId": "4242"
+      "managerId": "4242",
+      "linkedUid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     },
     {
       "id": "654b",
@@ -187,8 +186,7 @@
       "id": 1,
       "title": "Spotkanie 1",
       "participants": [
-        "a01c",
-        "4242"
+        "a01c"
       ],
       "location": "Lokalizacja 2",
       "virtualLink": "",
@@ -196,6 +194,9 @@
       "end": "2025-07-04T00:00",
       "allDay": true,
       "reminderMinutesBefore": 15,
+      "invitedUserIds": [
+        "usAkkEtLXbYp47knYpMjDIgkR6u2"
+      ],
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     },
     {

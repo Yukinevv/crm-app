@@ -1,29 +1,33 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ContactService} from '../contact.service';
 import {Contact} from '../contact.model';
 import {NgForOf, NgIf} from '@angular/common';
 import {AuthService} from '../../auth/auth.service';
 import {take} from 'rxjs';
+import {UsersService} from '../../auth/users.service';
 
 @Component({
   selector: 'app-contact-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgForOf],
+  imports: [ReactiveFormsModule, NgIf, NgForOf, FormsModule],
   templateUrl: './contact-form.component.html'
 })
 export class ContactFormComponent implements OnInit {
   form!: FormGroup;
   editId?: string;
   contactsList: Contact[] = [];
+  searchEmail = '';
+  foundUser: { uid: string; email: string } | null = null;
 
   constructor(
     private fb: FormBuilder,
     private contactService: ContactService,
     private route: ActivatedRoute,
     protected router: Router,
-    private auth: AuthService
+    private auth: AuthService,
+    private usersService: UsersService
   ) {
   }
 
@@ -48,7 +52,8 @@ export class ContactFormComponent implements OnInit {
       source: [''],
       region: [''],
       managerId: [''],
-      decisionMakerId: ['']
+      decisionMakerId: [''],
+      linkedUid: ['']
     });
 
     this.route.paramMap.subscribe(pm => {
@@ -60,7 +65,8 @@ export class ContactFormComponent implements OnInit {
             ...contact,
             // zamieniamy tablicę tagów na ciąg "tag1, tag2"
             tags: contact.tags?.length ? contact.tags.join(', ') : '',
-            createdAt: contact.createdAt.substring(0, 16)
+            createdAt: contact.createdAt.substring(0, 16),
+            linkedUid: contact.linkedUid ?? ''
           });
         });
       } else {
@@ -68,6 +74,22 @@ export class ContactFormComponent implements OnInit {
         this.form.get('createdAt')!.setValue(now.substring(0, 16));
       }
     });
+  }
+
+  searchUser() {
+    this.foundUser = null;
+    if (!this.searchEmail) return;
+    this.usersService.getUserByEmail(this.searchEmail)
+      .subscribe(
+        u => this.foundUser = u,
+        () => this.foundUser = null
+      );
+  }
+
+  linkUser() {
+    if (this.foundUser) {
+      this.form.get('linkedUid')!.setValue(this.foundUser.uid);
+    }
   }
 
   onSubmit() {
@@ -98,6 +120,7 @@ export class ContactFormComponent implements OnInit {
         region: raw.region,
         managerId: raw.managerId || undefined,
         decisionMakerId: raw.decisionMakerId || undefined,
+        linkedUid: raw.linkedUid || undefined,
         userId: user.uid
       };
 

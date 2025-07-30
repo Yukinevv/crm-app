@@ -7,5 +7,10 @@ export const environment = {
     storageBucket: "crm-app-e0108.firebasestorage.app",
     messagingSenderId: "973921929456",
     appId: "1:973921929456:web:4d5043f753ba2430c69a35"
+  },
+  useEmulators: true,
+  emulator: {
+    // auth: {host: 'localhost', port: 9099},
+    functions: {host: 'localhost', port: 5001}
   }
 };

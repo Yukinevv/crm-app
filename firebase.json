@@ -29,5 +29,17 @@
         "*.local"
       ]
     }
-  ]
+  ],
+  "emulators": {
+    "functions": {
+      "host": "localhost",
+      "port": 5001
+    },
+    "ui": {
+      "enabled": true,
+      "host": "localhost",
+      "port": 4000
+    },
+    "singleProjectMode": true
+  }
 }
