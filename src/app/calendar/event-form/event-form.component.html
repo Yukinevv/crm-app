@@ -1,5 +1,7 @@
 <div class="container mt-4" style="max-width:600px">
-  <h2>{{ editId ? 'Edycja spotkania' : 'Nowe spotkanie' }}</h2>
+  <h2 *ngIf="!editId">Nowe spotkanie</h2>
+  <h2 *ngIf="editId">{{ isCreator ? 'Edycja spotkania' : 'Szczegóły spotkania' }}</h2>
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="mb-3 mt-4">
       <label>Tytuł</label>
@@ -72,7 +74,7 @@
       <input type="number" formControlName="reminderMinutesBefore" class="form-control">
     </div>
 
-    <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
+    <button *ngIf="isCreator" type="submit" class="btn btn-primary" [disabled]="form.invalid">
       Zapisz
     </button>
     <button class="btn btn-secondary ms-2 ml-2" (click)="router.navigate(['/calendar'])" type="button">

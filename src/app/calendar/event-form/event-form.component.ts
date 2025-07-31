@@ -82,6 +82,10 @@ export class EventFormComponent implements OnInit {
           allDay: evt.allDay,
           reminderMinutesBefore: evt.reminderMinutesBefore ?? 0
         });
+
+        if (!this.isCreator) {
+          this.form.disable({emitEvent: false});
+        }
       } else {
         // Nowe wydarzenie -> zawsze twórca
         this.isCreator = true;
