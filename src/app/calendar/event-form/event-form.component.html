@@ -9,26 +9,37 @@
       </div>
     </div>
 
-    <div class="mb-3 mt-4">
+    <!-- Uczestnicy - tylko dla twórcy -->
+    <div *ngIf="isCreator; else readOnly" class="mb-3 mt-4">
       <label>Uczestnicy</label>
-      <select class="form-select ml-2" (change)="onParticipantSelect($event)">
+      <select class="form-select" (change)="onParticipantSelect($event)">
         <option value="">-- wybierz --</option>
         <option *ngFor="let c of contactsList" [value]="c.id">
           {{ c.firstName }} {{ c.lastName }}
         </option>
       </select>
-      <div class="participants-list">
+      <div class="participants-list mt-2">
         <div *ngFor="let pid of selectedParticipants" class="participant-chip">
           {{ getContactName(pid) }}
-          <button type="button"
-                  class="btn-remove"
-                  aria-label="Usuń uczestnika"
-                  (click)="removeParticipant(pid)">
-            &times;
+          <button type="button" class="btn-remove" aria-label="Usuń uczestnika"
+                  (click)="removeParticipant(pid)">&times;
           </button>
         </div>
       </div>
     </div>
+
+    <!-- Read-only dla zaproszonych -->
+    <ng-template #readOnly>
+      <div class="mb-3 mt-4">
+        <label>Uczestnicy</label>
+        <ul class="list-group mt-2">
+          <li *ngFor="let name of eventData?.participantsNames || []"
+              class="list-group-item">
+            {{ name === currentUserDisplayName ? 'Ty' : name }}
+          </li>
+        </ul>
+      </div>
+    </ng-template>
 
     <div class="mb-3 mt-4">
       <label>Lokalizacja</label>

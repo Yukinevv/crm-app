@@ -1,15 +1,17 @@
 export interface CalendarEvent {
   id: string;
-  userId: string;
+  userId?: string;                // tylko spotkania mają userId
   title: string;
-  participants: string[];
+  participants: string[];         // oryginalne IDs kontaktów u twórcy
+  invitedUserIds?: string[];      // UID zaproszonych użytkowników
+  creatorName?: string;           // nazwy twórcy (Imię Nazwisko lub displayName)
+  participantsNames?: string[];   // listy imion uczestników
   location?: string;
   virtualLink?: string;
   start: string;
   end: string;
   allDay: boolean;
   reminderMinutesBefore?: number;
-  invitedUserIds?: string[];
 }
 
 // Typ do tworzenia nowego wydarzenia (bez id i userId)

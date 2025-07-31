@@ -601,3 +601,39 @@ Issues? Report them at https://github.com/firebase/firebase-tools/issues and att
 
 [debug] [2025-07-29T16:20:08.790Z] Got response from /__/functions.yaml {"endpoints":{"getUserByEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"getUserByEmail"},"api":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"api"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
 [info] ✔  functions: Loaded functions definitions from source: getUserByEmail, api. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: getUserByEmail, api."}}
+[debug] [2025-07-31T14:37:53.565Z] File /Users/adrianrodzic/Desktop/angular_nauka/crm-app/functions/db.json changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File /Users/adrianrodzic/Desktop/angular_nauka/crm-app/functions/db.json changed, reloading triggers"}}
+[debug] [2025-07-31T14:37:54.581Z] Validating nodejs source
+[debug] [2025-07-31T14:37:55.222Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "express": "^5.1.0",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.0.1",
+    "json-server": "^0.16.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0"
+  },
+  "private": true
+}
+[debug] [2025-07-31T14:37:55.222Z] Building nodejs source
+[debug] [2025-07-31T14:37:55.222Z] Failed to find version of module node: reached end of search path /Users/adrianrodzic/Desktop/angular_nauka/crm-app/functions/node_modules
+[warn] ⚠  functions: Your requested "node" version "22" doesn't match your global version "20". Using node@20 from host. 
+[debug] [2025-07-31T14:37:55.226Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-07-31T14:37:55.232Z] Found firebase-functions binary at '/Users/adrianrodzic/Desktop/angular_nauka/crm-app/functions/node_modules/.bin/firebase-functions'
+[info] Serving at port 8969
+
+[debug] [2025-07-31T14:37:55.719Z] Got response from /__/functions.yaml {"endpoints":{"getUserByEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"getUserByEmail"},"api":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"api"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] ✔  functions: Loaded functions definitions from source: getUserByEmail, api. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: getUserByEmail, api."}}
