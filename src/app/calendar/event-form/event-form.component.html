@@ -1,4 +1,4 @@
-<div class="container mt-4" style="max-width:600px">
+<div class="container mt-4" style="max-width:600px" *ngIf="!loading; else loadingTpl">
   <h2 *ngIf="!editId">Nowe spotkanie</h2>
   <h2 *ngIf="editId">{{ isCreator ? 'Edycja spotkania' : 'Szczegóły spotkania' }}</h2>
 
@@ -35,7 +35,7 @@
       <div class="mb-3 mt-4">
         <label>Uczestnicy</label>
         <ul class="list-group mt-2">
-          <li *ngFor="let p of eventData?.participantsSnapshot || []"
+          <li *ngFor="let p of participantsSnapshot"
               class="list-group-item d-flex justify-content-between align-items-center">
             <span>{{ p.uid === currentUserUid ? 'Ty' : p.name }}</span>
             <button
@@ -89,3 +89,10 @@
     </button>
   </form>
 </div>
+
+<ng-template #loadingTpl>
+  <div class="text-center mt-5">
+    <div class="spinner-border" role="status"></div>
+    <div>Ładowanie danych...</div>
+  </div>
+</ng-template>

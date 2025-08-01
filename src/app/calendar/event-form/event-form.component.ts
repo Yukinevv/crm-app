@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {firstValueFrom} from 'rxjs';
-import {take} from 'rxjs/operators';
+import {combineLatest, of} from 'rxjs';
+import {switchMap, take} from 'rxjs/operators';
 import {Contact} from '../../contacts/contact.model';
 import {EventService} from '../event.service';
 import {ContactService} from '../../contacts/contact.service';
@@ -21,12 +21,16 @@ export class EventFormComponent implements OnInit {
   form: FormGroup;
   editId?: string;
   contactsList: Contact[] = [];
-  eventData?: CalendarEvent & { participantsSnapshot?: ParticipantWithFlag[] };
+  participantsSnapshot: ParticipantWithFlag[] = [];
+  eventData?: CalendarEvent;
 
   currentUserUid = '';
   currentUserEmail = '';
   currentUserDisplayName = '';
   isCreator = false;
+
+  loading = true;
+  error: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -49,58 +53,76 @@ export class EventFormComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    // Pobierz aktualnego użytkownika
-    const user = await firstValueFrom(this.auth.user$);
+    // Pobierz dane zalogowanego użytkownika
+    const user = await this.auth.user$.pipe(take(1)).toPromise();
     this.currentUserUid = user?.uid ?? '';
     this.currentUserEmail = user?.email ?? '';
     this.currentUserDisplayName = user?.displayName ?? this.currentUserEmail;
 
-    // Pobierz kontakty twórcy (tylko potrzebne przy edycji przez twórcę)
-    this.contactService.getAll().pipe(take(1))
-      .subscribe(list => this.contactsList = list);
-
-    // Sprawdź, czy to edycja, czy nowe wydarzenie
-    this.route.paramMap.pipe(take(1)).subscribe(async pm => {
-      const id = pm.get('id');
-      if (id) {
-        // Tryb edycji
-        this.editId = id;
-        const evt = await firstValueFrom(this.eventService.getById(id));
-        this.isCreator = evt.userId === this.currentUserUid;
-
-        const snap: ParticipantWithFlag[] = (evt.participantsSnapshot || []).map(p => ({
-          ...p,
-          isLinked: this.contactsList.some(c => c.linkedUid === p.uid)
-        }));
-
-        this.eventData = {...evt, participantsSnapshot: snap};
-
-        // Wypełnij formularz pobranymi danymi
-        this.form.patchValue({
-          title: evt.title,
-          participants: evt.participants,
-          location: evt.location,
-          virtualLink: evt.virtualLink,
-          start: this.formatForInput(evt.start),
-          end: this.formatForInput(evt.end),
-          allDay: evt.allDay,
-          reminderMinutesBefore: evt.reminderMinutesBefore ?? 0
-        });
-
-        if (!this.isCreator) {
-          this.form.disable({emitEvent: false});
+    // Przygotuj dwa strumienie: lista kontaktów oraz dane wydarzenia (lub null, gdy tworzymy nowe)
+    const contacts$ = this.contactService.getAll().pipe(take(1));
+    const event$ = this.route.paramMap.pipe(
+      take(1),
+      switchMap(pm => {
+        const id = pm.get('id');
+        if (id) {
+          this.editId = id;
+          return this.eventService.getById(id);
+        } else {
+          return of<CalendarEvent | null>(null);
         }
-      } else {
-        // Nowe wydarzenie -> zawsze twórca
-        this.isCreator = true;
-        this.route.queryParams.pipe(take(1)).subscribe(qp => {
-          let start = qp['start'] as string;
-          let end = qp['end'] as string;
-          const allDay = qp['allDay'] === 'true';
-          if (start?.length === 10) start = `${start}T00:00`;
-          if (end?.length === 10) end = `${end}T00:00`;
-          this.form.patchValue({start, end, allDay});
-        });
+      })
+    );
+
+    // Połącz i przetwórz w jednej subskrypcji
+    combineLatest([contacts$, event$]).subscribe({
+      next: ([contacts, evt]) => {
+        this.contactsList = contacts;
+        if (evt) {
+          // Edycja / podgląd
+          this.eventData = evt;
+          this.isCreator = evt.userId === this.currentUserUid;
+
+          // Snapshot uczestników
+          this.participantsSnapshot = (evt.participantsSnapshot || []).map<ParticipantWithFlag>(p => ({
+            uid: p.uid,
+            name: p.name,
+            email: p.email,
+            isLinked: contacts.some(c => c.email === p.email)
+          }));
+
+          // Wypełnij formularz
+          this.form.patchValue({
+            title: evt.title,
+            participants: evt.participants,
+            location: evt.location,
+            virtualLink: evt.virtualLink,
+            start: this.formatForInput(evt.start),
+            end: this.formatForInput(evt.end),
+            allDay: evt.allDay,
+            reminderMinutesBefore: evt.reminderMinutesBefore ?? 0
+          });
+
+          if (!this.isCreator) {
+            this.form.disable({emitEvent: false});
+          }
+        } else {
+          // Nowe wydarzenie
+          this.isCreator = true;
+          this.route.queryParams.pipe(take(1)).subscribe(qp => {
+            let start = qp['start'] as string;
+            let end = qp['end'] as string;
+            const allDay = qp['allDay'] === 'true';
+            if (start?.length === 10) start = `${start}T00:00`;
+            if (end?.length === 10) end = `${end}T00:00`;
+            this.form.patchValue({start, end, allDay});
+          });
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Błąd ładowania danych wydarzenia';
+        this.loading = false;
       }
     });
   }
@@ -171,7 +193,13 @@ export class EventFormComponent implements OnInit {
 
     this.contactService.create(contact).subscribe(created => {
       this.contactsList.push(created);
-      p.isLinked = true;
+      // Aktualizuj snapshot uczestników
+      const found = this.participantsSnapshot.filter(item => item.email === p.email);
+      if (found) {
+        found.forEach(item => {
+          item.isLinked = true;
+        })
+      }
     });
   }
 
