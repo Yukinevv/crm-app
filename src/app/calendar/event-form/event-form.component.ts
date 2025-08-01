@@ -7,7 +7,7 @@ import {Contact} from '../../contacts/contact.model';
 import {EventService} from '../event.service';
 import {ContactService} from '../../contacts/contact.service';
 import {AuthService} from '../../auth/auth.service';
-import {CalendarEvent, CreateEvent, UpdateEvent} from '../calendar-event.model';
+import {CalendarEvent, CreateEvent, ParticipantSnapshot, UpdateEvent} from '../calendar-event.model';
 import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
@@ -23,7 +23,6 @@ export class EventFormComponent implements OnInit {
   contactsList: Contact[] = [];
   eventData?: CalendarEvent;
 
-  participantsDisplay: string[] = [];
   currentUserUid = '';
   currentUserEmail = '';
   currentUserDisplayName = '';
@@ -70,7 +69,7 @@ export class EventFormComponent implements OnInit {
         this.eventData = evt;
         this.isCreator = evt.userId === this.currentUserUid;
 
-        // Wypełnij formę pobranymi danymi
+        // Wypełnij formularz pobranymi danymi
         const start = this.formatForInput(evt.start);
         const end = this.formatForInput(evt.end);
         this.form.patchValue({
@@ -86,11 +85,10 @@ export class EventFormComponent implements OnInit {
 
         if (!this.isCreator) {
           this.form.disable({emitEvent: false});
-
-          this.participantsDisplay = (evt.participantsNames || []).map((n, i) =>
-            (evt.invitedUserIds?.[i] === this.currentUserUid ? `${n} [Ty]` : n)
-          );
         }
+
+        this.contactService.getAll().pipe(take(1))
+          .subscribe(list => this.contactsList = list);
       } else {
         // Nowe wydarzenie -> zawsze twórca
         this.isCreator = true;
@@ -116,20 +114,22 @@ export class EventFormComponent implements OnInit {
       .map(pid => this.contactsList.find(c => c.id === pid)?.linkedUid)
       .filter((uid): uid is string => !!uid);
 
-    // Snapshot nazw uczestników
-    const participantsNames = raw.participants
-      .map(pid => {
-        const c = this.contactsList.find(x => x.id === pid);
-        return c ? `${c.firstName} ${c.lastName}` : undefined;
-      })
-      .filter((n): n is string => !!n);
+    // Snapshot uczestników
+    const participantsSnapshot: ParticipantSnapshot[] = raw.participants.map(pid => {
+      const c = this.contactsList.find(x => x.id === pid)!;
+      return {
+        uid: c.linkedUid!,
+        name: `${c.firstName} ${c.lastName}`,
+        email: c.email
+      };
+    });
 
     const base: CreateEvent = {
       title: raw.title,
       participants: raw.participants,
       invitedUserIds,
       creatorName: this.currentUserDisplayName,
-      participantsNames,
+      participantsSnapshot,
       location: raw.location,
       virtualLink: raw.virtualLink,
       start: raw.start,
@@ -146,6 +146,35 @@ export class EventFormComponent implements OnInit {
       this.eventService.create(base).pipe(take(1))
         .subscribe(() => this.router.navigate(['/calendar']));
     }
+  }
+
+  addToContacts(p: ParticipantSnapshot): void {
+    if (this.hasContact(p.uid)) return;
+    const [firstName, ...rest] = p.name.split(' ');
+    const lastName = rest.join(' ') || '';
+    const contact: Omit<Contact, 'id'> = {
+      firstName,
+      lastName,
+      company: '',
+      position: '',
+      phone: '',
+      email: p.email,
+      address: '',
+      notes: '',
+      tags: [],
+      status: '',
+      createdAt: new Date().toISOString(),
+      source: 'Z zaproszenia',
+      region: '',
+      managerId: undefined,
+      decisionMakerId: undefined,
+      linkedUid: p.uid
+    };
+    this.contactService.create(contact).subscribe(c => this.contactsList.push(c));
+  }
+
+  hasContact(uid: string): boolean {
+    return this.contactsList.some(c => c.linkedUid === uid);
   }
 
   private formatForInput(dateStr: string): string {

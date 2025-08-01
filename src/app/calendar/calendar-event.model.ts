@@ -1,11 +1,17 @@
+export interface ParticipantSnapshot {
+  uid: string;
+  name: string;
+  email: string;
+}
+
 export interface CalendarEvent {
   id: string;
-  userId?: string;                // tylko spotkania mają userId
+  userId?: string;                   // tylko spotkania mają userId
   title: string;
-  participants: string[];         // oryginalne IDs kontaktów u twórcy
-  invitedUserIds?: string[];      // UID zaproszonych użytkowników
-  creatorName?: string;           // nazwy twórcy (Imię Nazwisko lub displayName)
-  participantsNames?: string[];   // listy imion uczestników
+  participants: string[];            // oryginalne ID kontaktów twórcy
+  invitedUserIds?: string[];         // UID zaproszonych użytkowników
+  creatorName?: string;              // snapshot imienia twórcy
+  participantsSnapshot?: ParticipantSnapshot[]; // snapshot uczestników
   location?: string;
   virtualLink?: string;
   start: string;

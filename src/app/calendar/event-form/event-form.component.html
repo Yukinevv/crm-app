@@ -35,8 +35,14 @@
       <div class="mb-3 mt-4">
         <label>Uczestnicy</label>
         <ul class="list-group mt-2">
-          <li *ngFor="let name of participantsDisplay" class="list-group-item">
-            {{ name }}
+          <li *ngFor="let p of eventData?.participantsSnapshot || []"
+              class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ p.uid === currentUserUid ? 'Ty' : p.name }}</span>
+            <button *ngIf="!isCreator && p.uid !== currentUserUid && !hasContact(p.uid)"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="addToContacts(p)">
+              Dodaj do kontaktów
+            </button>
           </li>
         </ul>
       </div>

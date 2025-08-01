@@ -183,23 +183,6 @@
   ],
   "events": [
     {
-      "id": 1,
-      "title": "Spotkanie 1",
-      "participants": [
-        "a01c"
-      ],
-      "location": "Lokalizacja 2",
-      "virtualLink": "",
-      "start": "2025-07-03T03:00",
-      "end": "2025-07-04T00:00",
-      "allDay": true,
-      "reminderMinutesBefore": 15,
-      "invitedUserIds": [
-        "usAkkEtLXbYp47knYpMjDIgkR6u2"
-      ],
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
-    },
-    {
       "title": "Rezerwacja: Jan Polak",
       "participants": [],
       "location": "",
@@ -211,29 +194,39 @@
       "id": 2
     },
     {
-      "id": 3,
-      "title": "Spotkanie 2",
+      "title": "Spotkanie 3",
       "participants": [
         "a01c",
         "4242",
-        "1211"
+        "4b0e"
       ],
       "invitedUserIds": [
         "usAkkEtLXbYp47knYpMjDIgkR6u2"
       ],
       "creatorName": "adrianrodzic33@gmail.com",
-      "participantsNames": [
-        "Mariusz Rodzic",
-        "Adrian Rodzic",
-        "Mariusz Rodzic"
+      "participantsSnapshot": [
+        {
+          "uid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+          "name": "Mariusz Rodzic",
+          "email": "mariuszrodzic08@gmail.com"
+        },
+        {
+          "name": "Adrian Rodzic",
+          "email": "adrianrodzic33@gmail.com"
+        },
+        {
+          "name": "Mariusz Rodzic",
+          "email": "mariuszrodzic08@gmail.com"
+        }
       ],
-      "location": "Testowa lokalizacja 2",
+      "location": "Testowa lokalizacja 3",
       "virtualLink": "",
-      "start": "2025-07-04T05:00",
-      "end": "2025-07-05T00:00",
+      "start": "2025-08-05T02:00",
+      "end": "2025-08-06T00:00",
       "allDay": true,
       "reminderMinutesBefore": 15,
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "id": 4
     }
   ],
   "slots": [
