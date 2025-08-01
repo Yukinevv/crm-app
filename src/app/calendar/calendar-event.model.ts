@@ -4,6 +4,10 @@ export interface ParticipantSnapshot {
   email: string;
 }
 
+export interface ParticipantWithFlag extends ParticipantSnapshot {
+  isLinked: boolean;
+}
+
 export interface CalendarEvent {
   id: string;
   userId?: string;                   // tylko spotkania mają userId

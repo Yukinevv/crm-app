@@ -7,7 +7,7 @@ import {Contact} from '../../contacts/contact.model';
 import {EventService} from '../event.service';
 import {ContactService} from '../../contacts/contact.service';
 import {AuthService} from '../../auth/auth.service';
-import {CalendarEvent, CreateEvent, ParticipantSnapshot, UpdateEvent} from '../calendar-event.model';
+import {CalendarEvent, CreateEvent, ParticipantSnapshot, ParticipantWithFlag} from '../calendar-event.model';
 import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
@@ -21,7 +21,7 @@ export class EventFormComponent implements OnInit {
   form: FormGroup;
   editId?: string;
   contactsList: Contact[] = [];
-  eventData?: CalendarEvent;
+  eventData?: CalendarEvent & { participantsSnapshot?: ParticipantWithFlag[] };
 
   currentUserUid = '';
   currentUserEmail = '';
@@ -66,19 +66,23 @@ export class EventFormComponent implements OnInit {
         // Tryb edycji
         this.editId = id;
         const evt = await firstValueFrom(this.eventService.getById(id));
-        this.eventData = evt;
         this.isCreator = evt.userId === this.currentUserUid;
 
+        const snap: ParticipantWithFlag[] = (evt.participantsSnapshot || []).map(p => ({
+          ...p,
+          isLinked: this.contactsList.some(c => c.linkedUid === p.uid)
+        }));
+
+        this.eventData = {...evt, participantsSnapshot: snap};
+
         // Wypełnij formularz pobranymi danymi
-        const start = this.formatForInput(evt.start);
-        const end = this.formatForInput(evt.end);
         this.form.patchValue({
           title: evt.title,
           participants: evt.participants,
           location: evt.location,
           virtualLink: evt.virtualLink,
-          start,
-          end,
+          start: this.formatForInput(evt.start),
+          end: this.formatForInput(evt.end),
           allDay: evt.allDay,
           reminderMinutesBefore: evt.reminderMinutesBefore ?? 0
         });
@@ -86,9 +90,6 @@ export class EventFormComponent implements OnInit {
         if (!this.isCreator) {
           this.form.disable({emitEvent: false});
         }
-
-        this.contactService.getAll().pipe(take(1))
-          .subscribe(list => this.contactsList = list);
       } else {
         // Nowe wydarzenie -> zawsze twórca
         this.isCreator = true;
@@ -105,7 +106,7 @@ export class EventFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (!this.isCreator || this.form.invalid) return;
 
     const raw = this.form.value as CreateEvent;
 
@@ -138,18 +139,15 @@ export class EventFormComponent implements OnInit {
       reminderMinutesBefore: raw.reminderMinutesBefore
     };
 
-    if (this.editId) {
-      const updateEvt: UpdateEvent = {id: this.editId, ...base};
-      this.eventService.update(updateEvt).pipe(take(1))
-        .subscribe(() => this.router.navigate(['/calendar']));
-    } else {
-      this.eventService.create(base).pipe(take(1))
-        .subscribe(() => this.router.navigate(['/calendar']));
-    }
+    const action$ = this.editId
+      ? this.eventService.update({id: this.editId, ...base})
+      : this.eventService.create(base);
+
+    action$.pipe(take(1)).subscribe(() => this.router.navigate(['/calendar']));
   }
 
-  addToContacts(p: ParticipantSnapshot): void {
-    if (this.hasContact(p.uid)) return;
+  addToContacts(p: ParticipantWithFlag): void {
+    if (p.isLinked) return;
     const [firstName, ...rest] = p.name.split(' ');
     const lastName = rest.join(' ') || '';
     const contact: Omit<Contact, 'id'> = {
@@ -170,11 +168,11 @@ export class EventFormComponent implements OnInit {
       decisionMakerId: undefined,
       linkedUid: p.uid
     };
-    this.contactService.create(contact).subscribe(c => this.contactsList.push(c));
-  }
 
-  hasContact(uid: string): boolean {
-    return this.contactsList.some(c => c.linkedUid === uid);
+    this.contactService.create(contact).subscribe(created => {
+      this.contactsList.push(created);
+      p.isLinked = true;
+    });
   }
 
   private formatForInput(dateStr: string): string {
