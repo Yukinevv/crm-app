@@ -8,7 +8,10 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "json-server": "json-server --watch functions/db.json --port 3000",
-    "dev": "concurrently \"npm run json-server\" \"npm start\""
+    "emulators": "firebase emulators:start --only functions,ui",
+    "start-front": "wait-on http://localhost:9099 && ng serve --proxy-config proxy.conf.json",
+    "dev": "concurrently \"npm run json-server\" \"npm start\"",
+    "dev-em": "concurrently \"npm run emulators\" \"npm run json-server\" \"npm run start\""
   },
   "private": true,
   "dependencies": {
@@ -54,6 +57,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.7.2"
+    "typescript": "~5.7.2",
+    "wait-on": "^8.0.4"
   }
 }

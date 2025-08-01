@@ -25,7 +25,6 @@
     },
     {
       "id": "a01c",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "firstName": "Mariusz",
       "lastName": "Rodzic",
       "company": "",
@@ -34,14 +33,14 @@
       "email": "mariuszrodzic08@gmail.com",
       "address": "Szarych Szeregów, 19, 33",
       "notes": "",
-      "tags": [
-        []
-      ],
+      "tags": [],
       "status": "",
-      "createdAt": "2025-07-16T14:21:00.000Z",
+      "createdAt": "2025-07-16T12:21:00.000Z",
       "source": "",
       "region": "",
-      "managerId": "4242"
+      "managerId": "4242",
+      "linkedUid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     },
     {
       "id": "654b",
@@ -110,6 +109,23 @@
       "createdAt": "2025-07-17T07:56:00.000Z",
       "source": "",
       "region": ""
+    },
+    {
+      "firstName": "Mariusz",
+      "lastName": "Rodzic",
+      "company": "",
+      "position": "",
+      "phone": "",
+      "email": "mariuszrodzic08@gmail.com",
+      "address": "",
+      "notes": "",
+      "tags": [],
+      "status": "",
+      "createdAt": "2025-08-01T16:45:38.865Z",
+      "source": "Z zaproszenia",
+      "region": "",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "id": "ITPo-qt"
     }
   ],
   "stages": [
@@ -184,19 +200,76 @@
   ],
   "events": [
     {
-      "id": 1,
+      "title": "Rezerwacja: Jan Polak",
+      "participants": [],
+      "location": "",
+      "virtualLink": "",
+      "start": "2025-07-30T10:00:00.000Z",
+      "end": "2025-07-30T10:30:00.000Z",
+      "allDay": false,
+      "reminderMinutesBefore": 0,
+      "id": 2
+    },
+    {
       "title": "Spotkanie 1",
       "participants": [
         "a01c",
-        "4242"
+        "4242",
+        "4b0e"
       ],
-      "location": "Lokalizacja 2",
+      "invitedUserIds": [
+        "usAkkEtLXbYp47knYpMjDIgkR6u2"
+      ],
+      "creatorName": "adrianrodzic33@gmail.com",
+      "participantsSnapshot": [
+        {
+          "uid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+          "name": "Mariusz Rodzic",
+          "email": "mariuszrodzic08@gmail.com"
+        },
+        {
+          "name": "Adrian Rodzic",
+          "email": "adrianrodzic33@gmail.com"
+        },
+        {
+          "name": "Mariusz Rodzic",
+          "email": "mariuszrodzic08@gmail.com"
+        }
+      ],
+      "location": "",
       "virtualLink": "",
-      "start": "2025-07-03T03:00",
-      "end": "2025-07-04T00:00",
+      "start": "2025-08-12T03:00",
+      "end": "2025-08-13T00:00",
       "allDay": true,
       "reminderMinutesBefore": 15,
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "id": 3
+    }
+  ],
+  "slots": [
+    {
+      "id": "1",
+      "start": "2025-07-30T09:00:00.000Z",
+      "end": "2025-07-30T09:30:00.000Z",
+      "booked": false
+    },
+    {
+      "id": "2",
+      "start": "2025-07-30T10:00:00.000Z",
+      "end": "2025-07-30T10:30:00.000Z",
+      "booked": true
+    },
+    {
+      "id": "3",
+      "start": "2025-07-30T11:00:00.000Z",
+      "end": "2025-07-30T11:30:00.000Z",
+      "booked": false
+    },
+    {
+      "id": "4",
+      "start": "2025-07-30T12:00:00.000Z",
+      "end": "2025-07-30T12:30:00.000Z",
+      "booked": false
     }
   ]
 }

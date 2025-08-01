@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {CalendarEvent, CreateEvent, UpdateEvent} from './calendar-event.model';
 import {Observable, of} from 'rxjs';
 import {AuthService} from '../auth/auth.service';
-import {switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 
 @Injectable({providedIn: 'root'})
 export class EventService {
@@ -17,11 +17,23 @@ export class EventService {
 
   getAll(): Observable<CalendarEvent[]> {
     return this.auth.user$.pipe(
-      switchMap(user =>
-        user
-          ? this.http.get<CalendarEvent[]>(`${this.baseUrl}?userId=${user.uid}`)
-          : of([] as CalendarEvent[])
-      )
+      switchMap(user => {
+        if (!user) {
+          return of([]);
+        }
+        return this.http.get<CalendarEvent[]>(this.baseUrl).pipe(
+          map(events =>
+            events.filter(e =>
+              // rezerwacje (brak userId)
+              (!e.userId) ||
+              // własne eventy
+              e.userId === user.uid ||
+              // zaproszenia
+              (e.invitedUserIds?.includes(user.uid) ?? false)
+            )
+          )
+        );
+      })
     );
   }
 

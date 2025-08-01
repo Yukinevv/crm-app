@@ -1,8 +1,21 @@
+export interface ParticipantSnapshot {
+  uid: string;
+  name: string;
+  email: string;
+}
+
+export interface ParticipantWithFlag extends ParticipantSnapshot {
+  isLinked: boolean;
+}
+
 export interface CalendarEvent {
   id: string;
-  userId: string;
+  userId?: string;                   // tylko spotkania mają userId
   title: string;
-  participants: string[];
+  participants: string[];            // oryginalne ID kontaktów twórcy
+  invitedUserIds?: string[];         // UID zaproszonych użytkowników
+  creatorName?: string;              // snapshot imienia twórcy
+  participantsSnapshot?: ParticipantSnapshot[]; // snapshot uczestników
   location?: string;
   virtualLink?: string;
   start: string;

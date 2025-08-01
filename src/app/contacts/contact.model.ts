@@ -17,4 +17,5 @@ export interface Contact {
   region?: string;
   managerId?: string;
   decisionMakerId?: string;
+  linkedUid?: string;
 }

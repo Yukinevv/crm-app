@@ -2,6 +2,7 @@ import {Routes} from '@angular/router';
 import {TestComponent} from './test/test.component';
 import {LoginComponent} from './auth/login/login.component';
 import {RegisterComponent} from './auth/register/register.component';
+import {AuthGuard} from './auth/auth.guard';
 
 export const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -11,18 +12,26 @@ export const routes: Routes = [
     path: 'sales-funnel',
     loadChildren: () =>
       import('./sales-funnel/sales-funnel.module').then(
-        (m) => m.SalesFunnelModule
+        m => m.SalesFunnelModule
       )
   },
   {
     path: 'contacts',
     loadChildren: () =>
-      import('./contacts/contacts.module').then((m) => m.ContactsModule)
+      import('./contacts/contacts.module').then(m => m.ContactsModule)
   },
   {
     path: 'calendar',
     loadChildren: () =>
-      import('./calendar/calendar.module').then(m => m.CalendarModule)
+      import('./calendar/calendar.module').then(m => m.CalendarModule),
+    canLoad: [AuthGuard],
+    canActivate: [AuthGuard]
   },
-  {path: '', redirectTo: '/contacts', pathMatch: 'full'}
+  {
+    path: 'booking',
+    loadChildren: () =>
+      import('./booking/booking.module').then(m => m.BookingModule)
+  },
+  {path: '', redirectTo: '/contacts', pathMatch: 'full'},
+  {path: '**', redirectTo: '/contacts'}
 ];
