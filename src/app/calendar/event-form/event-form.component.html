@@ -12,7 +12,7 @@
     </div>
 
     <!-- Uczestnicy - tylko dla twórcy -->
-    <div *ngIf="isCreator; else readOnly" class="mb-3 mt-4">
+    <div *ngIf="isCreator; else readOnlyParticipants" class="mb-3 mt-4">
       <label>Uczestnicy</label>
       <select class="form-select" (change)="onParticipantSelect($event)">
         <option value="">-- wybierz --</option>
@@ -31,13 +31,12 @@
     </div>
 
     <!-- Read-only dla zaproszonych -->
-    <ng-template #readOnly>
+    <ng-template #readOnlyParticipants>
       <div class="mb-3 mt-4">
         <label>Uczestnicy</label>
         <ul class="list-group mt-2">
-          <li *ngFor="let name of eventData?.participantsNames || []"
-              class="list-group-item">
-            {{ name === currentUserDisplayName ? 'Ty' : name }}
+          <li *ngFor="let name of participantsDisplay" class="list-group-item">
+            {{ name }}
           </li>
         </ul>
       </div>

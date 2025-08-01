@@ -211,10 +211,12 @@
       "id": 2
     },
     {
+      "id": 3,
       "title": "Spotkanie 2",
       "participants": [
         "a01c",
-        "4242"
+        "4242",
+        "1211"
       ],
       "invitedUserIds": [
         "usAkkEtLXbYp47knYpMjDIgkR6u2"
@@ -222,7 +224,8 @@
       "creatorName": "adrianrodzic33@gmail.com",
       "participantsNames": [
         "Mariusz Rodzic",
-        "Adrian Rodzic"
+        "Adrian Rodzic",
+        "Mariusz Rodzic"
       ],
       "location": "Testowa lokalizacja 2",
       "virtualLink": "",
@@ -230,8 +233,7 @@
       "end": "2025-07-05T00:00",
       "allDay": true,
       "reminderMinutesBefore": 15,
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "id": 3
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     }
   ],
   "slots": [

@@ -23,6 +23,7 @@ export class EventFormComponent implements OnInit {
   contactsList: Contact[] = [];
   eventData?: CalendarEvent;
 
+  participantsDisplay: string[] = [];
   currentUserUid = '';
   currentUserEmail = '';
   currentUserDisplayName = '';
@@ -85,6 +86,10 @@ export class EventFormComponent implements OnInit {
 
         if (!this.isCreator) {
           this.form.disable({emitEvent: false});
+
+          this.participantsDisplay = (evt.participantsNames || []).map((n, i) =>
+            (evt.invitedUserIds?.[i] === this.currentUserUid ? `${n} [Ty]` : n)
+          );
         }
       } else {
         // Nowe wydarzenie -> zawsze twórca
