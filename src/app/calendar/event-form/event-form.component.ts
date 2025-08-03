@@ -202,6 +202,11 @@ export class EventFormComponent implements OnInit {
   leaveMeeting(): void {
     if (!this.eventData || !this.editId) return;
 
+    const confirmAnswer = window.confirm('Czy na pewno chcesz opuścić spotkanie?');
+    if (!confirmAnswer) {
+      return;
+    }
+
     // invitedUserIds bez bieżącego UID
     const newInvited = (this.eventData.invitedUserIds || [])
       .filter(uid => uid !== this.currentUserUid);
@@ -210,12 +215,12 @@ export class EventFormComponent implements OnInit {
     const newSnapshot = this.participantsSnapshot
       .filter(p => p.uid !== this.currentUserUid);
 
-    // participants (contact.id) bez kontaktu powiązanego z bieżącym UID
-    const newParticipants = (this.eventData.participants || [])
-      .filter(pid => {
-        const c = this.contactsList.find(x => x.id === pid);
-        return c?.linkedUid !== this.currentUserUid;
-      });
+    // usuwamy z participants po indeksie odpowiadającym dla snapshotu
+    const origSnap = this.eventData.participantsSnapshot || [];
+
+    const newParticipants = this.eventData.participants.filter((pid, idx) =>
+      origSnap[idx]?.uid !== this.currentUserUid
+    );
 
     this.eventService
       .leaveEvent(this.editId, newParticipants, newInvited, newSnapshot)
