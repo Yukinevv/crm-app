@@ -87,6 +87,11 @@
     <button class="btn btn-secondary ms-2 ml-2" (click)="router.navigate(['/calendar'])" type="button">
       Anuluj
     </button>
+
+    <button *ngIf="!isCreator" type="button" class="btn btn-outline-danger ml-5"
+            (click)="leaveMeeting()">
+      Opuść spotkanie
+    </button>
   </form>
 </div>
 

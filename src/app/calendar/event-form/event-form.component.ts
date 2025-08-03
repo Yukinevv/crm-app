@@ -193,14 +193,34 @@ export class EventFormComponent implements OnInit {
 
     this.contactService.create(contact).subscribe(created => {
       this.contactsList.push(created);
-      // Aktualizuj snapshot uczestników
-      const found = this.participantsSnapshot.filter(item => item.email === p.email);
-      if (found) {
-        found.forEach(item => {
-          item.isLinked = true;
-        })
-      }
+      this.participantsSnapshot
+        .filter(item => item.email === p.email)
+        .forEach(item => item.isLinked = true);
     });
+  }
+
+  leaveMeeting(): void {
+    if (!this.eventData || !this.editId) return;
+
+    // invitedUserIds bez bieżącego UID
+    const newInvited = (this.eventData.invitedUserIds || [])
+      .filter(uid => uid !== this.currentUserUid);
+
+    // participantsSnapshot bez bieżącego UID
+    const newSnapshot = this.participantsSnapshot
+      .filter(p => p.uid !== this.currentUserUid);
+
+    // participants (contact.id) bez kontaktu powiązanego z bieżącym UID
+    const newParticipants = (this.eventData.participants || [])
+      .filter(pid => {
+        const c = this.contactsList.find(x => x.id === pid);
+        return c?.linkedUid !== this.currentUserUid;
+      });
+
+    this.eventService
+      .leaveEvent(this.editId, newParticipants, newInvited, newSnapshot)
+      .pipe(take(1))
+      .subscribe(() => this.router.navigate(['/calendar']));
   }
 
   private formatForInput(dateStr: string): string {
