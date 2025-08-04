@@ -193,14 +193,39 @@ export class EventFormComponent implements OnInit {
 
     this.contactService.create(contact).subscribe(created => {
       this.contactsList.push(created);
-      // Aktualizuj snapshot uczestników
-      const found = this.participantsSnapshot.filter(item => item.email === p.email);
-      if (found) {
-        found.forEach(item => {
-          item.isLinked = true;
-        })
-      }
+      this.participantsSnapshot
+        .filter(item => item.email === p.email)
+        .forEach(item => item.isLinked = true);
     });
+  }
+
+  leaveMeeting(): void {
+    if (!this.eventData || !this.editId) return;
+
+    const confirmAnswer = window.confirm('Czy na pewno chcesz opuścić spotkanie?');
+    if (!confirmAnswer) {
+      return;
+    }
+
+    // invitedUserIds bez bieżącego UID
+    const newInvited = (this.eventData.invitedUserIds || [])
+      .filter(uid => uid !== this.currentUserUid);
+
+    // participantsSnapshot bez bieżącego UID
+    const newSnapshot = this.participantsSnapshot
+      .filter(p => p.uid !== this.currentUserUid);
+
+    // usuwamy z participants po indeksie odpowiadającym dla snapshotu
+    const origSnap = this.eventData.participantsSnapshot || [];
+
+    const newParticipants = this.eventData.participants.filter((pid, idx) =>
+      origSnap[idx]?.uid !== this.currentUserUid
+    );
+
+    this.eventService
+      .leaveEvent(this.editId, newParticipants, newInvited, newSnapshot)
+      .pipe(take(1))
+      .subscribe(() => this.router.navigate(['/calendar']));
   }
 
   private formatForInput(dateStr: string): string {

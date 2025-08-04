@@ -81,12 +81,23 @@
       <input type="number" formControlName="reminderMinutesBefore" class="form-control">
     </div>
 
-    <button *ngIf="isCreator" type="submit" class="btn btn-primary" [disabled]="form.invalid">
-      Zapisz
-    </button>
-    <button class="btn btn-secondary ms-2 ml-2" (click)="router.navigate(['/calendar'])" type="button">
-      Anuluj
-    </button>
+    <div class="row">
+      <div class="col">
+        <button *ngIf="isCreator" type="submit" class="btn btn-primary" [disabled]="form.invalid">
+          Zapisz
+        </button>
+        <button class="btn btn-secondary ms-2 ml-2" (click)="router.navigate(['/calendar'])" type="button">
+          Anuluj
+        </button>
+      </div>
+
+      <div class="mr-4">
+        <button *ngIf="!isCreator" type="button" class="btn btn-outline-danger"
+                (click)="leaveMeeting()">
+          Opuść spotkanie
+        </button>
+      </div>
+    </div>
   </form>
 </div>
 

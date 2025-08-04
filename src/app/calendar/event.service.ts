@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {CalendarEvent, CreateEvent, UpdateEvent} from './calendar-event.model';
+import {CalendarEvent, CreateEvent, ParticipantSnapshot, UpdateEvent} from './calendar-event.model';
 import {Observable, of} from 'rxjs';
 import {AuthService} from '../auth/auth.service';
 import {map, switchMap} from 'rxjs/operators';
@@ -71,6 +71,18 @@ export class EventService {
         if (!user) throw new Error('Nieautoryzowany');
         return this.http.delete<void>(`${this.baseUrl}/${id}`);
       })
+    );
+  }
+
+  leaveEvent(
+    id: string,
+    participants: string[],
+    invitedUserIds: string[],
+    participantsSnapshot: ParticipantSnapshot[]
+  ): Observable<CalendarEvent> {
+    return this.http.patch<CalendarEvent>(
+      `${this.baseUrl}/${id}`,
+      {participants, invitedUserIds, participantsSnapshot}
     );
   }
 }

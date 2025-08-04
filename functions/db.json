@@ -213,27 +213,21 @@
     {
       "title": "Spotkanie 1",
       "participants": [
-        "a01c",
         "4242",
         "4b0e"
       ],
-      "invitedUserIds": [
-        "usAkkEtLXbYp47knYpMjDIgkR6u2"
-      ],
+      "invitedUserIds": [],
       "creatorName": "adrianrodzic33@gmail.com",
       "participantsSnapshot": [
         {
-          "uid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
-          "name": "Mariusz Rodzic",
-          "email": "mariuszrodzic08@gmail.com"
-        },
-        {
           "name": "Adrian Rodzic",
-          "email": "adrianrodzic33@gmail.com"
+          "email": "adrianrodzic33@gmail.com",
+          "isLinked": false
         },
         {
           "name": "Mariusz Rodzic",
-          "email": "mariuszrodzic08@gmail.com"
+          "email": "mariuszrodzic08@gmail.com",
+          "isLinked": true
         }
       ],
       "location": "",

@@ -3,10 +3,16 @@
     <!-- Lewa kolumna: nazwa + moduły -->
     <div class="footer-section d-flex flex-column">
       <h5 class="app-name mb-3">CRM-APP</h5>
-      <nav class="nav flex-column">
-        <a routerLink="/contacts" routerLinkActive="active" class="nav-link">Kontakty</a>
-        <a routerLink="/sales-funnel" routerLinkActive="active" class="nav-link">Lejek sprzedaży</a>
-        <a routerLink="/test" routerLinkActive="active" class="nav-link">Testowy moduł</a>
+      <nav class="nav flex-row">
+        <div class="mr-5 ml-1">
+          <a routerLink="/contacts" routerLinkActive="active" class="nav-link">Kontakty</a>
+          <a routerLink="/sales-funnel" routerLinkActive="active" class="nav-link">Lejek sprzedaży</a>
+          <a routerLink="/calendar" routerLinkActive="active" class="nav-link">Kalendarz spotkań</a>
+        </div>
+        <div class="ml-4">
+          <a routerLink="/booking" routerLinkActive="active" class="nav-link">Rezerwacje</a>
+          <a routerLink="/test" routerLinkActive="active" class="nav-link">Testowy moduł</a>
+        </div>
       </nav>
     </div>
 
