@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {CalendarOptions, DateSelectArg, EventClickArg, EventContentArg} from '@fullcalendar/core';
+import {Component, OnInit, ViewEncapsulation} from '@angular/core';
+import {CalendarOptions, DateSpanApi, EventClickArg, EventContentArg} from '@fullcalendar/core';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -15,7 +15,8 @@ import {FullCalendarModule} from '@fullcalendar/angular';
   standalone: true,
   imports: [FullCalendarModule],
   templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.scss']
+  styleUrls: ['./calendar.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class CalendarComponent implements OnInit {
   calendarOptions: CalendarOptions;
@@ -43,6 +44,17 @@ export class CalendarComponent implements OnInit {
       },
       editable: true,
       selectable: true,
+      selectAllow: (span: DateSpanApi) => {
+        const day = span.start.getDay();
+        return day !== 0 && day !== 6;
+      },
+      dayCellClassNames: (arg: any) => {
+        const d = arg.date.getDay();
+        if (d === 0 || d === 6) {
+          return ['fc-disabled-day'];
+        }
+        return [];
+      },
       select: this.handleDateSelect.bind(this),
       eventClick: this.handleEventClick.bind(this),
       eventContent: this.renderEventContent.bind(this),
@@ -106,7 +118,7 @@ export class CalendarComponent implements OnInit {
     return {domNodes};
   }
 
-  private handleDateSelect(selectInfo: DateSelectArg): void {
+  private handleDateSelect(selectInfo: any): void {
     this.router.navigate(['/calendar/new'], {
       queryParams: {
         start: selectInfo.startStr,
