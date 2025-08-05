@@ -238,6 +238,28 @@
       "reminderMinutesBefore": 15,
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "id": 3
+    },
+    {
+      "title": "Spotkanie 2",
+      "participants": [
+        "654b"
+      ],
+      "invitedUserIds": [],
+      "creatorName": "adrianrodzic33@gmail.com",
+      "participantsSnapshot": [
+        {
+          "name": "Adrian Rodzic",
+          "email": "adrianrodzic33@gmail.com"
+        }
+      ],
+      "location": "",
+      "virtualLink": "",
+      "start": "2025-08-14T01:00",
+      "end": "2025-08-15T00:00",
+      "allDay": true,
+      "reminderMinutesBefore": 15,
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "id": 4
     }
   ],
   "slots": [

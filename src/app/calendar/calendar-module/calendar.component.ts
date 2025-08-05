@@ -20,6 +20,7 @@ import {FullCalendarModule} from '@fullcalendar/angular';
 export class CalendarComponent implements OnInit {
   calendarOptions: CalendarOptions;
   private currentUserUid = '';
+  viewAll = false;
 
   constructor(
     private eventService: EventService,
@@ -55,26 +56,36 @@ export class CalendarComponent implements OnInit {
     this.loadEvents();
   }
 
-  private loadEvents(): void {
-    this.eventService.getAll().subscribe((evts: CalendarEvent[]) => {
-      this.calendarOptions.events = evts.map(e => {
-        const obj: any = {
-          id: e.id,
-          title: e.title,
-          start: e.start,
-          end: e.end,
-          allDay: e.allDay
-        };
-        
-        if (e.userId) {
-          const creatorName = e.creatorName ?? '—';
-          obj.extendedProps = {
-            creatorName: (e.userId === this.currentUserUid ? 'Ty' : creatorName)
-          };
-        }
+  setViewAll(all: boolean) {
+    this.viewAll = all;
+    this.loadEvents();
+  }
 
-        return obj;
-      });
+  private loadEvents(): void {
+    const source$ = this.viewAll
+      ? this.eventService.getGlobal()
+      : this.eventService.getAll();
+
+    source$.subscribe((evts: CalendarEvent[]) => {
+      this.calendarOptions = {
+        ...this.calendarOptions,
+        events: evts.map(e => {
+          const obj: any = {
+            id: e.id,
+            title: e.title,
+            start: e.start,
+            end: e.end,
+            allDay: e.allDay
+          };
+          if (e.userId) {
+            const creatorName = e.creatorName ?? '—';
+            obj.extendedProps = {
+              creatorName: e.userId === this.currentUserUid ? 'Ty' : creatorName
+            };
+          }
+          return obj;
+        })
+      };
     });
   }
 

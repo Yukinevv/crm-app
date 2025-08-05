@@ -1,3 +1,20 @@
+<div class="container mt-3 mb-2 d-flex align-items-center">
+  <div class="btn-group">
+    <button
+      class="btn btn-outline-primary ml-3"
+      [class.active]="!viewAll"
+      (click)="setViewAll(false)">
+      Mój kalendarz
+    </button>
+    <button
+      class="btn btn-outline-primary ml-3"
+      [class.active]="viewAll"
+      (click)="setViewAll(true)">
+      Wszyscy użytkownicy
+    </button>
+  </div>
+</div>
+
 <div class="calendar-container">
   <full-calendar [options]="calendarOptions"></full-calendar>
 </div>

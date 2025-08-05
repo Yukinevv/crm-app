@@ -14,7 +14,7 @@
     <!-- Uczestnicy - tylko dla twórcy -->
     <div *ngIf="isCreator; else readOnlyParticipants" class="mb-3 mt-4">
       <label>Uczestnicy</label>
-      <select class="form-select" (change)="onParticipantSelect($event)">
+      <select class="form-select ml-2" (change)="onParticipantSelect($event)">
         <option value="">-- wybierz --</option>
         <option *ngFor="let c of contactsList" [value]="c.id">
           {{ c.firstName }} {{ c.lastName }}
@@ -92,7 +92,7 @@
       </div>
 
       <div class="mr-4">
-        <button *ngIf="!isCreator" type="button" class="btn btn-outline-danger"
+        <button *ngIf="!isCreator && isInvited" type="button" class="btn btn-outline-danger"
                 (click)="leaveMeeting()">
           Opuść spotkanie
         </button>
