@@ -1,10 +1,15 @@
 .calendar-container {
-  max-width: 900px;
+  max-width: 920px;
   margin: 2rem auto;
 }
 
 .fc-event-creator {
   font-size: 0.75em;
-  color: #666;
+  color: #fff;
   margin-top: 2px;
+}
+
+.fc-disabled-day {
+  background-color: rgba(211, 211, 211, 0.4);
+  pointer-events: none;
 }

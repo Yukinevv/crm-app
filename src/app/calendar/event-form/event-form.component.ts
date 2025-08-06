@@ -28,6 +28,7 @@ export class EventFormComponent implements OnInit {
   currentUserEmail = '';
   currentUserDisplayName = '';
   isCreator = false;
+  isInvited = false;
 
   loading = true;
   error: string | null = null;
@@ -82,6 +83,7 @@ export class EventFormComponent implements OnInit {
           // Edycja / podgląd
           this.eventData = evt;
           this.isCreator = evt.userId === this.currentUserUid;
+          this.isInvited = !this.isCreator && !!evt.invitedUserIds?.includes(this.currentUserUid);
 
           // Snapshot uczestników
           this.participantsSnapshot = (evt.participantsSnapshot || []).map<ParticipantWithFlag>(p => ({

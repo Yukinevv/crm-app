@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {CalendarOptions, DateSelectArg, EventClickArg, EventContentArg} from '@fullcalendar/core';
+import {Component, OnInit, ViewEncapsulation} from '@angular/core';
+import {CalendarOptions, DateSpanApi, EventClickArg, EventContentArg} from '@fullcalendar/core';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -15,11 +15,13 @@ import {FullCalendarModule} from '@fullcalendar/angular';
   standalone: true,
   imports: [FullCalendarModule],
   templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.scss']
+  styleUrls: ['./calendar.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class CalendarComponent implements OnInit {
   calendarOptions: CalendarOptions;
   private currentUserUid = '';
+  viewAll = false;
 
   constructor(
     private eventService: EventService,
@@ -42,6 +44,17 @@ export class CalendarComponent implements OnInit {
       },
       editable: true,
       selectable: true,
+      selectAllow: (span: DateSpanApi) => {
+        const day = span.start.getDay();
+        return day !== 0 && day !== 6;
+      },
+      dayCellClassNames: (arg: any) => {
+        const d = arg.date.getDay();
+        if (d === 0 || d === 6) {
+          return ['fc-disabled-day'];
+        }
+        return [];
+      },
       select: this.handleDateSelect.bind(this),
       eventClick: this.handleEventClick.bind(this),
       eventContent: this.renderEventContent.bind(this),
@@ -55,26 +68,36 @@ export class CalendarComponent implements OnInit {
     this.loadEvents();
   }
 
-  private loadEvents(): void {
-    this.eventService.getAll().subscribe((evts: CalendarEvent[]) => {
-      this.calendarOptions.events = evts.map(e => {
-        const obj: any = {
-          id: e.id,
-          title: e.title,
-          start: e.start,
-          end: e.end,
-          allDay: e.allDay
-        };
-        
-        if (e.userId) {
-          const creatorName = e.creatorName ?? '—';
-          obj.extendedProps = {
-            creatorName: (e.userId === this.currentUserUid ? 'Ty' : creatorName)
-          };
-        }
+  setViewAll(all: boolean) {
+    this.viewAll = all;
+    this.loadEvents();
+  }
 
-        return obj;
-      });
+  private loadEvents(): void {
+    const source$ = this.viewAll
+      ? this.eventService.getGlobal()
+      : this.eventService.getAll();
+
+    source$.subscribe((evts: CalendarEvent[]) => {
+      this.calendarOptions = {
+        ...this.calendarOptions,
+        events: evts.map(e => {
+          const obj: any = {
+            id: e.id,
+            title: e.title,
+            start: e.start,
+            end: e.end,
+            allDay: e.allDay
+          };
+          if (e.userId) {
+            const creatorName = e.creatorName ?? '—';
+            obj.extendedProps = {
+              creatorName: e.userId === this.currentUserUid ? 'Ty' : creatorName
+            };
+          }
+          return obj;
+        })
+      };
     });
   }
 
@@ -95,7 +118,7 @@ export class CalendarComponent implements OnInit {
     return {domNodes};
   }
 
-  private handleDateSelect(selectInfo: DateSelectArg): void {
+  private handleDateSelect(selectInfo: any): void {
     this.router.navigate(['/calendar/new'], {
       queryParams: {
         start: selectInfo.startStr,

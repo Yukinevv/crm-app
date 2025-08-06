@@ -1,7 +1,7 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {ContactListComponent} from './contact-list.component';
 import {ContactService} from '../contact.service';
-import {ImportExportService} from '../import-export.service';
+import {ImportExportService} from '../import-export/import-export.service';
 import {AuthService} from '../../auth/auth.service';
 import {FormBuilder} from '@angular/forms';
 import {of} from 'rxjs';

@@ -37,6 +37,10 @@ export class EventService {
     );
   }
 
+  getGlobal(): Observable<CalendarEvent[]> {
+    return this.http.get<CalendarEvent[]>(this.baseUrl);
+  }
+
   getById(id: string): Observable<CalendarEvent> {
     return this.http.get<CalendarEvent>(`${this.baseUrl}/${id}`);
   }

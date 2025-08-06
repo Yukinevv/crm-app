@@ -4,7 +4,7 @@ import {ContactService} from '../contact.service';
 import {RouterLink} from '@angular/router';
 import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {debounceTime, Observable} from 'rxjs';
-import {ImportExportService} from '../import-export.service';
+import {ImportExportService} from '../import-export/import-export.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {PaginationComponent} from '../pagination.component';
 import {AuthService} from '../../auth/auth.service';
@@ -54,14 +54,18 @@ export class ContactListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.cs.getAll().subscribe(list => {
-      this.contacts = list;
-      this.applyFilters();
-    });
+    this.loadContacts();
 
     this.filterForm.valueChanges
       .pipe(debounceTime(300))
       .subscribe(() => this.applyFilters());
+  }
+
+  private loadContacts() {
+    this.cs.getAll().subscribe(list => {
+      this.contacts = list;
+      this.applyFilters();
+    });
   }
 
   private applyFilters() {
@@ -154,19 +158,33 @@ export class ContactListComponent implements OnInit {
     });
   }
 
-  importFile(e: Event) {
+  importFile(e: Event): void {
     const input = e.target as HTMLInputElement;
     if (!input.files?.length) return;
     const file = input.files[0];
     const ext = file.name.split('.').pop()?.toLowerCase();
-    const fn = ext === 'csv' ? this.ie.importCSV(file) : this.ie.importXLSX(file);
-    fn.then(() => {
-      alert('Import zakończony');
-      this.cs.getAll().subscribe(list => {
-        this.contacts = list;
+    let importPromise: Promise<Contact[]>;
+
+    if (ext === 'csv') {
+      importPromise = this.ie.importCSV(file);
+    } else if (ext === 'xlsx') {
+      importPromise = this.ie.importXLSX(file);
+    } else {
+      alert('Nieobsługiwany format pliku');
+      return;
+    }
+
+    importPromise
+      .then(createdContacts => {
+        this.contacts = [...this.contacts, ...createdContacts];
         this.applyFilters();
+        alert('Import zakończony');
+      })
+      .catch(() => {
+        alert('Błąd podczas importu');
+      })
+      .finally(() => {
+        this.fileInput.nativeElement.value = '';
       });
-      this.fileInput.nativeElement.value = '';
-    }).catch(() => alert('Błąd importu'));
   }
 }
