@@ -7,7 +7,7 @@
       <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('csv')">Eksport CSV</button>
       <button class="btn btn-outline-primary btn-sm mr-1" (click)="exportAll('xlsx')">Eksport XLSX</button>
       <button class="btn btn-outline-primary btn-sm mr-3" (click)="exportAll('pdf')">Eksport PDF</button>
-      <input type="file" #fileInput hidden (change)="importFile($event)"/>
+      <input type="file" #fileInput hidden accept=".csv,.xlsx" (change)="importFile($event)"/>
       <button class="btn btn-outline-secondary btn-sm" (click)="fileInput.click()">Import CSV/XLSX</button>
     </div>
 
