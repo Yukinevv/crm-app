@@ -114,6 +114,53 @@ Zespół ${APP_NAME}`
   }
 });
 
+// Callable: sendInvitationEmail dla zaproszeń
+exports.sendInvitationEmail = functions.https.onCall(async (data, context) => {
+  const payload = (data && data.data) ? data.data : data;
+  console.log('>>> sendInvitationEmail payload=', payload);
+
+  const {email, title, start, end, inviterEmail} = payload || {};
+  if (!email || !title || !start || !end || !inviterEmail) {
+    console.error('❌ Brakuje pól w zaproszeniu:', {email, title, start, end, inviterEmail});
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Brakuje danych do wysłania zaproszenia'
+    );
+  }
+
+  const transport = await mailTransportPromise;
+
+  const startFormat = new Date(start).toLocaleString('pl-PL', {dateStyle: 'full', timeStyle: 'short'});
+  const endFormat = new Date(end).toLocaleTimeString('pl-PL', {timeStyle: 'short'});
+
+  const msg = {
+    from: `${APP_NAME} <no-reply@crm-app.example.com>`,
+    to: email,
+    subject: 'Zaproszenie na spotkanie',
+    text:
+      `Zostałeś zaproszony na spotkanie przez ${inviterEmail}:
+  • Tytuł: ${title}
+  • Termin: ${startFormat} – ${endFormat}
+
+Spotkanie pojawi się w Twoim kalendarzu po zalogowaniu.
+
+Pozdrawiamy,
+Zespół ${APP_NAME}`
+  };
+
+  try {
+    const info = await transport.sendMail(msg);
+    console.log('✅ Zaproszenie wysłane:', info.messageId);
+    if (info.previewURL) {
+      console.log('🔗 Podgląd (Ethereal):', info.previewURL);
+    }
+    return {success: true};
+  } catch (err) {
+    console.error('❌ Błąd wysyłki zaproszenia:', err);
+    throw new functions.https.HttpsError('internal', 'Nie udało się wysłać zaproszenia');
+  }
+});
+
 // REST API przez json-server
 const app = express();
 const router = jsonServer.router('db.json');
