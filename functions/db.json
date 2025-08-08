@@ -312,6 +312,29 @@
       "date": "2025-08-08T15:12:15.552Z",
       "isRead": true,
       "id": 2
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "jantestowy@gmail.com",
+      "subject": "Przypomnienie: spotkanie w dniu 25.08.2025",
+      "body": "Cześć Jan!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na 25.08.2025 o godzinie 14:00.\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-08T23:19:03.542Z",
+      "isRead": true,
+      "id": 3
+    }
+  ],
+  "emailTemplates": [
+    {
+      "id": "1",
+      "name": "Powitanie",
+      "subject": "Witaj {{Imię}}!",
+      "body": "Cześć {{Imię}}!\n\nDziękujemy za zainteresowanie firmą {{Firma}}.\n\nPozdrawiamy,\nZespół CRM-APP"
+    },
+    {
+      "id": "2",
+      "name": "Przypomnienie o spotkaniu",
+      "subject": "Przypomnienie: spotkanie w dniu {{Data}}",
+      "body": "Cześć {{Imię}}!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na {{Data}} o godzinie {{Godzina}}.\n\nDo zobaczenia,\nZespół CRM-APP"
     }
   ]
 }
