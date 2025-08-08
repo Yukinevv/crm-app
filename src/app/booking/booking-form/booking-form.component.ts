@@ -5,6 +5,8 @@ import {Slot} from '../slot.model';
 import {SlotService} from '../slot.service';
 import {BookingService} from '../booking.service';
 import {DatePipe, NgIf} from '@angular/common';
+import {Functions, httpsCallable} from "@angular/fire/functions";
+import {from} from "rxjs";
 
 @Component({
   selector: 'app-booking-form',
@@ -23,11 +25,12 @@ export class BookingFormComponent implements OnInit {
   submitted = false;
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private slotService: SlotService,
-    private bookingService: BookingService,
-    protected router: Router
+      private fb: FormBuilder,
+      private route: ActivatedRoute,
+      private slotService: SlotService,
+      private bookingService: BookingService,
+      protected router: Router,
+      private functions: Functions
   ) {
   }
 
@@ -58,7 +61,7 @@ export class BookingFormComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) return;
 
-    const {name} = this.form.value;
+    const {name, email} = this.form.value;
     const evt = {
       title: `Rezerwacja: ${name}`,
       participants: [],
@@ -73,6 +76,7 @@ export class BookingFormComponent implements OnInit {
     this.bookingService.createBooking(evt).subscribe({
       next: () => {
         this.slotService.bookSlot(this.slot.id).subscribe(() => {
+          this.sendConfirmationEmail(email, this.slot.start, this.slot.end);
           this.submitted = true;
           setTimeout(() => this.router.navigate(['/booking']), 3000);
         });
@@ -81,5 +85,21 @@ export class BookingFormComponent implements OnInit {
         this.error = 'Błąd podczas rezerwacji. Spróbuj ponownie.';
       }
     });
+  }
+
+  private sendConfirmationEmail(userEmail: string, start: string, end: string): void {
+    const fn = httpsCallable<{ email: string; start: string; end: string }, { success: boolean }>(
+        this.functions,
+        'sendBookingConfirmation'
+    );
+    from(fn({email: userEmail, start, end}))
+        .subscribe({
+          next: () => {
+            console.log('Potwierdzenie mailowe wysłane');
+          },
+          error: err => {
+            console.error('Błąd wysyłki maila potwierdzającego', err);
+          }
+        });
   }
 }

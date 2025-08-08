@@ -211,23 +211,30 @@
       "id": 2
     },
     {
+      "id": 3,
       "title": "Spotkanie 1",
       "participants": [
         "4242",
-        "4b0e"
+        "4b0e",
+        "a01c"
       ],
-      "invitedUserIds": [],
+      "invitedUserIds": [
+        "usAkkEtLXbYp47knYpMjDIgkR6u2"
+      ],
       "creatorName": "adrianrodzic33@gmail.com",
       "participantsSnapshot": [
         {
           "name": "Adrian Rodzic",
-          "email": "adrianrodzic33@gmail.com",
-          "isLinked": false
+          "email": "adrianrodzic33@gmail.com"
         },
         {
           "name": "Mariusz Rodzic",
-          "email": "mariuszrodzic08@gmail.com",
-          "isLinked": true
+          "email": "mariuszrodzic08@gmail.com"
+        },
+        {
+          "uid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+          "name": "Mariusz Rodzic",
+          "email": "mariuszrodzic08@gmail.com"
         }
       ],
       "location": "",
@@ -236,8 +243,7 @@
       "end": "2025-08-13T00:00",
       "allDay": true,
       "reminderMinutesBefore": 15,
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "id": 3
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     },
     {
       "title": "Spotkanie 2",

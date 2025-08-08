@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {combineLatest, of} from 'rxjs';
+import {combineLatest, from, of} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
 import {Contact} from '../../contacts/contact.model';
 import {EventService} from '../event.service';
@@ -9,6 +9,7 @@ import {ContactService} from '../../contacts/contact.service';
 import {AuthService} from '../../auth/auth.service';
 import {CalendarEvent, CreateEvent, ParticipantSnapshot, ParticipantWithFlag} from '../calendar-event.model';
 import {NgForOf, NgIf} from '@angular/common';
+import {Functions, httpsCallable} from '@angular/fire/functions';
 
 @Component({
   selector: 'app-event-form',
@@ -39,7 +40,8 @@ export class EventFormComponent implements OnInit {
     private route: ActivatedRoute,
     protected router: Router,
     private eventService: EventService,
-    private contactService: ContactService
+    private contactService: ContactService,
+    private functions: Functions
   ) {
     this.form = this.fb.group({
       title: ['', Validators.required],
@@ -167,7 +169,34 @@ export class EventFormComponent implements OnInit {
       ? this.eventService.update({id: this.editId, ...base})
       : this.eventService.create(base);
 
-    action$.pipe(take(1)).subscribe(() => this.router.navigate(['/calendar']));
+    action$.pipe(take(1)).subscribe(evt => {
+      // po zapisie wydarzenia wysyłamy maile z zaproszeniem
+      const sendFn = httpsCallable<{ email: string; title: string; start: string; end: string; inviterEmail: string }, {
+        success: boolean
+      }>(
+        this.functions,
+        'sendInvitationEmail'
+      );
+      for (const p of participantsSnapshot) {
+        if (p.uid) {
+          from(sendFn({
+            email: p.email,
+            title: base.title,
+            start: base.start,
+            end: base.end,
+            inviterEmail: this.currentUserEmail
+          })).subscribe({
+            next: () => console.log(`Zaproszenie wysłane do ${p.email}`),
+            error: err => console.error(`Błąd wysyłki zaproszenia do ${p.email}`, err)
+          });
+        }
+      }
+
+      // powrót do kalendarza
+      this.router.navigate(['/calendar']);
+    }, () => {
+      this.error = 'Błąd zapisu wydarzenia';
+    });
   }
 
   addToContacts(p: ParticipantWithFlag): void {
