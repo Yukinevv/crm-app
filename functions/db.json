@@ -293,5 +293,16 @@
       "end": "2025-07-30T12:30:00.000Z",
       "booked": false
     }
+  ],
+  "emails": [
+    {
+      "from": "me@example.com",
+      "to": "mariuszrodzic08@gmail.com",
+      "subject": "Testowy temat",
+      "body": "testowa tresc maila",
+      "date": "2025-08-07T21:42:23.775Z",
+      "isRead": true,
+      "id": 1
+    }
   ]
 }

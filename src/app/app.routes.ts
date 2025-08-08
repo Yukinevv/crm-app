@@ -9,6 +9,13 @@ export const routes: Routes = [
   {path: 'register', component: RegisterComponent},
   {path: 'test', component: TestComponent},
   {
+    path: 'email',
+    loadChildren: () =>
+      import('./email/email.module').then(m => m.EmailModule),
+    canLoad: [AuthGuard],
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'sales-funnel',
     loadChildren: () =>
       import('./sales-funnel/sales-funnel.module').then(
