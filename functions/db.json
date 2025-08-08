@@ -303,6 +303,15 @@
       "date": "2025-08-07T21:42:23.775Z",
       "isRead": true,
       "id": 1
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "mariuszrodzic08@gmail.com",
+      "subject": "Testowy mail 2",
+      "body": "Tresc 2",
+      "date": "2025-08-08T15:12:15.552Z",
+      "isRead": true,
+      "id": 2
     }
   ]
 }

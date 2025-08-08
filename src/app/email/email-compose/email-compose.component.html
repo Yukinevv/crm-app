@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <h2>Nowa wiadomość</h2>
   <form [formGroup]="form" (ngSubmit)="send()">
-    <div class="mb-3">
+    <div class="mb-3 mt-3">
       <label>Do</label>
       <input formControlName="to" class="form-control">
       <div *ngIf="form.get('to')?.invalid && form.get('to')?.touched" class="text-danger small">
@@ -15,7 +15,7 @@
         Podaj temat
       </div>
     </div>
-    <div class="mb-3">
+    <div class="mb-4">
       <label>Treść</label>
       <textarea formControlName="body" rows="8" class="form-control"></textarea>
       <div *ngIf="form.get('body')?.invalid && form.get('body')?.touched" class="text-danger small">
@@ -23,7 +23,7 @@
       </div>
     </div>
     <button class="btn btn-primary" type="submit" [disabled]="form.invalid || sending">Wyślij</button>
-    <button class="btn btn-secondary ms-2" type="button" (click)="cancel()">Anuluj</button>
+    <button class="btn btn-secondary ms-2 ml-2" type="button" (click)="cancel()">Anuluj</button>
     <div *ngIf="error" class="text-danger mt-3">{{ error }}</div>
   </form>
 </div>

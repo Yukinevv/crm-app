@@ -3,6 +3,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {EmailService} from '../email.service';
 import {Router} from '@angular/router';
 import {NgIf} from '@angular/common';
+import {AuthService} from "../../auth/auth.service";
+import {take} from "rxjs";
 
 @Component({
   selector: 'app-email-compose',
@@ -19,9 +21,10 @@ export class EmailComposeComponent {
   error: string | null = null;
 
   constructor(
-    private fb: FormBuilder,
-    private emailService: EmailService,
-    private router: Router
+      private fb: FormBuilder,
+      private emailService: EmailService,
+      private router: Router,
+      private auth: AuthService
   ) {
     this.form = this.fb.group({
       to: ['', [Validators.required, Validators.email]],
@@ -34,15 +37,20 @@ export class EmailComposeComponent {
     if (this.form.invalid) return;
     this.sending = true;
     this.error = null;
-    const {to, subject, body} = this.form.value;
-    this.emailService.sendEmail({from: 'me@example.com', to, subject, body})
-      .subscribe({
-        next: () => this.router.navigate(['/email']),
-        error: () => {
-          this.error = 'Błąd wysyłki wiadomości';
-          this.sending = false;
-        }
-      });
+
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      const fromEmail = user?.email ?? '';
+      const {to, subject, body} = this.form.value;
+
+      this.emailService.sendEmail({from: fromEmail, to, subject, body})
+          .subscribe({
+            next: () => this.router.navigate(['/email']),
+            error: () => {
+              this.error = 'Błąd wysyłki wiadomości';
+              this.sending = false;
+            }
+          });
+    });
   }
 
   cancel(): void {
