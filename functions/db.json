@@ -293,5 +293,57 @@
       "end": "2025-07-30T12:30:00.000Z",
       "booked": false
     }
+  ],
+  "emails": [
+    {
+      "from": "me@example.com",
+      "to": "mariuszrodzic08@gmail.com",
+      "subject": "Testowy temat",
+      "body": "testowa tresc maila",
+      "date": "2025-08-07T21:42:23.775Z",
+      "isRead": true,
+      "id": 1
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "mariuszrodzic08@gmail.com",
+      "subject": "Testowy mail 2",
+      "body": "Tresc 2",
+      "date": "2025-08-08T15:12:15.552Z",
+      "isRead": true,
+      "id": 2
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "jantestowy@gmail.com",
+      "subject": "Przypomnienie: spotkanie w dniu 25.08.2025",
+      "body": "Cześć Jan!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na 25.08.2025 o godzinie 14:00.\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-08T23:19:03.542Z",
+      "isRead": true,
+      "id": 3
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "franio23@gmail.com",
+      "subject": "Przypomnienie: spotkanie w dniu środa, 20 sierpnia 2025",
+      "body": "Cześć Franek!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na środa, 20 sierpnia 2025 o godzinie 16:10.\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-09T11:10:26.447Z",
+      "isRead": true,
+      "id": 4
+    }
+  ],
+  "emailTemplates": [
+    {
+      "id": "1",
+      "name": "Powitanie",
+      "subject": "Witaj {{Imię}}!",
+      "body": "Cześć {{Imię}}!\n\nDziękujemy za zainteresowanie firmą {{Firma}}.\n\nPozdrawiamy,\nZespół CRM-APP"
+    },
+    {
+      "id": "2",
+      "name": "Przypomnienie o spotkaniu",
+      "subject": "Przypomnienie: spotkanie w dniu {{Data}}",
+      "body": "Cześć {{Imię}}!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na {{Data}} o godzinie {{Godzina}}.\n\nDo zobaczenia,\nZespół CRM-APP"
+    }
   ]
 }
