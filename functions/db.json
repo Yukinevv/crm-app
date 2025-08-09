@@ -321,6 +321,15 @@
       "date": "2025-08-08T23:19:03.542Z",
       "isRead": true,
       "id": 3
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "franio23@gmail.com",
+      "subject": "Przypomnienie: spotkanie w dniu środa, 20 sierpnia 2025",
+      "body": "Cześć Franek!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na środa, 20 sierpnia 2025 o godzinie 16:10.\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-09T11:10:26.447Z",
+      "isRead": true,
+      "id": 4
     }
   ],
   "emailTemplates": [

@@ -1,12 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {EmailService} from '../email.service';
 import {Router} from '@angular/router';
-import {NgForOf, NgIf} from '@angular/common';
+import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
 import {AuthService} from "../../auth/auth.service";
-import {take} from "rxjs";
+import {Subscription, take} from "rxjs";
 import {Template} from "../template.model";
 import {TemplateService} from "../template.service";
+
+type VarType = 'text' | 'date' | 'time';
 
 @Component({
   selector: 'app-email-compose',
@@ -14,18 +16,25 @@ import {TemplateService} from "../template.service";
   imports: [
     ReactiveFormsModule,
     NgIf,
-    NgForOf
+    NgForOf,
+    NgSwitch,
+    NgSwitchCase,
+    NgSwitchDefault
   ],
   styleUrls: ['./email-compose.component.scss']
 })
-export class EmailComposeComponent implements OnInit {
+export class EmailComposeComponent implements OnInit, OnDestroy {
   form: FormGroup;
   sending = false;
   error: string | null = null;
 
   templates: Template[] = [];
   currentTemplate?: Template;
+
   placeholderKeys: string[] = [];
+  variableTypes: Record<string, VarType> = {};
+
+  private varsSub?: Subscription;
 
   constructor(
       private fb: FormBuilder,
@@ -55,11 +64,18 @@ export class EmailComposeComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.varsSub?.unsubscribe();
+  }
+
   private onTemplateSelect(id: string): void {
+    // wyczyść poprzednią subskrypcję zmiennych
+    this.varsSub?.unsubscribe();
+
     if (!id) {
       this.currentTemplate = undefined;
       this.placeholderKeys = [];
-      // wyczyść zmienne i pola
+      this.variableTypes = {};
       this.form.setControl('variables', this.fb.group({}));
       this.form.patchValue({subject: '', body: ''}, {emitEvent: false});
       return;
@@ -67,56 +83,98 @@ export class EmailComposeComponent implements OnInit {
 
     this.templateService.getTemplate(id).subscribe(temp => {
       this.currentTemplate = temp;
-      // pobierz unikalne klucze z {{...}}
+
+      // wykryj klucze zmiennych z subject + body
       const keys = Array.from(new Set([
         ...this.extractKeys(temp.subject),
         ...this.extractKeys(temp.body)
       ]));
+
       this.placeholderKeys = keys;
 
-      // ustaw pustą grupę dla zmiennych
-      const varsGroup: { [key: string]: string } = {};
-      keys.forEach(k => varsGroup[k] = '');
+      // zmapuj nazwy zmiennych na typy pól
+      this.variableTypes = {};
+      keys.forEach(k => (this.variableTypes[k] = this.detectType(k)));
+
+      // zbuduj grupę formularza dla zmiennych
+      const varsGroup: Record<string, any> = {};
+      keys.forEach(k => (varsGroup[k] = ''));
       this.form.setControl('variables', this.fb.group(varsGroup));
 
-      // za każdym razem, gdy zmienią się wartości zmiennych, aktualizuj temat i treść
-      this.form.get('variables')!.valueChanges.subscribe(() => {
+      // dynamiczna aktualizacja subject/body przy zmianach zmiennych
+      this.varsSub = this.form.get('variables')!.valueChanges.subscribe(() => {
         this.updateFromTemplate();
       });
 
-      // pierwsza inicjalizacja pól
+      // inicjalne podstawienie
       this.updateFromTemplate();
     });
   }
 
-  /** Zamienia {{klucz}} na wartość wpisaną w formularzu */
+  /** Zamienia {{klucz}} na wartości z formularza, formatując date/time po polsku */
   private updateFromTemplate(): void {
     if (!this.currentTemplate) return;
 
     let subj = this.currentTemplate.subject;
     let body = this.currentTemplate.body;
-    const vars = this.form.get('variables')!.value as { [key: string]: string };
+    const vars = this.form.get('variables')!.value as Record<string, string>;
 
     this.placeholderKeys.forEach(key => {
-      const val = vars[key] || '';
-      const re = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      const type = this.variableTypes[key];
+      let val = vars[key] || '';
+
+      if (type === 'date' && val) {
+        val = this.formatDatePL(val); // 'YYYY-MM-DD' -> np. 'sobota, 9 sierpnia 2025'
+      } else if (type === 'time' && val) {
+        val = this.formatTime(val);   // 'HH:mm' -> 'HH:mm'
+      }
+
+      const re = new RegExp(`{{\\s*${this.escapeRegExp(key)}\\s*}}`, 'g');
       subj = subj.replace(re, val);
       body = body.replace(re, val);
     });
 
-    // wpisz zaktualizowane wartości bez wywoływania ponownie valueChanges
     this.form.patchValue({subject: subj, body: body}, {emitEvent: false});
   }
 
-  /** Zwraca wszystkie zmienne z napisu w postaci listy kluczy */
+  /** Proste wykrywanie typu pola po nazwie zmiennej */
+  private detectType(key: string): VarType {
+    const k = key.trim().toLowerCase();
+    if (['data', 'date', 'termin', 'dzień', 'dzien', 'day'].includes(k)) return 'date';
+    if (['godzina', 'czas', 'time', 'hour'].includes(k)) return 'time';
+    return 'text';
+  }
+
   private extractKeys(text: string): string[] {
-    const re = /{{\s*([^{}]+)\s*}}/g;
+    const re = /{{\s*([^{}]+?)\s*}}/g;
     const keys: string[] = [];
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
       keys.push(m[1]);
     }
     return keys;
+  }
+
+  private formatDatePL(yyyyMmDd: string): string {
+    // Unikamy strefy czasowej: parsujemy ręcznie 'YYYY-MM-DD'
+    const [y, m, d] = yyyyMmDd.split('-').map(n => parseInt(n, 10));
+    if (!y || !m || !d) return yyyyMmDd;
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString('pl-PL', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  private formatTime(hhmm: string): string {
+    // Zakładamy format 'HH:mm'
+    return hhmm;
+  }
+
+  private escapeRegExp(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   send(): void {

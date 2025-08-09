@@ -3,18 +3,43 @@
     <form [formGroup]="form" (ngSubmit)="send()">
 
         <!-- Wybór szablonu -->
-        <div class="mb-3">
+        <div class="mb-3 mt-4">
             <label>Szablon</label>
             <select formControlName="templateId" class="form-select ml-2">
                 <option value="">(Brak)</option>
                 <option *ngFor="let t of templates" [value]="t.id">{{ t.name }}</option>
             </select>
+            <small class="text-muted d-block mt-1">
+                Pola typu data/godzina wybierzesz z kalendarza i zegara.
+            </small>
         </div>
-        <!-- Pola dla każdej zmiennej z szablonu -->
-        <div *ngIf="placeholderKeys.length" formGroupName="variables">
+        <!-- Zmienne z szablonu -->
+        <div *ngIf="placeholderKeys.length" formGroupName="variables" class="mb-3">
             <div *ngFor="let key of placeholderKeys" class="mb-3">
-                <label>{{ key }}</label>
-                <input [formControlName]="key" class="form-control">
+                <label class="form-label">{{ key }}</label>
+                <ng-container [ngSwitch]="variableTypes[key]">
+                    <!-- DATA -->
+                    <input
+                            *ngSwitchCase="'date'"
+                            [formControlName]="key"
+                            class="form-control"
+                            type="date"
+                    />
+                    <!-- GODZINA -->
+                    <input
+                            *ngSwitchCase="'time'"
+                            [formControlName]="key"
+                            class="form-control"
+                            type="time"
+                    />
+                    <!-- TEKST -->
+                    <input
+                            *ngSwitchDefault
+                            [formControlName]="key"
+                            class="form-control"
+                            type="text"
+                    />
+                </ng-container>
             </div>
         </div>
         <hr>
@@ -39,6 +64,9 @@
             <div *ngIf="form.get('body')?.invalid && form.get('body')?.touched" class="text-danger small">
                 Wpisz treść wiadomości
             </div>
+            <small class="text-muted d-block mt-1">
+                Daty są automatycznie formatowane po polsku (np. "sobota, 9 sierpnia 2025").
+            </small>
         </div>
         <button class="btn btn-primary" type="submit" [disabled]="form.invalid || sending">Wyślij</button>
         <button class="btn btn-secondary ms-2 ml-2" type="button" (click)="cancel()">Anuluj</button>
