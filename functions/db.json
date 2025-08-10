@@ -330,6 +330,23 @@
       "date": "2025-08-09T11:10:26.447Z",
       "isRead": true,
       "id": 4
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "stefank@gmail.com",
+      "subject": "Przypomnienie: spotkanie w dniu niedziela, 10 sierpnia 2025",
+      "body": "Cześć Stefan!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na niedziela, 10 sierpnia 2025 o godzinie 15:30.\n\nZapraszam: https://example.com/oferta?utm_source=crm-app&utm_medium=email&utm_campaign=Przypomnienie%3A+spotkanie+w+dniu+niedziela%2C+10+sierpnia+2025&utm_content=m_me4w2xlc_z3ccrr02&utm_recipient=stefank%40gmail.com\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-09T23:31:52.080Z",
+      "isRead": true,
+      "messageId": "m_me4w2xlc_z3ccrr02",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Przypomnienie: spotkanie w dniu niedziela, 10 sierpnia 2025",
+        "utm_content": "m_me4w2xlc_z3ccrr02",
+        "utm_recipient": "stefank@gmail.com"
+      },
+      "id": 5
     }
   ],
   "emailTemplates": [

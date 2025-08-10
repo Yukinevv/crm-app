@@ -6,4 +6,6 @@ export interface Email {
   body: string;
   date: string;
   isRead: boolean;
+  messageId?: string;
+  tags?: Record<string, string | number>;
 }
