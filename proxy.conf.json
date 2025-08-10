@@ -1,10 +1,23 @@
-{
-  "/api": {
+[
+  {
+    "context": [
+      "/api/t"
+    ],
+    "target": "http://localhost:5001/crm-app-e0108/us-central1",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true
+  },
+  {
+    "context": [
+      "/api"
+    ],
     "target": "http://localhost:3000",
     "secure": false,
+    "logLevel": "debug",
     "changeOrigin": true,
     "pathRewrite": {
       "^/api": ""
     }
   }
-}
+]

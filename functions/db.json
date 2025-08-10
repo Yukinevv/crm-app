@@ -347,6 +347,23 @@
         "utm_recipient": "stefank@gmail.com"
       },
       "id": 5
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "jan25@gmail.com",
+      "subject": "Witaj Jan!",
+      "body": "Cześć Jan!\n\nDziękujemy za zainteresowanie firmą Testowa firma.\n\nZapraszamy na: http://localhost:4200/api/t?m=m_me5vh969_dn802wtk&u=https%3A%2F%2Fexample.com%2Foferta%3Futm_source%3Dcrm-app%26utm_medium%3Demail%26utm_campaign%3DWitaj%2BJan%2521%26utm_content%3Dm_me5vh969_dn802wtk%26utm_recipient%3Djan25%2540gmail.com&r=jan25%40gmail.com\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-10T16:02:46.833Z",
+      "isRead": true,
+      "messageId": "m_me5vh969_dn802wtk",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Jan!",
+        "utm_content": "m_me5vh969_dn802wtk",
+        "utm_recipient": "jan25@gmail.com"
+      },
+      "id": 6
     }
   ],
   "emailTemplates": [

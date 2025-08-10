@@ -3,6 +3,11 @@ const admin = require('firebase-admin');
 const express = require('express');
 const jsonServer = require('json-server');
 const nodemailer = require('nodemailer');
+const {FieldValue} = require('firebase-admin/firestore');
+
+if (process.env.FORCE_PROD_DB === '1') {
+  delete process.env.FIRESTORE_EMULATOR_HOST;
+}
 
 admin.initializeApp();
 
@@ -168,6 +173,51 @@ const middlewares = jsonServer.defaults();
 
 app.use(middlewares);
 app.use(jsonServer.bodyParser);
+
+// Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
+const trackingHandler = async (req, res) => {
+  try {
+    const m = String(req.query.m || '');
+    const u = String(req.query.u || '');
+    const r = req.query.r ? String(req.query.r) : null;
+
+    console.log('↪️ /t hit', {path: req.path, m, hasU: !!u, r});
+
+    if (!m || !u) {
+      console.warn('⚠️ Missing params');
+      return res.status(400).send('Missing query params: m, u');
+    }
+    if (!/^https?:\/\//i.test(u)) {
+      console.warn('⚠️ Invalid target url');
+      return res.status(400).send('Invalid target url');
+    }
+
+    const ua = req.get('user-agent') || '';
+    const ipHeader = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '';
+    const ip = Array.isArray(ipHeader) ? ipHeader[0] : String(ipHeader).split(',')[0].trim();
+
+    await admin.firestore().collection('clicks').add({
+      messageId: m,
+      recipient: r,
+      url: u,
+      userAgent: ua,
+      ip,
+      ts: FieldValue.serverTimestamp()
+    });
+
+    console.log('📝 zapisano kliknięcie → redirect 302');
+    return res.redirect(302, u);
+  } catch (err) {
+    console.error('❌ Click tracking error:', err);
+    return res.status(500).send('Click tracking failed');
+  }
+};
+
+// https://example.com/oferta
+// Rejestrujemy ścieżki
+app.get('/api/t', trackingHandler);
+app.get('/t', trackingHandler);
+
 app.use('/api', router);
 
 exports.api = functions.https.onRequest(app);

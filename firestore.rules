@@ -1,0 +1,15 @@
+// Firestore Security Rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Kolekcja na kliknięcia – zapisuje wyłącznie Admin SDK (z Functions).
+    match /clicks/{docId} {
+      allow read: if false;   // na razie brak odczytu z frontu
+      allow write: if false;  // klienci nie piszą – Admin SDK omija reguły
+    }
+    // Reszta zablokowana
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

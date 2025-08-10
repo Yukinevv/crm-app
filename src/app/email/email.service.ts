@@ -28,7 +28,7 @@ export class EmailService {
    *  utm_recipient=<email odbiorcy>
    */
   sendEmail(
-      email: Omit<Email, 'id' | 'date' | 'isRead'> & { trackLinks?: boolean }
+    email: Omit<Email, 'id' | 'date' | 'isRead'> & { trackLinks?: boolean }
   ): Observable<Email> {
     const messageId = this.generateMessageId();
 
@@ -40,15 +40,16 @@ export class EmailService {
       utm_recipient: email.to
     };
 
-    const bodyTagged = email.trackLinks
-        ? this.tagAllLinks(email.body, tags)
-        : email.body;
+    const withUtm = email.trackLinks ? this.tagAllLinks(email.body, tags) : email.body;
+    const withTracking = email.trackLinks
+      ? this.wrapWithTracking(withUtm, messageId, email.to)
+      : withUtm;
 
     const payload: Omit<Email, 'id'> = {
       from: email.from,
       to: email.to,
       subject: email.subject,
-      body: bodyTagged,
+      body: withTracking,
       date: new Date().toISOString(),
       isRead: false,
       messageId,
@@ -70,7 +71,7 @@ export class EmailService {
 
   /**
    * Znajduje wszystkie URL-e i dopina do nich parametry UTM.
-   * Działa na prostym regexie – dobry kompromis dla plain-text.
+   * Działa na prostym regexie.
    */
   private tagAllLinks(text: string, params: Record<string, string>): string {
     if (!text) return text;
@@ -93,6 +94,38 @@ export class EmailService {
     } catch {
       // gdy URL jest nietypowy (np. brak schematu) - zostawiamy bez zmian
       return url;
+    }
+  }
+
+  /**
+   * Zastępuje każdy URL adresem śledzącym:
+   *   {origin}/api/t?m=<messageId>&u=<url>&r=<recipient>
+   * gdzie {origin} to bieżąca domena aplikacji (Hosting proxy'uje /api do Functions).
+   */
+  private wrapWithTracking(text: string, messageId: string, recipient: string): string {
+    if (!text) return text;
+    const urlRe = /\bhttps?:\/\/[^\s<>"']+/gi;
+    const base = this.getTrackingBaseUrl();
+    return text.replace(urlRe, (url: string) => {
+      // już śledzony?
+      if (url.startsWith(base)) return url;
+      try {
+        const t = new URL(base);
+        t.searchParams.set('m', messageId);
+        t.searchParams.set('u', url);
+        if (recipient) t.searchParams.set('r', recipient);
+        return t.toString();
+      } catch {
+        return url;
+      }
+    });
+  }
+
+  private getTrackingBaseUrl(): string {
+    try {
+      return `${window.location.origin}/api/t`;
+    } catch {
+      return '/api/t';
     }
   }
 }
