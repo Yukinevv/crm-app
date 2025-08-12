@@ -364,6 +364,23 @@
         "utm_recipient": "jan25@gmail.com"
       },
       "id": 6
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "bartoszrp@gmail.com",
+      "subject": "Witaj Bartek!",
+      "body": "Cześć Bartek!\n\nDziękujemy za zainteresowanie firmą BarCorp.\nZapraszamy na: http://localhost:4200/api/t?m=m_me772zmq_jvqp2oy2&u=https%3A%2F%2Ftest.com%2Foferta%3Futm_source%3Dcrm-app%26utm_medium%3Demail%26utm_campaign%3DWitaj%2BBartek%2521%26utm_content%3Dm_me772zmq_jvqp2oy2%26utm_recipient%3Dbartoszrp%2540gmail.com&r=bartoszrp%40gmail.com\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-11T14:15:22.850Z",
+      "isRead": true,
+      "messageId": "m_me772zmq_jvqp2oy2",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Bartek!",
+        "utm_content": "m_me772zmq_jvqp2oy2",
+        "utm_recipient": "bartoszrp@gmail.com"
+      },
+      "id": 7
     }
   ],
   "emailTemplates": [

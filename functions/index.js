@@ -218,6 +218,164 @@ const trackingHandler = async (req, res) => {
 app.get('/api/t', trackingHandler);
 app.get('/t', trackingHandler);
 
+// ====== STATYSTYKI: LISTA KLIKÓW, PODSUMOWANIA, CSV ======
+function tsToIso(ts) {
+  if (!ts) return null;
+  if (ts.toDate) return ts.toDate().toISOString();
+  try {
+    return new Date(ts).toISOString();
+  } catch {
+    return null;
+  }
+}
+
+// lista klików dla messageId
+const clicksListHandler = async (req, res) => {
+  try {
+    const messageId = String(req.query.messageId || '');
+    if (!messageId) return res.status(400).json({error: 'messageId is required'});
+
+    const limit = Math.min(parseInt(String(req.query.limit || '200'), 10) || 200, 2000);
+    const from = req.query.from ? new Date(String(req.query.from)) : null;
+    const to = req.query.to ? new Date(String(req.query.to)) : null;
+
+    let q = admin.firestore().collection('clicks')
+      .where('messageId', '==', messageId)
+      .orderBy('ts', 'desc');
+    if (from) q = q.where('ts', '>=', from);
+    if (to) q = q.where('ts', '<=', to);
+
+    const snap = await q.limit(limit).get();
+    const items = snap.docs.map(d => {
+      const v = d.data();
+      return {
+        id: d.id,
+        messageId: v.messageId,
+        recipient: v.recipient || null,
+        url: v.url,
+        userAgent: v.userAgent || null,
+        ip: v.ip || null,
+        ts: tsToIso(v.ts)
+      };
+    });
+
+    res.json({items});
+  } catch (e) {
+    console.error('❌ /stats clicks error', e);
+    res.status(500).json({error: 'internal'});
+  }
+};
+
+const clicksSummaryHandler = async (req, res) => {
+  try {
+    const sinceDays = parseInt(String(req.query.sinceDays || '365'), 10) || 365;
+    const limit = Math.min(parseInt(String(req.query.limit || '5000'), 10) || 5000, 20000);
+    const since = new Date();
+    since.setDate(since.getDate() - sinceDays);
+
+    const snap = await admin.firestore().collection('clicks')
+      .where('ts', '>=', since)
+      .orderBy('ts', 'desc')
+      .limit(limit)
+      .get();
+
+    const map = new Map();
+    snap.forEach(d => {
+      const v = d.data();
+      const mid = v.messageId;
+      if (!mid) return;
+      const iso = tsToIso(v.ts);
+      const cur = map.get(mid) || {messageId: mid, count: 0, lastTs: null};
+      cur.count++;
+      if (!cur.lastTs || (iso && iso > cur.lastTs)) cur.lastTs = iso;
+      map.set(mid, cur);
+    });
+
+    const items = Array.from(map.values()).sort((a, b) => b.count - a.count);
+    res.json({items});
+  } catch (e) {
+    console.error('❌ /stats summary error', e);
+    res.status(500).json({error: 'internal'});
+  }
+};
+
+const clicksCsvHandler = async (req, res) => {
+  try {
+    const messageId = String(req.query.messageId || '');
+    if (!messageId) return res.status(400).send('messageId is required');
+
+    const snap = await admin.firestore().collection('clicks')
+      .where('messageId', '==', messageId)
+      .orderBy('ts', 'desc')
+      .limit(5000)
+      .get();
+
+    const rows = [['id', 'messageId', 'recipient', 'url', 'userAgent', 'ip', 'ts']];
+    snap.forEach(d => {
+      const v = d.data();
+      rows.push([
+        d.id, v.messageId || '', v.recipient || '', v.url || '',
+        String(v.userAgent || '').replace(/"/g, '""'),
+        v.ip || '', tsToIso(v.ts) || ''
+      ]);
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="clicks_${messageId}.csv"`);
+    res.send(rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n'));
+  } catch (e) {
+    console.error('❌ /stats clicks.csv error', e);
+    res.status(500).send('internal');
+  }
+};
+
+const summaryCsvHandler = async (req, res) => {
+  try {
+    const sinceDays = parseInt(String(req.query.sinceDays || '365'), 10) || 365;
+    const since = new Date();
+    since.setDate(since.getDate() - sinceDays);
+
+    const snap = await admin.firestore().collection('clicks')
+      .where('ts', '>=', since)
+      .orderBy('ts', 'desc')
+      .limit(20000)
+      .get();
+
+    const map = new Map();
+    snap.forEach(d => {
+      const v = d.data();
+      const mid = v.messageId;
+      if (!mid) return;
+      const iso = tsToIso(v.ts);
+      const cur = map.get(mid) || {messageId: mid, count: 0, lastTs: null};
+      cur.count++;
+      if (!cur.lastTs || (iso && iso > cur.lastTs)) cur.lastTs = iso;
+      map.set(mid, cur);
+    });
+
+    const rows = [['messageId', 'count', 'lastTs']];
+    Array.from(map.values()).sort((a, b) => b.count - a.count)
+      .forEach(r => rows.push([r.messageId, r.count, r.lastTs || '']));
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="clicks_summary.csv"`);
+    res.send(rows.map(r => r.join(',')).join('\n'));
+  } catch (e) {
+    console.error('❌ /stats summary.csv error', e);
+    res.status(500).send('internal');
+  }
+};
+
+// rejestrujemy ścieżki zarówno z /api/... jak i bez /api (na wszelki wypadek proxy)
+app.get('/api/stats/clicks', clicksListHandler);
+app.get('/stats/clicks', clicksListHandler);
+app.get('/api/stats/clicks/summary', clicksSummaryHandler);
+app.get('/stats/clicks/summary', clicksSummaryHandler);
+app.get('/api/stats/clicks/csv', clicksCsvHandler);
+app.get('/stats/clicks/csv', clicksCsvHandler);
+app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
+app.get('/stats/clicks/summary.csv', summaryCsvHandler);
+
 app.use('/api', router);
 
 exports.api = functions.https.onRequest(app);
