@@ -30,6 +30,7 @@
     "@fullcalendar/timegrid": "^6.1.18",
     "bootstrap": "^4.6.2",
     "chart.js": "^4.5.0",
+    "chartjs-adapter-date-fns": "^3.0.0",
     "file-saver": "^2.0.5",
     "firebase": "^10.14.1",
     "jquery": "^3.7.1",

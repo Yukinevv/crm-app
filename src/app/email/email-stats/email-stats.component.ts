@@ -3,7 +3,8 @@ import {EmailService} from '../email.service';
 import {Email} from '../email.model';
 import {forkJoin, Subscription} from 'rxjs';
 
-import {Chart, ChartConfiguration, registerables} from 'chart.js';
+import {Chart, ChartConfiguration, registerables, ScatterDataPoint} from 'chart.js';
+import 'chartjs-adapter-date-fns';
 import {ClickEvent, ClickSummary, EmailStatsService} from '../email-stats.service';
 import {RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
@@ -23,17 +24,12 @@ interface SummaryRow {
 @Component({
   selector: 'app-email-stats',
   templateUrl: './email-stats.component.html',
-  imports: [
-    RouterLink,
-    FormsModule,
-    NgIf,
-    DatePipe,
-    NgForOf
-  ],
+  imports: [RouterLink, FormsModule, NgIf, DatePipe, NgForOf],
   styleUrls: ['./email-stats.component.scss']
 })
 export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('topChart') topChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('timeChart') timeChartRef!: ElementRef<HTMLCanvasElement>;
 
   loading = true;
   refreshing = false;
@@ -44,9 +40,14 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
   selected?: SummaryRow;
   selectedClicks: ClickEvent[] = [];
 
+  // Filtry
   sinceDays = 365;
+  filterRecipient = '';
+  filterUrl = '';
+
   private subs: Subscription[] = [];
-  private chart?: Chart;
+  private chartTop?: Chart;
+  private chartTime?: Chart;
 
   private viewReady = false;
   private dataReady = false;
@@ -66,9 +67,9 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
       next: ([emails, summary]) => {
         this.emails = emails;
         this.summary = this.joinSummary(emails, summary);
-        this.loading = false;
         this.dataReady = true;
-        this.tryRenderChart();
+        this.loading = false;
+        this.tryRenderTopChart();
         if (this.summary.length) this.selectRow(this.summary[0]);
       },
       error: () => {
@@ -81,14 +82,19 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.viewReady = true;
-    this.tryRenderChart();
+    this.tryRenderTopChart();
+    this.tryRenderTimeChart();
   }
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = undefined;
+    if (this.chartTop) {
+      this.chartTop.destroy();
+      this.chartTop = undefined;
+    }
+    if (this.chartTime) {
+      this.chartTime.destroy();
+      this.chartTime = undefined;
     }
   }
 
@@ -109,7 +115,6 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
         lastTs: s.lastTs
       };
     });
-
     rows.sort((a, b) => b.clicks - a.clicks);
     return rows;
   }
@@ -120,7 +125,7 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (summary) => {
         this.summary = this.joinSummary(this.emails, summary);
         this.refreshing = false;
-        this.updateChart();
+        this.updateTopChart();
       },
       error: () => {
         this.error = 'Błąd odświeżenia statystyk';
@@ -133,10 +138,31 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
   selectRow(row: SummaryRow): void {
     this.selected = row;
     const sub = this.statsService.getClicksByMessageId(row.messageId, 1000).subscribe({
-      next: clicks => this.selectedClicks = clicks,
-      error: () => this.selectedClicks = []
+      next: clicks => {
+        this.selectedClicks = clicks;
+        this.updateTimeChart();
+      },
+      error: () => {
+        this.selectedClicks = [];
+        this.updateTimeChart();
+      }
     });
     this.subs.push(sub);
+  }
+
+  onFiltersChange(): void {
+    this.updateTimeChart();
+  }
+
+  get filteredClicks(): ClickEvent[] {
+    const r = this.filterRecipient.trim().toLowerCase();
+    const u = this.filterUrl.trim().toLowerCase();
+
+    return (this.selectedClicks || []).filter(c => {
+      const okR = r ? (c.recipient || '').toLowerCase().includes(r) : true;
+      const okU = u ? (c.url || '').toLowerCase().includes(u) : true;
+      return okR && okU;
+    });
   }
 
   exportSummaryCsv(): void {
@@ -147,8 +173,8 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
     window.open(this.statsService.clicksCsvUrl(row.messageId), '_blank');
   }
 
-  // ===== wykres =====
-  private tryRenderChart(): void {
+  // ===== wykres Top 10 =====
+  private tryRenderTopChart(): void {
     if (!this.viewReady || !this.dataReady) return;
 
     const top = this.summary.slice(0, 10);
@@ -156,73 +182,124 @@ export class EmailStatsComponent implements OnInit, AfterViewInit, OnDestroy {
     const data = top.map(r => r.clicks);
 
     this.ngZone.runOutsideAngular(() => {
-      requestAnimationFrame(() => {
-        this.renderChart(labels, data);
-      });
+      requestAnimationFrame(() => this.renderTopChart(labels, data));
     });
   }
 
-  private ensureChartCanvasCurrent(): boolean {
-    if (!this.chart) return false;
-    const currentCanvas = this.topChartRef?.nativeElement;
-    const chartCanvas: HTMLCanvasElement | undefined = this.chart.canvas;
-    if (!currentCanvas || !chartCanvas || currentCanvas !== chartCanvas) {
-      // Canvas został prze-montowany to odtwórz wykres
-      this.chart.destroy();
-      this.chart = undefined;
-      return false;
-    }
-    return true;
-  }
-
-  private renderChart(labels: (string | string[])[], data: number[]): void {
+  private renderTopChart(labels: (string | string[])[], data: number[]): void {
     if (!this.topChartRef) return;
 
-    if (this.chart) {
-      this.chart.destroy();
-      this.chart = undefined;
+    if (this.chartTop) {
+      this.chartTop.destroy();
+      this.chartTop = undefined;
     }
 
     const cfg: ChartConfiguration<'bar'> = {
       type: 'bar',
+      data: {labels, datasets: [{label: 'Kliknięcia', data}]},
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {legend: {display: true}},
+        scales: {x: {ticks: {autoSkip: false}}}
+      }
+    };
+
+    const canvas = this.topChartRef.nativeElement;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+
+    this.chartTop = new Chart(canvas, cfg);
+    queueMicrotask(() => this.chartTop?.resize());
+  }
+
+  private updateTopChart(): void {
+    if (!this.chartTop) return this.tryRenderTopChart();
+    const top = this.summary.slice(0, 10);
+    this.chartTop.data.labels = top.map(r => r.subject.length > 24 ? r.subject.slice(0, 22) + '…' : r.subject);
+    (this.chartTop.data.datasets[0].data as number[]) = top.map(r => r.clicks);
+    this.chartTop.update();
+  }
+
+  // ===== wykres „kliknięcia w czasie” =====
+  private tryRenderTimeChart(): void {
+    if (!this.viewReady) return;
+    const series = this.buildTimeSeries(this.filteredClicks);
+    this.ngZone.runOutsideAngular(() => {
+      requestAnimationFrame(() => this.renderTimeChart(series));
+    });
+  }
+
+  private renderTimeChart(series: ScatterDataPoint[]): void {
+    if (!this.timeChartRef) return;
+
+    if (this.chartTime) {
+      this.chartTime.destroy();
+      this.chartTime = undefined;
+    }
+
+    const cfg: ChartConfiguration<'line', ScatterDataPoint[], number> = {
+      type: 'line',
       data: {
-        labels,
-        datasets: [{label: 'Kliknięcia', data}]
+        datasets: [{
+          label: 'Kliknięcia (dziennie)',
+          data: series,
+          parsing: false, // używamy {x,y}
+          fill: false,
+          tension: 0.25
+        }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-        plugins: {
-          legend: {display: true}
-        },
+        plugins: {legend: {display: true}},
         scales: {
-          x: {ticks: {autoSkip: false}}
+          x: {
+            type: 'time',
+            time: {unit: 'day'},
+            ticks: {source: 'auto'}
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {precision: 0}
+          }
         }
       }
     };
 
-    const canvas = this.topChartRef.nativeElement;
-
+    const canvas = this.timeChartRef.nativeElement;
     canvas.style.width = '100%';
     canvas.style.height = '100%';
 
-    this.chart = new Chart(canvas, cfg);
-
-    // po pierwszym cyklu - wymuś przeliczenie
-    queueMicrotask(() => this.chart?.resize());
+    this.chartTime = new Chart(canvas, cfg);
+    queueMicrotask(() => this.chartTime?.resize());
   }
 
-  private updateChart(): void {
-    if (!this.ensureChartCanvasCurrent()) {
-      return this.tryRenderChart();
-    }
-    const top = this.summary.slice(0, 10);
-    const labels = top.map(r => r.subject.length > 24 ? r.subject.slice(0, 22) + '…' : r.subject);
-    const values = top.map(r => r.clicks);
+  private updateTimeChart(): void {
+    if (!this.timeChartRef) return;
+    const series = this.buildTimeSeries(this.filteredClicks);
+    if (!this.chartTime) return this.tryRenderTimeChart();
+    (this.chartTime.data.datasets[0].data as ScatterDataPoint[]) = series;
+    this.chartTime.update();
+  }
 
-    this.chart!.data.labels = labels;
-    (this.chart!.data.datasets[0].data as number[]) = values;
-    this.chart!.update();
+  private buildTimeSeries(clicks: ClickEvent[]): ScatterDataPoint[] {
+    const bucket = new Map<string, number>();
+    for (const c of clicks) {
+      if (!c.ts) continue;
+      const d = new Date(c.ts);
+      if (isNaN(d.getTime())) continue;
+      const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+      bucket.set(key, (bucket.get(key) || 0) + 1);
+    }
+
+    return Array.from(bucket.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([k, v]) => {
+        const t = new Date(k).getTime(); // ms timestamp
+        return {x: t, y: v} as ScatterDataPoint;
+      });
   }
 }

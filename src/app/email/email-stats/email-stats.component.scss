@@ -11,6 +11,11 @@
   min-height: 300px;
 }
 
+.chart-holder.small-chart {
+  height: 260px;
+  min-height: 260px;
+}
+
 .chart-holder > canvas {
   display: block;
   width: 100% !important;
