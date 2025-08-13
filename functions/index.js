@@ -1,4 +1,7 @@
-const functions = require('firebase-functions');
+const {onRequest, onCall, HttpsError} = require('firebase-functions/v2/https');
+const {defineSecret} = require('firebase-functions/params');
+const {setGlobalOptions} = require('firebase-functions/v2');
+
 const admin = require('firebase-admin');
 const express = require('express');
 const jsonServer = require('json-server');
@@ -9,9 +12,15 @@ if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
 }
 
+setGlobalOptions({region: 'us-central1'});
+
 admin.initializeApp();
 
-// Ustawiamy transport w zależności od środowiska / configów
+// === Secrets ===
+const SENDGRID_KEY = defineSecret('SENDGRID_KEY');
+
+// Transport email zależny od środowiska (MailHog w emulatorze, SendGrid na produkcji,
+// Ethereal jako fallback).
 async function createMailTransport() {
   // Emulator: MailHog na localhost:1025
   if (process.env.FUNCTIONS_EMULATOR) {
@@ -23,10 +32,10 @@ async function createMailTransport() {
     });
   }
 
-  // Hosting: SendGrid
-  const sgKey = functions.config().sendgrid?.key;
+  // Produkcja: SendGrid przez sekret
+  const sgKey = process.env.SENDGRID_KEY;
   if (sgKey) {
-    console.log('⚙️ Używam SendGrid SMTP');
+    console.log('⚙️ Używam SendGrid SMTP (sekret SENDGRID_KEY obecny)');
     return nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
       port: 587,
@@ -37,10 +46,10 @@ async function createMailTransport() {
     });
   }
 
-  // Fallback: Ethereal konto testowe
-  console.log('⚙️ Nie wykryto configów mailowych – tworzę konto Ethereal (test)');
+  // Fallback: Ethereal test account (tylko do podglądu)
+  console.log('⚙️ Brak SENDGRID_KEY – tworzę konto Ethereal (test)');
   const testAccount = await nodemailer.createTestAccount();
-  console.log('ℹ️ Konto Ethereal:', testAccount.user, testAccount.pass);
+  console.log('ℹ️ Ethereal user/pass:', testAccount.user, testAccount.pass);
   return nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
@@ -54,51 +63,46 @@ async function createMailTransport() {
 const mailTransportPromise = createMailTransport();
 const APP_NAME = 'CRM-APP';
 
-// Callable: getUserByEmail
-exports.getUserByEmail = functions.https.onCall(async (data, context) => {
-  console.log('>>> getUserByEmail data=', data);
-  const email = typeof data.email === 'string'
-    ? data.email
-    : data.data?.email;
+// ========== CALLABLES ==========
+
+// getUserByEmail (by powiązać kontakt po emailu z Firebase Auth UID)
+exports.getUserByEmail = onCall(async (request) => {
+  const data = request.data || {};
+  const email = typeof data.email === 'string' ? data.email : data?.data?.email;
+
   if (!email) {
-    throw new functions.https.HttpsError('invalid-argument', 'Brak adresu email');
+    throw new HttpsError('invalid-argument', 'Brak adresu email');
   }
+
   try {
     const user = await admin.auth().getUserByEmail(email);
     return {uid: user.uid, email: user.email};
   } catch {
-    throw new functions.https.HttpsError('not-found', 'Użytkownik nie znaleziony');
+    throw new HttpsError('not-found', 'Użytkownik nie znaleziony');
   }
 });
 
-// Callable: sendBookingConfirmation z dynamicznym transportem
-exports.sendBookingConfirmation = functions.https.onCall(async (data, context) => {
-  // unwrap payload - emulator pakuje w data.data
-  const payload = (data && data.data) ? data.data : data;
-  console.log('>>> sendBookingConfirmation payload=', payload);
+// sendBookingConfirmation – potwierdzenie rezerwacji
+exports.sendBookingConfirmation = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
+  const payload = request.data || {};
+  const {email, start, end} = payload;
 
-  const {email, start, end} = payload || {};
   if (!email || !start || !end) {
-    console.error('❌ Brakuje pól:', {email, start, end});
-    throw new functions.https.HttpsError(
-      'invalid-argument',
-      'Brakuje danych do wysłania potwierdzenia'
-    );
+    throw new HttpsError('invalid-argument', 'Brakuje danych do wysłania potwierdzenia');
   }
 
   const transport = await mailTransportPromise;
 
-  // Formatowanie po polsku
   const startFormat = new Date(start).toLocaleString('pl-PL', {dateStyle: 'full', timeStyle: 'short'});
   const endFormat = new Date(end).toLocaleTimeString('pl-PL', {timeStyle: 'short'});
 
   const msg = {
-    from: `${APP_NAME} <adrianrodzicsh@gmail.com>`,
+    from: `${APP_NAME} <no-reply@crm-app.example.com>`,
     to: email,
     subject: 'Potwierdzenie rezerwacji spotkania',
     text:
       `Dziękujemy za rezerwację terminu:
-  • ${startFormat} – ${endFormat}
+• ${startFormat} – ${endFormat}
 
 Możesz zobaczyć swoje rezerwacje w kalendarzu po zalogowaniu lub utworzeniu konta.
 
@@ -109,28 +113,21 @@ Zespół ${APP_NAME}`
   try {
     const info = await transport.sendMail(msg);
     console.log('✅ Mail wysłany:', info.messageId);
-    if (info.previewURL) {
-      console.log('🔗 Podgląd (Ethereal):', info.previewURL);
-    }
+    if (info.previewURL) console.log('🔗 Podgląd (Ethereal):', info.previewURL);
     return {success: true};
   } catch (err) {
     console.error('❌ Błąd wysyłki maila:', err);
-    throw new functions.https.HttpsError('internal', 'Nie udało się wysłać maila');
+    throw new HttpsError('internal', 'Nie udało się wysłać maila');
   }
 });
 
-// Callable: sendInvitationEmail dla zaproszeń
-exports.sendInvitationEmail = functions.https.onCall(async (data, context) => {
-  const payload = (data && data.data) ? data.data : data;
-  console.log('>>> sendInvitationEmail payload=', payload);
+// sendInvitationEmail – powiadomienie dla zaproszonego użytkownika
+exports.sendInvitationEmail = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
+  const payload = request.data || {};
+  const {email, title, start, end, inviterEmail} = payload;
 
-  const {email, title, start, end, inviterEmail} = payload || {};
   if (!email || !title || !start || !end || !inviterEmail) {
-    console.error('❌ Brakuje pól w zaproszeniu:', {email, title, start, end, inviterEmail});
-    throw new functions.https.HttpsError(
-      'invalid-argument',
-      'Brakuje danych do wysłania zaproszenia'
-    );
+    throw new HttpsError('invalid-argument', 'Brakuje danych do wysłania zaproszenia');
   }
 
   const transport = await mailTransportPromise;
@@ -144,8 +141,8 @@ exports.sendInvitationEmail = functions.https.onCall(async (data, context) => {
     subject: 'Zaproszenie na spotkanie',
     text:
       `Zostałeś zaproszony na spotkanie przez ${inviterEmail}:
-  • Tytuł: ${title}
-  • Termin: ${startFormat} – ${endFormat}
+• Tytuł: ${title}
+• Termin: ${startFormat} – ${endFormat}
 
 Spotkanie pojawi się w Twoim kalendarzu po zalogowaniu.
 
@@ -156,17 +153,16 @@ Zespół ${APP_NAME}`
   try {
     const info = await transport.sendMail(msg);
     console.log('✅ Zaproszenie wysłane:', info.messageId);
-    if (info.previewURL) {
-      console.log('🔗 Podgląd (Ethereal):', info.previewURL);
-    }
+    if (info.previewURL) console.log('🔗 Podgląd (Ethereal):', info.previewURL);
     return {success: true};
   } catch (err) {
     console.error('❌ Błąd wysyłki zaproszenia:', err);
-    throw new functions.https.HttpsError('internal', 'Nie udało się wysłać zaproszenia');
+    throw new HttpsError('internal', 'Nie udało się wysłać zaproszenia');
   }
 });
 
-// REST API przez json-server
+// ========== HTTP API (Express) ==========
+
 const app = express();
 const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
@@ -174,7 +170,7 @@ const middlewares = jsonServer.defaults();
 app.use(middlewares);
 app.use(jsonServer.bodyParser);
 
-// Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
+// --- Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
 const trackingHandler = async (req, res) => {
   try {
     const m = String(req.query.m || '');
@@ -184,11 +180,9 @@ const trackingHandler = async (req, res) => {
     console.log('↪️ /t hit', {path: req.path, m, hasU: !!u, r});
 
     if (!m || !u) {
-      console.warn('⚠️ Missing params');
       return res.status(400).send('Missing query params: m, u');
     }
     if (!/^https?:\/\//i.test(u)) {
-      console.warn('⚠️ Invalid target url');
       return res.status(400).send('Invalid target url');
     }
 
@@ -213,8 +207,7 @@ const trackingHandler = async (req, res) => {
   }
 };
 
-// https://example.com/oferta
-// Rejestrujemy ścieżki
+// Rejestrujemy ścieżki zarówno z /api/... jak i bez /api (na wszelki wypadek proxy)
 app.get('/api/t', trackingHandler);
 app.get('/t', trackingHandler);
 
@@ -229,7 +222,7 @@ function tsToIso(ts) {
   }
 }
 
-// lista klików dla messageId
+// lista kliknięć dla messageId
 const clicksListHandler = async (req, res) => {
   try {
     const messageId = String(req.query.messageId || '');
@@ -366,7 +359,7 @@ const summaryCsvHandler = async (req, res) => {
   }
 };
 
-// rejestrujemy ścieżki zarówno z /api/... jak i bez /api (na wszelki wypadek proxy)
+// REST przez json-server
 app.get('/api/stats/clicks', clicksListHandler);
 app.get('/stats/clicks', clicksListHandler);
 app.get('/api/stats/clicks/summary', clicksSummaryHandler);
@@ -378,4 +371,4 @@ app.get('/stats/clicks/summary.csv', summaryCsvHandler);
 
 app.use('/api', router);
 
-exports.api = functions.https.onRequest(app);
+exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);
