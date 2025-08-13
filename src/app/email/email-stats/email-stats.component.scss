@@ -1,0 +1,23 @@
+.table {
+  th, td {
+    vertical-align: middle;
+  }
+}
+
+.chart-holder {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  min-height: 300px;
+}
+
+.chart-holder.small-chart {
+  height: 260px;
+  min-height: 260px;
+}
+
+.chart-holder > canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}

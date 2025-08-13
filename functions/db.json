@@ -330,6 +330,57 @@
       "date": "2025-08-09T11:10:26.447Z",
       "isRead": true,
       "id": 4
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "stefank@gmail.com",
+      "subject": "Przypomnienie: spotkanie w dniu niedziela, 10 sierpnia 2025",
+      "body": "Cześć Stefan!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na niedziela, 10 sierpnia 2025 o godzinie 15:30.\n\nZapraszam: https://example.com/oferta?utm_source=crm-app&utm_medium=email&utm_campaign=Przypomnienie%3A+spotkanie+w+dniu+niedziela%2C+10+sierpnia+2025&utm_content=m_me4w2xlc_z3ccrr02&utm_recipient=stefank%40gmail.com\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-09T23:31:52.080Z",
+      "isRead": true,
+      "messageId": "m_me4w2xlc_z3ccrr02",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Przypomnienie: spotkanie w dniu niedziela, 10 sierpnia 2025",
+        "utm_content": "m_me4w2xlc_z3ccrr02",
+        "utm_recipient": "stefank@gmail.com"
+      },
+      "id": 5
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "jan25@gmail.com",
+      "subject": "Witaj Jan!",
+      "body": "Cześć Jan!\n\nDziękujemy za zainteresowanie firmą Testowa firma.\n\nZapraszamy na: http://localhost:4200/api/t?m=m_me5vh969_dn802wtk&u=https%3A%2F%2Fexample.com%2Foferta%3Futm_source%3Dcrm-app%26utm_medium%3Demail%26utm_campaign%3DWitaj%2BJan%2521%26utm_content%3Dm_me5vh969_dn802wtk%26utm_recipient%3Djan25%2540gmail.com&r=jan25%40gmail.com\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-10T16:02:46.833Z",
+      "isRead": true,
+      "messageId": "m_me5vh969_dn802wtk",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Jan!",
+        "utm_content": "m_me5vh969_dn802wtk",
+        "utm_recipient": "jan25@gmail.com"
+      },
+      "id": 6
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "bartoszrp@gmail.com",
+      "subject": "Witaj Bartek!",
+      "body": "Cześć Bartek!\n\nDziękujemy za zainteresowanie firmą BarCorp.\nZapraszamy na: http://localhost:4200/api/t?m=m_me772zmq_jvqp2oy2&u=https%3A%2F%2Ftest.com%2Foferta%3Futm_source%3Dcrm-app%26utm_medium%3Demail%26utm_campaign%3DWitaj%2BBartek%2521%26utm_content%3Dm_me772zmq_jvqp2oy2%26utm_recipient%3Dbartoszrp%2540gmail.com&r=bartoszrp%40gmail.com\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-11T14:15:22.850Z",
+      "isRead": true,
+      "messageId": "m_me772zmq_jvqp2oy2",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Bartek!",
+        "utm_content": "m_me772zmq_jvqp2oy2",
+        "utm_recipient": "bartoszrp@gmail.com"
+      },
+      "id": 7
     }
   ],
   "emailTemplates": [

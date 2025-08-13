@@ -68,6 +68,19 @@
                 Daty są automatycznie formatowane po polsku (np. "sobota, 9 sierpnia 2025").
             </small>
         </div>
+
+        <!-- Tagowanie linków -->
+        <div class="form-check mb-3">
+            <input id="trackLinks" type="checkbox" class="form-check-input" formControlName="trackLinks">
+            <label for="trackLinks" class="form-check-label">
+                Taguj linki parametrami UTM (zalecane)
+            </label>
+            <small class="text-muted d-block">
+                Do każdego linku zostaną dodane: utm_source=crm-app, utm_medium=email,
+                utm_campaign=(temat), utm_content=(ID wiadomości), utm_recipient=(adresat).
+            </small>
+        </div>
+
         <button class="btn btn-primary" type="submit" [disabled]="form.invalid || sending">Wyślij</button>
         <button class="btn btn-secondary ms-2 ml-2" type="button" (click)="cancel()">Anuluj</button>
         <div *ngIf="error" class="text-danger mt-3">{{ error }}</div>

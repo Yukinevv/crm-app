@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {EmailService} from '../email.service';
 import {Email} from '../email.model';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 
 @Component({
@@ -10,7 +10,8 @@ import {DatePipe, NgForOf, NgIf} from '@angular/common';
   imports: [
     NgIf,
     NgForOf,
-    DatePipe
+    DatePipe,
+    RouterLink
   ],
   styleUrls: ['./email-list.component.scss']
 })

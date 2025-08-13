@@ -48,6 +48,7 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       to: ['', [Validators.required, Validators.email]],
       subject: ['', Validators.required],
       body: ['', Validators.required],
+      trackLinks: [true],
       variables: this.fb.group({})
     });
   }
@@ -184,9 +185,9 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
 
     this.auth.user$.pipe(take(1)).subscribe(user => {
       const fromEmail = user?.email ?? '';
-      const {to, subject, body} = this.form.value;
+      const {to, subject, body, trackLinks} = this.form.value;
 
-      this.emailService.sendEmail({from: fromEmail, to, subject, body})
+      this.emailService.sendEmail({from: fromEmail, to, subject, body, trackLinks})
           .subscribe({
             next: () => this.router.navigate(['/email']),
             error: () => {
