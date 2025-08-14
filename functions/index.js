@@ -207,11 +207,8 @@ const trackingHandler = async (req, res) => {
   }
 };
 
-// Rejestrujemy ścieżki zarówno z /api/... jak i bez /api (na wszelki wypadek proxy)
-app.get('/api/t', trackingHandler);
-app.get('/t', trackingHandler);
-
 // ====== STATYSTYKI: LISTA KLIKÓW, PODSUMOWANIA, CSV ======
+
 function tsToIso(ts) {
   if (!ts) return null;
   if (ts.toDate) return ts.toDate().toISOString();
@@ -222,7 +219,7 @@ function tsToIso(ts) {
   }
 }
 
-// lista kliknięć dla messageId
+// Lista kliknięć dla messageId
 const clicksListHandler = async (req, res) => {
   try {
     const messageId = String(req.query.messageId || '');
@@ -360,14 +357,139 @@ const summaryCsvHandler = async (req, res) => {
 };
 
 // REST przez json-server
-app.get('/api/stats/clicks', clicksListHandler);
+app.get('/t', trackingHandler);
 app.get('/stats/clicks', clicksListHandler);
-app.get('/api/stats/clicks/summary', clicksSummaryHandler);
 app.get('/stats/clicks/summary', clicksSummaryHandler);
-app.get('/api/stats/clicks/csv', clicksCsvHandler);
 app.get('/stats/clicks/csv', clicksCsvHandler);
-app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
 app.get('/stats/clicks/summary.csv', summaryCsvHandler);
+
+// ====== POMOCNICZE dla lowdb (json-server) ======
+
+function ensureCollection(name) {
+  if (!router.db.has(name).value()) {
+    router.db.set(name, []).write();
+  }
+}
+
+function genId(prefix) {
+  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function normalizeEmail(e) {
+  return String(e || '').trim().toLowerCase();
+}
+
+// ====== LOGI KONWERSACJI + AUTO-LINK ======
+
+app.post('/conversations/logEmail', (req, res) => {
+  try {
+    ensureCollection('leadsEmail');
+    ensureCollection('conversations');
+    ensureCollection('contacts');
+
+    const {
+      userId,
+      direction,
+      subject,
+      body,
+      date,
+      emailId,
+      counterpartEmail
+    } = req.body || {};
+
+    if (!userId || !direction || !subject || !emailId || !counterpartEmail) {
+      return res.status(400).json({error: 'Missing required fields'});
+    }
+
+    const ce = normalizeEmail(counterpartEmail);
+
+    // znajdź kontakt (po email + userId)
+    const contacts = router.db.get('contacts').filter({userId}).value() || [];
+    const foundContact = contacts.find(c => normalizeEmail(c.email) === ce);
+
+    let contactId = foundContact ? foundContact.id : undefined;
+    let leadId;
+
+    // jeśli brak kontaktu -> znajdź/utwórz lead
+    if (!contactId) {
+      const leads = router.db.get('leadsEmail').filter({userId}).value() || [];
+      const foundLead = leads.find(l => normalizeEmail(l.email) === ce);
+      if (foundLead) {
+        leadId = foundLead.id;
+      } else {
+        const newLead = {
+          id: genId('lead'),
+          userId,
+          email: ce,
+          name: ce.split('@')[0],
+          status: 'Nowy',
+          source: 'E-mail',
+          createdAt: new Date().toISOString()
+        };
+        router.db.get('leadsEmail').push(newLead).write();
+        leadId = newLead.id;
+      }
+    }
+
+    // zapisz konwersację
+    const conv = {
+      id: genId('conv'),
+      userId,
+      type: 'email',
+      direction, // 'out' | 'in'
+      subject,
+      preview: String(body || '').slice(0, 300),
+      date: date || new Date().toISOString(),
+      emailId,
+      contactId,
+      leadId,
+      counterpartEmail: ce
+    };
+
+    router.db.get('conversations').push(conv).write();
+
+    return res.json({ok: true, conversation: conv});
+  } catch (e) {
+    console.error('❌ logEmail error', e);
+    return res.status(500).json({error: 'internal'});
+  }
+});
+
+app.get('/conversations', (req, res) => {
+  try {
+    ensureCollection('conversations');
+    const userId = String(req.query.userId || '');
+    if (!userId) return res.status(400).json({error: 'userId required'});
+
+    let list = router.db.get('conversations').filter({userId}).value() || [];
+
+    const contactId = req.query.contactId ? String(req.query.contactId) : null;
+    const leadId = req.query.leadId ? String(req.query.leadId) : null;
+    const ce = req.query.counterpartEmail ? normalizeEmail(req.query.counterpartEmail) : null;
+    const q = req.query.q ? String(req.query.q).toLowerCase() : null;
+
+    if (contactId) list = list.filter(x => x.contactId === contactId);
+    if (leadId) list = list.filter(x => x.leadId === leadId);
+    if (ce) list = list.filter(x => normalizeEmail(x.counterpartEmail) === ce);
+    if (q) {
+      list = list.filter(x =>
+        (x.subject || '').toLowerCase().includes(q) ||
+        (x.preview || '').toLowerCase().includes(q) ||
+        (x.counterpartEmail || '').toLowerCase().includes(q)
+      );
+    }
+
+    list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const limit = Math.min(parseInt(String(req.query.limit || '100'), 10) || 100, 2000);
+    list = list.slice(0, limit);
+
+    res.json({items: list});
+  } catch (e) {
+    console.error('❌ list conversations error', e);
+    res.status(500).json({error: 'internal'});
+  }
+});
 
 app.use('/api', router);
 

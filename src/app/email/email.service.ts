@@ -1,13 +1,20 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {catchError, Observable, of, take} from 'rxjs';
 import {Email} from './email.model';
+import {AuthService} from '../auth/auth.service';
+import {ConversationService} from './conversations/conversations.service';
+import {map, switchMap} from 'rxjs/operators';
 
 @Injectable({providedIn: 'root'})
 export class EmailService {
   private apiUrl = '/api/emails';
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+    private conversations: ConversationService
+  ) {
   }
 
   getEmails(): Observable<Email[]> {
@@ -56,7 +63,35 @@ export class EmailService {
       tags
     };
 
-    return this.http.post<Email>(this.apiUrl, payload);
+    // return this.http.post<Email>(this.apiUrl, payload);
+
+    // Zapisz maila
+    return this.http.post<Email>(this.apiUrl, payload).pipe(
+      // Spróbuj zalogować konwersację (nie blokuje wysyłki)
+      switchMap(saved =>
+        this.auth.user$.pipe(
+          take(1),
+          switchMap(user => {
+            if (!user) return of(saved);
+            return this.conversations.logEmail({
+              userId: user.uid,
+              direction: 'out',
+              subject: saved.subject,
+              body: saved.body || '',
+              date: saved.date,
+              emailId: saved.id,
+              counterpartEmail: saved.to
+            }).pipe(
+              catchError(err => {
+                console.warn('⚠️ Log konwersacji nie zapisany', err);
+                return of({ok: false} as any);
+              }),
+              map(() => saved)
+            );
+          })
+        )
+      )
+    );
   }
 
   markAsRead(id: string): Observable<Email> {

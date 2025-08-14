@@ -6,6 +6,7 @@ import {EmailComposeComponent} from './email-compose/email-compose.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {EmailRoutingModule} from './email.routing';
 import {EmailStatsComponent} from './email-stats/email-stats.component';
+import {EmailConversationsComponent} from './conversations/email-conversations/email-conversations.component';
 
 @NgModule({
   declarations: [],
@@ -17,7 +18,8 @@ import {EmailStatsComponent} from './email-stats/email-stats.component';
     EmailListComponent,
     EmailDetailComponent,
     EmailComposeComponent,
-    EmailStatsComponent
+    EmailStatsComponent,
+    EmailConversationsComponent
   ]
 })
 export class EmailModule {
