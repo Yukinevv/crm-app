@@ -1,0 +1,39 @@
+{
+  "conversations": [
+    {
+      "id": "conv_mebptu27_svxr3brc",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Witaj Mariusz!",
+      "preview": "Cześć Mariusz!\n\nDziękujemy za zainteresowanie firmą Testowa3.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-14T18:11:13.075Z",
+      "emailId": 8,
+      "contactId": "a01c",
+      "counterpartEmail": "mariuszrodzic08@gmail.com"
+    },
+    {
+      "id": "conv_mebpvt47_bq8d1gc4",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Witaj Grzegorz!",
+      "preview": "Cześć Grzegorz!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-14T18:12:43.609Z",
+      "emailId": 9,
+      "leadId": "lead_mebpvt46_7ptxandn",
+      "counterpartEmail": "gregory51@gmail.com"
+    }
+  ],
+  "leadsEmail": [
+    {
+      "id": "lead_mebpvt46_7ptxandn",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "gregory51@gmail.com",
+      "name": "gregory51",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-08-14T18:12:45.222Z"
+    }
+  ]
+}

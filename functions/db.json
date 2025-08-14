@@ -381,6 +381,40 @@
         "utm_recipient": "bartoszrp@gmail.com"
       },
       "id": 7
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "mariuszrodzic08@gmail.com",
+      "subject": "Witaj Mariusz!",
+      "body": "Cześć Mariusz!\n\nDziękujemy za zainteresowanie firmą Testowa3.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-14T18:11:13.075Z",
+      "isRead": true,
+      "messageId": "m_mebptu0j_277ahj9y",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Mariusz!",
+        "utm_content": "m_mebptu0j_277ahj9y",
+        "utm_recipient": "mariuszrodzic08@gmail.com"
+      },
+      "id": 8
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "gregory51@gmail.com",
+      "subject": "Witaj Grzegorz!",
+      "body": "Cześć Grzegorz!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-14T18:12:43.609Z",
+      "isRead": true,
+      "messageId": "m_mebpvrvd_ok9fk1u8",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Grzegorz!",
+        "utm_content": "m_mebpvrvd_ok9fk1u8",
+        "utm_recipient": "gregory51@gmail.com"
+      },
+      "id": 9
     }
   ],
   "emailTemplates": [
@@ -396,7 +430,5 @@
       "subject": "Przypomnienie: spotkanie w dniu {{Data}}",
       "body": "Cześć {{Imię}}!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na {{Data}} o godzinie {{Godzina}}.\n\nDo zobaczenia,\nZespół CRM-APP"
     }
-  ],
-  "conversations": [],
-  "leadsEmail": []
+  ]
 }

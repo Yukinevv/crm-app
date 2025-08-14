@@ -63,8 +63,6 @@ export class EmailService {
       tags
     };
 
-    // return this.http.post<Email>(this.apiUrl, payload);
-
     // Zapisz maila
     return this.http.post<Email>(this.apiUrl, payload).pipe(
       // Spróbuj zalogować konwersację (nie blokuje wysyłki)
@@ -73,7 +71,7 @@ export class EmailService {
           take(1),
           switchMap(user => {
             if (!user) return of(saved);
-            return this.conversations.logEmail({
+            return this.conversations.logEmailAutoLink({
               userId: user.uid,
               direction: 'out',
               subject: saved.subject,

@@ -164,7 +164,7 @@ Zespół ${APP_NAME}`
 // ========== HTTP API (Express) ==========
 
 const app = express();
-const router = jsonServer.router('db.json');
+const router = jsonServer.router('db-email.json');
 const middlewares = jsonServer.defaults();
 
 app.use(middlewares);
@@ -385,7 +385,6 @@ app.post('/conversations/logEmail', (req, res) => {
   try {
     ensureCollection('leadsEmail');
     ensureCollection('conversations');
-    ensureCollection('contacts');
 
     const {
       userId,
@@ -394,7 +393,8 @@ app.post('/conversations/logEmail', (req, res) => {
       body,
       date,
       emailId,
-      counterpartEmail
+      counterpartEmail,
+      contactId   // opcjonalne - jeśli front je poda, użyjemy go bez sięgania do kontaktów
     } = req.body || {};
 
     if (!userId || !direction || !subject || !emailId || !counterpartEmail) {
@@ -403,15 +403,11 @@ app.post('/conversations/logEmail', (req, res) => {
 
     const ce = normalizeEmail(counterpartEmail);
 
-    // znajdź kontakt (po email + userId)
-    const contacts = router.db.get('contacts').filter({userId}).value() || [];
-    const foundContact = contacts.find(c => normalizeEmail(c.email) === ce);
-
-    let contactId = foundContact ? foundContact.id : undefined;
+    // Jeśli front dostarczy contactId - pobieramy kontakt. W przeciwnym razie zrobimy/wykorzystamy leada.
+    let finalContactId = contactId || undefined;
     let leadId;
 
-    // jeśli brak kontaktu -> znajdź/utwórz lead
-    if (!contactId) {
+    if (!finalContactId) {
       const leads = router.db.get('leadsEmail').filter({userId}).value() || [];
       const foundLead = leads.find(l => normalizeEmail(l.email) === ce);
       if (foundLead) {
@@ -431,7 +427,6 @@ app.post('/conversations/logEmail', (req, res) => {
       }
     }
 
-    // zapisz konwersację
     const conv = {
       id: genId('conv'),
       userId,
@@ -441,13 +436,12 @@ app.post('/conversations/logEmail', (req, res) => {
       preview: String(body || '').slice(0, 300),
       date: date || new Date().toISOString(),
       emailId,
-      contactId,
+      contactId: finalContactId,
       leadId,
       counterpartEmail: ce
     };
 
     router.db.get('conversations').push(conv).write();
-
     return res.json({ok: true, conversation: conv});
   } catch (e) {
     console.error('❌ logEmail error', e);
@@ -458,6 +452,7 @@ app.post('/conversations/logEmail', (req, res) => {
 app.get('/conversations', (req, res) => {
   try {
     ensureCollection('conversations');
+
     const userId = String(req.query.userId || '');
     if (!userId) return res.status(400).json({error: 'userId required'});
 
