@@ -8,6 +8,9 @@ const jsonServer = require('json-server');
 const nodemailer = require('nodemailer');
 const {FieldValue} = require('firebase-admin/firestore');
 
+const {join} = require("node:path");
+const {createConversationsRouter} = require('./server-api');
+
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
 }
@@ -161,16 +164,8 @@ Zespół ${APP_NAME}`
   }
 });
 
-// ========== HTTP API (Express) ==========
-
-const app = express();
-const router = jsonServer.router('db-email.json');
-const middlewares = jsonServer.defaults();
-
-app.use(middlewares);
-app.use(jsonServer.bodyParser);
-
 // --- Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
+
 const trackingHandler = async (req, res) => {
   try {
     const m = String(req.query.m || '');
@@ -356,6 +351,14 @@ const summaryCsvHandler = async (req, res) => {
   }
 };
 
+// ========== HTTP API (Express) ==========
+
+const app = express();
+const middlewares = jsonServer.defaults();
+
+app.use(middlewares);
+app.use(jsonServer.bodyParser);
+
 // REST przez json-server
 app.get('/t', trackingHandler);
 app.get('/stats/clicks', clicksListHandler);
@@ -363,129 +366,7 @@ app.get('/stats/clicks/summary', clicksSummaryHandler);
 app.get('/stats/clicks/csv', clicksCsvHandler);
 app.get('/stats/clicks/summary.csv', summaryCsvHandler);
 
-// ====== POMOCNICZE dla lowdb (json-server) ======
-
-function ensureCollection(name) {
-  if (!router.db.has(name).value()) {
-    router.db.set(name, []).write();
-  }
-}
-
-function genId(prefix) {
-  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function normalizeEmail(e) {
-  return String(e || '').trim().toLowerCase();
-}
-
-// ====== LOGI KONWERSACJI + AUTO-LINK ======
-
-app.post('/conversations/logEmail', (req, res) => {
-  try {
-    ensureCollection('leadsEmail');
-    ensureCollection('conversations');
-
-    const {
-      userId,
-      direction,
-      subject,
-      body,
-      date,
-      emailId,
-      counterpartEmail,
-      contactId   // opcjonalne - jeśli front je poda, użyjemy go bez sięgania do kontaktów
-    } = req.body || {};
-
-    if (!userId || !direction || !subject || !emailId || !counterpartEmail) {
-      return res.status(400).json({error: 'Missing required fields'});
-    }
-
-    const ce = normalizeEmail(counterpartEmail);
-
-    // Jeśli front dostarczy contactId - pobieramy kontakt. W przeciwnym razie zrobimy/wykorzystamy leada.
-    let finalContactId = contactId || undefined;
-    let leadId;
-
-    if (!finalContactId) {
-      const leads = router.db.get('leadsEmail').filter({userId}).value() || [];
-      const foundLead = leads.find(l => normalizeEmail(l.email) === ce);
-      if (foundLead) {
-        leadId = foundLead.id;
-      } else {
-        const newLead = {
-          id: genId('lead'),
-          userId,
-          email: ce,
-          name: ce.split('@')[0],
-          status: 'Nowy',
-          source: 'E-mail',
-          createdAt: new Date().toISOString()
-        };
-        router.db.get('leadsEmail').push(newLead).write();
-        leadId = newLead.id;
-      }
-    }
-
-    const conv = {
-      id: genId('conv'),
-      userId,
-      type: 'email',
-      direction, // 'out' | 'in'
-      subject,
-      preview: String(body || '').slice(0, 300),
-      date: date || new Date().toISOString(),
-      emailId,
-      contactId: finalContactId,
-      leadId,
-      counterpartEmail: ce
-    };
-
-    router.db.get('conversations').push(conv).write();
-    return res.json({ok: true, conversation: conv});
-  } catch (e) {
-    console.error('❌ logEmail error', e);
-    return res.status(500).json({error: 'internal'});
-  }
-});
-
-app.get('/conversations', (req, res) => {
-  try {
-    ensureCollection('conversations');
-
-    const userId = String(req.query.userId || '');
-    if (!userId) return res.status(400).json({error: 'userId required'});
-
-    let list = router.db.get('conversations').filter({userId}).value() || [];
-
-    const contactId = req.query.contactId ? String(req.query.contactId) : null;
-    const leadId = req.query.leadId ? String(req.query.leadId) : null;
-    const ce = req.query.counterpartEmail ? normalizeEmail(req.query.counterpartEmail) : null;
-    const q = req.query.q ? String(req.query.q).toLowerCase() : null;
-
-    if (contactId) list = list.filter(x => x.contactId === contactId);
-    if (leadId) list = list.filter(x => x.leadId === leadId);
-    if (ce) list = list.filter(x => normalizeEmail(x.counterpartEmail) === ce);
-    if (q) {
-      list = list.filter(x =>
-        (x.subject || '').toLowerCase().includes(q) ||
-        (x.preview || '').toLowerCase().includes(q) ||
-        (x.counterpartEmail || '').toLowerCase().includes(q)
-      );
-    }
-
-    list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    const limit = Math.min(parseInt(String(req.query.limit || '100'), 10) || 100, 2000);
-    list = list.slice(0, limit);
-
-    res.json({items: list});
-  } catch (e) {
-    console.error('❌ list conversations error', e);
-    res.status(500).json({error: 'internal'});
-  }
-});
-
-app.use('/api', router);
+const conversationsDbPath = join(__dirname, 'db-email.json');
+app.use(createConversationsRouter({dbPath: conversationsDbPath}));
 
 exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);
