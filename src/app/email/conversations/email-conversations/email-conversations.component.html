@@ -33,6 +33,7 @@
         <th>Temat</th>
         <th>Rozmówca</th>
         <th>Email</th>
+        <th style="width: 1%"></th>
       </tr>
       </thead>
       <tbody>
@@ -45,9 +46,17 @@
         </td>
         <td>{{ nameFor(c) }}</td>
         <td>{{ c.counterpartEmail }}</td>
+        <td class="text-nowrap">
+          <a
+            class="btn btn-sm btn-outline-primary"
+            [routerLink]="['/email/thread']"
+            [queryParams]="threadParams(c)"
+            title="Pokaż wątek"
+          >Wątek</a>
+        </td>
       </tr>
       <tr *ngIf="!filtered.length">
-        <td colspan="5" class="text-center text-muted">Brak danych</td>
+        <td colspan="6" class="text-center text-muted">Brak danych</td>
       </tr>
       </tbody>
     </table>

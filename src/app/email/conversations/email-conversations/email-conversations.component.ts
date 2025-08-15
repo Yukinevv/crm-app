@@ -83,4 +83,10 @@ export class EmailConversationsComponent implements OnInit {
   icon(c: Conversation): string {
     return c.direction === 'out' ? 'bi-arrow-up-right' : 'bi-arrow-down-left';
   }
+
+  threadParams(c: Conversation): Record<string, string> {
+    if (c.contactId) return {contactId: c.contactId};
+    if (c.leadId) return {leadId: c.leadId};
+    return {email: c.counterpartEmail};
+  }
 }
