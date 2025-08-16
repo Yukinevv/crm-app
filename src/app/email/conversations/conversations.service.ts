@@ -3,6 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {map, Observable, of, retry, switchMap, take} from 'rxjs';
 import {AuthService} from '../../auth/auth.service';
 import {Conversation} from './conversations.model';
+import {ContactService} from '../../contacts/contact.service';
 
 export interface LogEmailPayload {
   userId: string;
@@ -18,11 +19,11 @@ export interface LogEmailPayload {
 @Injectable({providedIn: 'root'})
 export class ConversationService {
   private base = '/api/conversations';
-  private contactsBase = '/api/contacts';
 
   constructor(
     private http: HttpClient,
-    private auth: AuthService
+    private auth: AuthService,
+    private contacts: ContactService
   ) {
   }
 
@@ -35,9 +36,7 @@ export class ConversationService {
   }): Observable<Conversation[]> {
     return this.auth.user$.pipe(
       switchMap(user => {
-        if (!user) {
-          return of({items: [] as Conversation[]});
-        }
+        if (!user) return of({items: [] as Conversation[]});
 
         let p = new HttpParams().set('userId', user.uid);
         if (params?.contactId) p = p.set('contactId', params.contactId);
@@ -52,46 +51,25 @@ export class ConversationService {
     );
   }
 
+  logEmail(payload: LogEmailPayload): Observable<{ ok: true; conversation: Conversation }> {
+    return this.http.post<{ ok: true; conversation: Conversation }>(
+      `${this.base}/logEmail`,
+      payload
+    );
+  }
+
   logEmailAutoLink(payload: Omit<LogEmailPayload, 'contactId'>): Observable<{ ok: true; conversation: Conversation }> {
-    const ce = this.normalizeEmail(payload.counterpartEmail);
-
-    return of(null).pipe(
-      switchMap(() => this.auth.user$.pipe(take(1))),
+    return this.auth.user$.pipe(
+      take(1),
       switchMap(user => {
-        const uid = payload.userId || user?.uid || '';
-        if (!uid) {
-          // Brak użytkownika, nie można pobrać kontaktów - strzelaj bez contactId
-          return this.http.post<{ ok: true; conversation: Conversation }>(
-            `${this.base}/logEmail`,
-            payload
-          );
-        }
+        const userId = payload.userId || user?.uid || '';
+        if (!userId) return this.logEmail({...payload, userId});
 
-        // Pobierz kontakty użytkownika z json-server (po userId), potem dopasuj email po stronie klienta
-        return this.http.get<any[]>(`${this.contactsBase}`, {
-          params: new HttpParams().set('userId', uid)
-        }).pipe(
-          map(list => {
-            const contact = (list || []).find(c => this.normalizeEmail(c?.email) === ce);
-            return contact?.id as string | undefined;
-          }),
-          switchMap(contactId => {
-            const body: LogEmailPayload = {...payload, userId: uid, contactId};
-            return this.http.post<{ ok: true; conversation: Conversation }>(
-              `${this.base}/logEmail`,
-              body
-            );
-          }),
-          // delikatny retry w DEV na wypadek chwilowej niedostępności Functions
+        return this.contacts.resolveByEmail(payload.counterpartEmail).pipe(
+          switchMap(found => this.logEmail({...payload, userId, contactId: found?.id})),
           retry({count: 1, delay: 120})
         );
       })
     );
-  }
-
-  // ===== utils =====
-
-  private normalizeEmail(e: string | null | undefined): string {
-    return String(e || '').trim().toLowerCase();
   }
 }
