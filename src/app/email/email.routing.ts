@@ -4,12 +4,16 @@ import {EmailListComponent} from './email-list/email-list.component';
 import {EmailDetailComponent} from './email-detail/email-detail.component';
 import {EmailComposeComponent} from './email-compose/email-compose.component';
 import {EmailStatsComponent} from './email-stats/email-stats.component';
+import {EmailConversationsComponent} from './conversations/email-conversations/email-conversations.component';
+import {EmailThreadComponent} from './thread/email-thread/email-thread.component';
 
 const routes: Routes = [
   {path: '', component: EmailListComponent},
   {path: 'read/:id', component: EmailDetailComponent},
   {path: 'compose', component: EmailComposeComponent},
-  {path: 'stats', component: EmailStatsComponent}
+  {path: 'stats', component: EmailStatsComponent},
+  {path: 'conversations', component: EmailConversationsComponent},
+  {path: 'thread', component: EmailThreadComponent}
 ];
 
 @NgModule({

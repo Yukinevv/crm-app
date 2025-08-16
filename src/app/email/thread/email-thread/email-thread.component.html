@@ -1,0 +1,36 @@
+<div class="container mt-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">{{ title }}</h2>
+    <button class="btn btn-outline-secondary" (click)="back()">← Powrót</button>
+  </div>
+
+  <div *ngIf="loading">Ładowanie…</div>
+  <div *ngIf="error" class="text-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && !items.length" class="alert alert-info">
+    Brak wiadomości w tym wątku.
+  </div>
+
+  <div *ngIf="!loading && items.length" class="thread">
+    <div *ngFor="let m of items" class="msg" [ngClass]="{'out': m.direction==='out', 'in': m.direction==='in'}">
+      <div class="meta">
+        <span class="badge" [ngClass]="{'bg-primary': m.direction==='out', 'bg-secondary': m.direction==='in'}">
+          {{ m.direction === 'out' ? 'Wysłane' : 'Odebrane' }}
+        </span>
+        <span class="time">{{ m.date | date:'full' }}</span>
+      </div>
+
+      <div class="subject" (click)="toggle(m)" role="button">
+        <i class="bi" [ngClass]="isExpanded(m.emailId) ? 'bi-caret-down-fill' : 'bi-caret-right-fill'"></i>
+        <strong>{{ m.subject }}</strong>
+      </div>
+
+      <div class="body" *ngIf="isExpanded(m.emailId)">
+        <div class="body-inner">
+          <div class="preview" *ngIf="!getEmailBody(m)">Brak treści</div>
+          <div class="content preserve-newlines" *ngIf="getEmailBody(m)">{{ getEmailBody(m) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
