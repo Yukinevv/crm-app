@@ -7,11 +7,12 @@ import {NgForOf, NgIf} from '@angular/common';
 import {AuthService} from '../../auth/auth.service';
 import {take} from 'rxjs';
 import {UsersService} from '../../auth/users.service';
+import {ContactActivityComponent} from '../contact-activity/contact-activity.component';
 
 @Component({
   selector: 'app-contact-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgForOf, FormsModule],
+  imports: [ReactiveFormsModule, NgIf, NgForOf, FormsModule, ContactActivityComponent],
   templateUrl: './contact-form.component.html'
 })
 export class ContactFormComponent implements OnInit {

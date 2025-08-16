@@ -1,0 +1,45 @@
+<div class="card mt-4">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <div>Aktywność kontaktu</div>
+    <a *ngIf="contactId" class="btn btn-sm btn-outline-primary"
+       [routerLink]="['/email/thread']"
+       [queryParams]="{contactId: contactId}">
+      Zobacz wątek
+    </a>
+  </div>
+
+  <div class="card-body">
+    <div *ngIf="!contactId" class="text-muted">Zapisz kontakt, aby zobaczyć aktywność.</div>
+    <div *ngIf="loading">Ładowanie…</div>
+    <div *ngIf="error" class="text-danger">{{ error }}</div>
+
+    <div class="table-responsive" *ngIf="!loading && contactId">
+      <table class="table table-sm align-middle">
+        <thead>
+        <tr>
+          <th style="width:32px"></th>
+          <th>Data</th>
+          <th>Temat</th>
+          <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let c of items">
+          <td class="text-muted"><i class="bi"
+                                    [ngClass]="c.direction === 'out' ? 'bi-arrow-up-right' : 'bi-arrow-down-left'"></i>
+          </td>
+          <td>{{ c.date | date:'short' }}</td>
+          <td>
+            {{ c.subject }}
+            <div class="text-muted small" *ngIf="c.preview">{{ c.preview }}</div>
+          </td>
+          <td>{{ c.counterpartEmail }}</td>
+        </tr>
+        <tr *ngIf="!items.length && !loading">
+          <td colspan="4" class="text-center text-muted">Brak aktywności</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

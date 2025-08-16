@@ -1,0 +1,64 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Logi konwersacji</h2>
+    <a routerLink="/email" class="btn btn-outline-secondary">← Skrzynka</a>
+  </div>
+
+  <div class="row mb-4 ml-1">
+    <div class="col">
+      <div class="input-group">
+        <span class="input-group-text">Wyszukaj</span>
+        <input class="form-control ml-2" [(ngModel)]="q" (keyup.enter)="refresh()" placeholder="temat, treść, email...">
+        <button class="btn btn-primary ml-2" (click)="refresh()">Szukaj</button>
+      </div>
+    </div>
+    <div class="col ml-3 mr-5">
+      <select class="form-control" [(ngModel)]="filterDirection">
+        <option value="all">Wszystkie kierunki</option>
+        <option value="out">Wysłane</option>
+        <option value="in">Odebrane</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading">Ładowanie…</div>
+  <div *ngIf="error" class="text-danger">{{ error }}</div>
+
+  <div class="table-responsive" *ngIf="!loading">
+    <table class="table table-sm align-middle">
+      <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>Data</th>
+        <th>Temat</th>
+        <th>Rozmówca</th>
+        <th>Email</th>
+        <th style="width: 1%"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let c of filtered">
+        <td class="text-muted"><i class="bi" [ngClass]="icon(c)"></i></td>
+        <td>{{ c.date | date:'short' }}</td>
+        <td>
+          {{ c.subject }}
+          <div class="text-muted small" *ngIf="c.preview">{{ c.preview }}</div>
+        </td>
+        <td>{{ nameFor(c) }}</td>
+        <td>{{ c.counterpartEmail }}</td>
+        <td class="text-nowrap">
+          <a
+            class="btn btn-sm btn-outline-primary"
+            [routerLink]="['/email/thread']"
+            [queryParams]="threadParams(c)"
+            title="Pokaż wątek"
+          >Wątek</a>
+        </td>
+      </tr>
+      <tr *ngIf="!filtered.length">
+        <td colspan="6" class="text-center text-muted">Brak danych</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

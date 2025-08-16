@@ -8,6 +8,9 @@ const jsonServer = require('json-server');
 const nodemailer = require('nodemailer');
 const {FieldValue} = require('firebase-admin/firestore');
 
+const {join} = require("node:path");
+const {createConversationsRouter} = require('./server-api');
+
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
 }
@@ -161,16 +164,8 @@ Zespół ${APP_NAME}`
   }
 });
 
-// ========== HTTP API (Express) ==========
-
-const app = express();
-const router = jsonServer.router('db.json');
-const middlewares = jsonServer.defaults();
-
-app.use(middlewares);
-app.use(jsonServer.bodyParser);
-
 // --- Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
+
 const trackingHandler = async (req, res) => {
   try {
     const m = String(req.query.m || '');
@@ -207,11 +202,8 @@ const trackingHandler = async (req, res) => {
   }
 };
 
-// Rejestrujemy ścieżki zarówno z /api/... jak i bez /api (na wszelki wypadek proxy)
-app.get('/api/t', trackingHandler);
-app.get('/t', trackingHandler);
-
 // ====== STATYSTYKI: LISTA KLIKÓW, PODSUMOWANIA, CSV ======
+
 function tsToIso(ts) {
   if (!ts) return null;
   if (ts.toDate) return ts.toDate().toISOString();
@@ -222,7 +214,7 @@ function tsToIso(ts) {
   }
 }
 
-// lista kliknięć dla messageId
+// Lista kliknięć dla messageId
 const clicksListHandler = async (req, res) => {
   try {
     const messageId = String(req.query.messageId || '');
@@ -359,16 +351,22 @@ const summaryCsvHandler = async (req, res) => {
   }
 };
 
+// ========== HTTP API (Express) ==========
+
+const app = express();
+const middlewares = jsonServer.defaults();
+
+app.use(middlewares);
+app.use(jsonServer.bodyParser);
+
 // REST przez json-server
-app.get('/api/stats/clicks', clicksListHandler);
+app.get('/t', trackingHandler);
 app.get('/stats/clicks', clicksListHandler);
-app.get('/api/stats/clicks/summary', clicksSummaryHandler);
 app.get('/stats/clicks/summary', clicksSummaryHandler);
-app.get('/api/stats/clicks/csv', clicksCsvHandler);
 app.get('/stats/clicks/csv', clicksCsvHandler);
-app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
 app.get('/stats/clicks/summary.csv', summaryCsvHandler);
 
-app.use('/api', router);
+const conversationsDbPath = join(__dirname, 'db-email.json');
+app.use(createConversationsRouter({dbPath: conversationsDbPath}));
 
 exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);

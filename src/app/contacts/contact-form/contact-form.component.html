@@ -142,4 +142,7 @@
       Anuluj
     </button>
   </form>
+
+  <!-- PANEL AKTYWNOŚCI: wyświetlany tylko podczas edycji istniejącego kontaktu -->
+  <app-contact-activity *ngIf="editId" [contactId]="editId"></app-contact-activity>
 </div>
