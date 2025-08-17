@@ -35,5 +35,8 @@
       "source": "E-mail",
       "createdAt": "2025-08-14T18:12:45.222Z"
     }
-  ]
+  ],
+  "inboxRead": {
+    "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example": true
+  }
 }

@@ -10,6 +10,7 @@ const {FieldValue} = require('firebase-admin/firestore');
 
 const {join} = require("node:path");
 const {createConversationsRouter} = require('./server-api');
+const {createInboxRouter} = require('./server-inbox');
 
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
@@ -21,6 +22,14 @@ admin.initializeApp();
 
 // === Secrets ===
 const SENDGRID_KEY = defineSecret('SENDGRID_KEY');
+
+const imapConfig = {
+  host: process.env.IMAP_HOST || '',
+  port: process.env.IMAP_PORT || '993',
+  secure: process.env.IMAP_SECURE || 'true',
+  user: process.env.IMAP_USER || '',
+  pass: process.env.IMAP_PASS || ''
+};
 
 // Transport email zależny od środowiska (MailHog w emulatorze, SendGrid na produkcji,
 // Ethereal jako fallback).
@@ -368,5 +377,7 @@ app.get('/stats/clicks/summary.csv', summaryCsvHandler);
 
 const conversationsDbPath = join(__dirname, 'db-email.json');
 app.use(createConversationsRouter({dbPath: conversationsDbPath}));
+
+app.use(createInboxRouter({dbPath: conversationsDbPath, imapConfig}));
 
 exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);

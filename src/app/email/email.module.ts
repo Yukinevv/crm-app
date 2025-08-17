@@ -8,6 +8,7 @@ import {EmailRoutingModule} from './email.routing';
 import {EmailStatsComponent} from './email-stats/email-stats.component';
 import {EmailConversationsComponent} from './conversations/email-conversations/email-conversations.component';
 import {EmailThreadComponent} from './thread/email-thread/email-thread.component';
+import {InboxDetailComponent} from './inbox-detail/inbox-detail.component';
 
 @NgModule({
   declarations: [],
@@ -21,7 +22,8 @@ import {EmailThreadComponent} from './thread/email-thread/email-thread.component
     EmailComposeComponent,
     EmailStatsComponent,
     EmailConversationsComponent,
-    EmailThreadComponent
+    EmailThreadComponent,
+    InboxDetailComponent
   ]
 })
 export class EmailModule {

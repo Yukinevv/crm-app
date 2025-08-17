@@ -3,7 +3,8 @@
     "context": [
       "/api/t",
       "/api/stats",
-      "/api/conversations"
+      "/api/conversations",
+      "/api/inbox"
     ],
     "target": "http://localhost:5001/crm-app-e0108/us-central1",
     "secure": false,

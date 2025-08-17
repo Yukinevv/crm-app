@@ -1,0 +1,15 @@
+<div class="container mt-4">
+  <button class="btn btn-secondary mb-4" (click)="back()">← Powrót</button>
+
+  <div *ngIf="loading">Ładowanie...</div>
+  <div *ngIf="error" class="text-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && msg">
+    <h3 class="mb-3">{{ msg.subject }}</h3>
+    <p><strong>Od:</strong> {{ msg.from }}</p>
+    <p><strong>Do:</strong> {{ msg.to }}</p>
+    <p><strong>Data:</strong> {{ msg.date | date:'full' }}</p>
+    <hr>
+    <div [innerHTML]="bodyHtml"></div>
+  </div>
+</div>

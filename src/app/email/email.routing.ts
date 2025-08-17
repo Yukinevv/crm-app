@@ -6,10 +6,12 @@ import {EmailComposeComponent} from './email-compose/email-compose.component';
 import {EmailStatsComponent} from './email-stats/email-stats.component';
 import {EmailConversationsComponent} from './conversations/email-conversations/email-conversations.component';
 import {EmailThreadComponent} from './thread/email-thread/email-thread.component';
+import {InboxDetailComponent} from './inbox-detail/inbox-detail.component';
 
 const routes: Routes = [
   {path: '', component: EmailListComponent},
   {path: 'read/:id', component: EmailDetailComponent},
+  {path: 'inbox/:id', component: InboxDetailComponent},
   {path: 'compose', component: EmailComposeComponent},
   {path: 'stats', component: EmailStatsComponent},
   {path: 'conversations', component: EmailConversationsComponent},
