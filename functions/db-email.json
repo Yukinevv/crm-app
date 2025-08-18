@@ -23,6 +23,18 @@
       "emailId": 9,
       "leadId": "lead_mebpvt46_7ptxandn",
       "counterpartEmail": "gregory51@gmail.com"
+    },
+    {
+      "id": "conv_mega2aid_auguxag5",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "in",
+      "subject": "Zaproszenie na spotkanie",
+      "preview": "Zosta=C5=82e=C5=9B zaproszony na spotkanie przez adrianrodzic33@gmail.com:\r\n  =E2=80=A2 Tytu=C5=82: Spotkanie 1\r\n  =E2=80=A2 Termin: wtorek, 12 sierpnia=\r\n 2025 03:00 =E2=80=93 00:00\r\n\r\nSpotkanie pojawi si=C4=99 w Twoim kalendarzu =\r\npo zalogowaniu.\r\n\r\nPozdrawiamy,\r\nZesp=C3=B3=C5=82 CRM-APP",
+      "date": "2025-08-06T23:01:53.000Z",
+      "emailId": "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example",
+      "leadId": "lead_mega2aid_ywnimvk2",
+      "counterpartEmail": "no-reply@crm-app.example.com"
     }
   ],
   "leadsEmail": [
@@ -34,6 +46,15 @@
       "status": "Nowy",
       "source": "E-mail",
       "createdAt": "2025-08-14T18:12:45.222Z"
+    },
+    {
+      "id": "lead_mega2aid_ywnimvk2",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "no-reply@crm-app.example.com",
+      "name": "no-reply",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-08-17T22:48:44.725Z"
     }
   ],
   "inboxRead": {

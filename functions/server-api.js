@@ -1,20 +1,13 @@
 const express = require('express');
 const jsonServer = require('json-server');
 
-/**
- * Tworzy router Express z endpointami:
- *  - POST  /conversations/logEmail
- *  - GET   /conversations
- * Dane zapisywane są do lowdb (json-server) wskazanego przez dbPath (np. db-email.json).
- */
 function createConversationsRouter({dbPath}) {
   const r = express.Router();
-  const routerConv = jsonServer.router(dbPath);
+  const routerDb = jsonServer.router(dbPath);
 
-  // ===== helpers =====
   function ensureCollection(name) {
-    if (!routerConv.db.has(name).value()) {
-      routerConv.db.set(name, []).write();
+    if (!routerDb.db.has(name).value()) {
+      routerDb.db.set(name, []).write();
     }
   }
 
@@ -26,7 +19,7 @@ function createConversationsRouter({dbPath}) {
     return String(e || '').trim().toLowerCase();
   }
 
-  // ===== POST /conversations/logEmail =====
+  // POST /api/conversations/logEmail
   r.post('/conversations/logEmail', (req, res) => {
     try {
       ensureCollection('leadsEmail');
@@ -40,7 +33,7 @@ function createConversationsRouter({dbPath}) {
         date,
         emailId,
         counterpartEmail,
-        contactId // opcjonalne - jeśli front poda, nie szukamy kontaktu po stronie backendu
+        contactId
       } = req.body || {};
 
       if (!userId || !direction || !subject || !emailId || !counterpartEmail) {
@@ -49,12 +42,18 @@ function createConversationsRouter({dbPath}) {
 
       const ce = normalizeEmail(counterpartEmail);
 
-      // Nie dotykamy bazy kontaktów (jest w innym pliku). Jeśli front nie poda contactId -> tworzymy/odnajdujemy leada.
-      let finalContactId = contactId || undefined;
+      // Jeśli już mamy konwersację dla (userId,emailId) to zwróć istniejącą
+      const convs = routerDb.db.get('conversations').filter({userId, emailId}).value() || [];
+      if (convs.length) {
+        return res.json({ok: true, conversation: convs[0]});
+      }
+
+      let finalContactId = contactId;
       let leadId;
 
+      // Gdy brak contactId – autolead (po emailu)
       if (!finalContactId) {
-        const leads = routerConv.db.get('leadsEmail').filter({userId}).value() || [];
+        const leads = routerDb.db.get('leadsEmail').filter({userId}).value() || [];
         const foundLead = leads.find(l => normalizeEmail(l.email) === ce);
         if (foundLead) {
           leadId = foundLead.id;
@@ -68,7 +67,7 @@ function createConversationsRouter({dbPath}) {
             source: 'E-mail',
             createdAt: new Date().toISOString()
           };
-          routerConv.db.get('leadsEmail').push(newLead).write();
+          routerDb.db.get('leadsEmail').push(newLead).write();
           leadId = newLead.id;
         }
       }
@@ -87,7 +86,7 @@ function createConversationsRouter({dbPath}) {
         counterpartEmail: ce
       };
 
-      routerConv.db.get('conversations').push(conv).write();
+      routerDb.db.get('conversations').push(conv).write();
       return res.json({ok: true, conversation: conv});
     } catch (e) {
       console.error('❌ logEmail error', e);
@@ -95,15 +94,14 @@ function createConversationsRouter({dbPath}) {
     }
   });
 
-  // ===== GET /conversations =====
+  // GET /api/conversations
   r.get('/conversations', (req, res) => {
     try {
       ensureCollection('conversations');
-
       const userId = String(req.query.userId || '');
       if (!userId) return res.status(400).json({error: 'userId required'});
 
-      let list = routerConv.db.get('conversations').filter({userId}).value() || [];
+      let list = routerDb.db.get('conversations').filter({userId}).value() || [];
 
       const contactId = req.query.contactId ? String(req.query.contactId) : null;
       const leadId = req.query.leadId ? String(req.query.leadId) : null;

@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {EmailService} from '../email.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
 import {AuthService} from "../../auth/auth.service";
 import {Subscription, take} from "rxjs";
@@ -21,7 +21,8 @@ type VarType = 'text' | 'date' | 'time';
     NgSwitchCase,
     NgSwitchDefault
   ],
-  styleUrls: ['./email-compose.component.scss']
+  styleUrls: ['./email-compose.component.scss'],
+  standalone: true
 })
 export class EmailComposeComponent implements OnInit, OnDestroy {
   form: FormGroup;
@@ -37,11 +38,12 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   private varsSub?: Subscription;
 
   constructor(
-      private fb: FormBuilder,
-      private emailService: EmailService,
-      private templateService: TemplateService,
-      private router: Router,
-      private auth: AuthService
+    private fb: FormBuilder,
+    private emailService: EmailService,
+    private templateService: TemplateService,
+    private router: Router,
+    private auth: AuthService,
+    private route: ActivatedRoute
   ) {
     this.form = this.fb.group({
       templateId: [''],
@@ -54,12 +56,21 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Pobierz listę szablonów
+    // Prefill z query params (np. odpowiedź z Odebranych)
+    const qp = this.route.snapshot.queryParamMap;
+    const to = qp.get('to') || '';
+    const subject = qp.get('subject') || '';
+    const body = qp.get('body') || '';
+    if (to || subject || body) {
+      this.form.patchValue({to, subject, body});
+    }
+
+    // Pobierz szablony
     this.templateService.getTemplates().subscribe(list => {
       this.templates = list;
     });
 
-    // Gdy użytkownik wybierze szablon
+    // Reakcja na wybór szablonu
     this.form.get('templateId')?.valueChanges.subscribe(id => {
       this.onTemplateSelect(id);
     });
@@ -70,7 +81,6 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   }
 
   private onTemplateSelect(id: string): void {
-    // wyczyść poprzednią subskrypcję zmiennych
     this.varsSub?.unsubscribe();
 
     if (!id) {
@@ -78,41 +88,45 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       this.placeholderKeys = [];
       this.variableTypes = {};
       this.form.setControl('variables', this.fb.group({}));
-      this.form.patchValue({subject: '', body: ''}, {emitEvent: false});
+      // UWAGA: jeśli pola były prefilled z query params – nie nadpisujemy ich
       return;
     }
 
     this.templateService.getTemplate(id).subscribe(temp => {
       this.currentTemplate = temp;
 
-      // wykryj klucze zmiennych z subject + body
       const keys = Array.from(new Set([
         ...this.extractKeys(temp.subject),
         ...this.extractKeys(temp.body)
       ]));
 
       this.placeholderKeys = keys;
-
-      // zmapuj nazwy zmiennych na typy pól
       this.variableTypes = {};
       keys.forEach(k => (this.variableTypes[k] = this.detectType(k)));
 
-      // zbuduj grupę formularza dla zmiennych
       const varsGroup: Record<string, any> = {};
       keys.forEach(k => (varsGroup[k] = ''));
       this.form.setControl('variables', this.fb.group(varsGroup));
 
-      // dynamiczna aktualizacja subject/body przy zmianach zmiennych
       this.varsSub = this.form.get('variables')!.valueChanges.subscribe(() => {
         this.updateFromTemplate();
       });
 
-      // inicjalne podstawienie
-      this.updateFromTemplate();
+      // inicjalne podstawienie do subject/body tylko gdy puste (nie nadpisuj prefill)
+      const subjEmpty = !this.form.get('subject')?.value;
+      const bodyEmpty = !this.form.get('body')?.value;
+      if (subjEmpty || bodyEmpty) {
+        const prev = {subj: this.form.value.subject, body: this.form.value.body};
+        this.updateFromTemplate();
+        // jeśli któreś było wypełnione – zachowaj użytkownika
+        this.form.patchValue({
+          subject: subjEmpty ? this.form.value.subject : prev.subj,
+          body: bodyEmpty ? this.form.value.body : prev.body
+        }, {emitEvent: false});
+      }
     });
   }
 
-  /** Zamienia {{klucz}} na wartości z formularza, formatując date/time po polsku */
   private updateFromTemplate(): void {
     if (!this.currentTemplate) return;
 
@@ -125,9 +139,9 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       let val = vars[key] || '';
 
       if (type === 'date' && val) {
-        val = this.formatDatePL(val); // 'YYYY-MM-DD' -> np. 'sobota, 9 sierpnia 2025'
+        val = this.formatDatePL(val);
       } else if (type === 'time' && val) {
-        val = this.formatTime(val);   // 'HH:mm' -> 'HH:mm'
+        val = this.formatTime(val);
       }
 
       const re = new RegExp(`{{\\s*${this.escapeRegExp(key)}\\s*}}`, 'g');
@@ -138,7 +152,6 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
     this.form.patchValue({subject: subj, body: body}, {emitEvent: false});
   }
 
-  /** Proste wykrywanie typu pola po nazwie zmiennej */
   private detectType(key: string): VarType {
     const k = key.trim().toLowerCase();
     if (['data', 'date', 'termin', 'dzień', 'dzien', 'day'].includes(k)) return 'date';
@@ -157,7 +170,6 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   }
 
   private formatDatePL(yyyyMmDd: string): string {
-    // Unikamy strefy czasowej: parsujemy ręcznie 'YYYY-MM-DD'
     const [y, m, d] = yyyyMmDd.split('-').map(n => parseInt(n, 10));
     if (!y || !m || !d) return yyyyMmDd;
     const dt = new Date(y, m - 1, d);
@@ -170,7 +182,6 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   }
 
   private formatTime(hhmm: string): string {
-    // Zakładamy format 'HH:mm'
     return hhmm;
   }
 
@@ -188,13 +199,13 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       const {to, subject, body, trackLinks} = this.form.value;
 
       this.emailService.sendEmail({from: fromEmail, to, subject, body, trackLinks})
-          .subscribe({
-            next: () => this.router.navigate(['/email']),
-            error: () => {
-              this.error = 'Błąd wysyłki wiadomości';
-              this.sending = false;
-            }
-          });
+        .subscribe({
+          next: () => this.router.navigate(['/email']),
+          error: () => {
+            this.error = 'Błąd wysyłki wiadomości';
+            this.sending = false;
+          }
+        });
     });
   }
 
