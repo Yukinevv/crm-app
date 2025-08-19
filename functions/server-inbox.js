@@ -210,21 +210,69 @@ function createInboxRouter({dbPath, imapConfig}) {
 
   // ====== ROUTES ======
 
-  // GET /inbox/messages?limit=50
+  // GET /inbox/messages?limit=50&q=&from=&to=&subject=&dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&unread=1
   r.get('/inbox/messages', async (req, res) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit || '50'), 10) || 50, 200);
+
+      // Pobierz surową listę (MailHog/IMAP)
       let list = [];
       if (isEmu) list = await mhList(limit);
       else list = await imapList(limit);
 
+      // Zastosuj read-map (tylko MailHog)
       if (isEmu) {
         const rm = getReadMap();
         list = list.map(m => ({...m, isRead: !!rm[m.id]}));
       }
 
-      list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      res.json({items: list});
+      // ===== Filtrowanie =====
+      const q = String(req.query.q || '').trim().toLowerCase();
+      const fromF = String(req.query.from || '').trim().toLowerCase();
+      const toF = String(req.query.to || '').trim().toLowerCase();
+      const subjF = String(req.query.subject || '').trim().toLowerCase();
+      const unreadParam = String(req.query.unread || '').trim().toLowerCase();
+      const unreadOnly = unreadParam === '1' || unreadParam === 'true' || unreadParam === 'yes';
+
+      const dfRaw = String(req.query.dateFrom || '').trim();
+      const dtRaw = String(req.query.dateTo || '').trim();
+      const dateFrom = dfRaw ? new Date(dfRaw) : null; // akceptujemy YYYY-MM-DD
+      const dateTo = dtRaw ? new Date(dtRaw) : null;
+      if (dateTo) dateTo.setHours(23, 59, 59, 999);
+
+      const norm = (s) => String(s || '').toLowerCase();
+
+      let filtered = list;
+
+      if (q) {
+        filtered = filtered.filter(m => {
+          const bucket = `${m.from} ${m.to} ${m.subject} ${m.preview || ''}`.toLowerCase();
+          return bucket.includes(q);
+        });
+      }
+      if (fromF) {
+        filtered = filtered.filter(m => norm(m.from).includes(fromF));
+      }
+      if (toF) {
+        filtered = filtered.filter(m => norm(m.to).includes(toF));
+      }
+      if (subjF) {
+        filtered = filtered.filter(m => norm(m.subject).includes(subjF));
+      }
+      if (dateFrom) {
+        filtered = filtered.filter(m => new Date(m.date) >= dateFrom);
+      }
+      if (dateTo) {
+        filtered = filtered.filter(m => new Date(m.date) <= dateTo);
+      }
+      if (unreadOnly) {
+        filtered = filtered.filter(m => !m.isRead);
+      }
+
+      // sort desc by date
+      filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      res.json({items: filtered});
     } catch (e) {
       console.error('❌ /inbox/messages error', e);
       res.status(500).json({error: 'internal'});

@@ -106,7 +106,7 @@ export class InboxDetailComponent implements OnInit {
     this.auth.user$.pipe(take(1)).subscribe(user => {
       const myEmail = user?.email?.toLowerCase() || '';
 
-      this.inbox.list(300).subscribe({
+      this.inbox.list({limit: 300}).subscribe({
         next: items => {
           const candidates = items.filter(it => {
             const s = this.normalizeSubject(it.subject || '');

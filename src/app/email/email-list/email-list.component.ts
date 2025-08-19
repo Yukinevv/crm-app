@@ -3,7 +3,9 @@ import {EmailService} from '../email.service';
 import {Email} from '../email.model';
 import {Router, RouterLink} from '@angular/router';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
-import {InboxItem, InboxService} from '../inbox.service';
+import {InboxItem, InboxQuery, InboxService} from '../inbox.service';
+import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {debounceTime} from 'rxjs/operators';
 
 type Tab = 'inbox' | 'sent';
 
@@ -14,7 +16,8 @@ type Tab = 'inbox' | 'sent';
     NgIf,
     NgForOf,
     DatePipe,
-    RouterLink
+    RouterLink,
+    ReactiveFormsModule
   ],
   styleUrls: ['./email-list.component.scss'],
   standalone: true
@@ -28,6 +31,9 @@ export class EmailListComponent implements OnInit {
   inboxLoading = false;
   inboxError: string | null = null;
 
+  // INBOX filters
+  inboxForm: FormGroup;
+
   // SENT
   emails: Email[] = [];
   sentLoading = false;
@@ -36,29 +42,72 @@ export class EmailListComponent implements OnInit {
   constructor(
     private emailService: EmailService,
     private inboxService: InboxService,
-    private router: Router
+    private router: Router,
+    private fb: FormBuilder
   ) {
+    this.inboxForm = this.fb.group({
+      q: [''],
+      from: [''],
+      subject: [''],
+      dateFrom: [''],
+      dateTo: [''],
+      unread: [false]
+    });
   }
 
   ngOnInit(): void {
-    // domyślnie ładujemy Odebrane
+    // Domyślnie Odebrane
     this.loadInbox();
+
+    // Debounce filtrów (tylko gdy zakładka Odebrane jest aktywna)
+    this.inboxForm.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(() => {
+        if (this.active === 'inbox') this.loadInbox();
+      });
   }
 
   setTab(tab: Tab): void {
     this.active = tab;
-    if (tab === 'inbox' && this.inbox.length === 0 && !this.inboxLoading) {
+    if (tab === 'inbox' && !this.inboxLoading) {
       this.loadInbox();
     } else if (tab === 'sent' && this.emails.length === 0 && !this.sentLoading) {
       this.loadSent();
     }
   }
 
+  resetInboxFilters(): void {
+    this.inboxForm.reset({
+      q: '',
+      from: '',
+      subject: '',
+      dateFrom: '',
+      dateTo: '',
+      unread: false
+    }, {emitEvent: true});
+  }
+
   // ----- INBOX -----
+  private buildQuery(): InboxQuery {
+    const f = this.inboxForm.value;
+    const q: InboxQuery = {
+      limit: 200,
+      q: f.q?.trim() || undefined,
+      from: f.from?.trim() || undefined,
+      subject: f.subject?.trim() || undefined,
+      dateFrom: f.dateFrom || undefined,
+      dateTo: f.dateTo || undefined,
+      unread: !!f.unread
+    };
+    return q;
+  }
+
   loadInbox(): void {
     this.inboxLoading = true;
     this.inboxError = null;
-    this.inboxService.list(100).subscribe({
+
+    const query = this.buildQuery();
+    this.inboxService.list(query).subscribe({
       next: items => {
         this.inbox = items;
         this.inboxLoading = false;

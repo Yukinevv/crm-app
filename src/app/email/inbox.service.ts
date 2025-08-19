@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {map, Observable} from 'rxjs';
 
 export interface InboxItem {
@@ -24,6 +24,17 @@ export interface InboxMessage {
   bodyText: string | null;
 }
 
+export interface InboxQuery {
+  limit?: number;
+  q?: string;
+  from?: string;
+  to?: string;
+  subject?: string;
+  dateFrom?: string; // 'YYYY-MM-DD'
+  dateTo?: string;   // 'YYYY-MM-DD'
+  unread?: boolean;
+}
+
 @Injectable({providedIn: 'root'})
 export class InboxService {
   private base = '/api/inbox';
@@ -31,8 +42,19 @@ export class InboxService {
   constructor(private http: HttpClient) {
   }
 
-  list(limit = 50): Observable<InboxItem[]> {
-    return this.http.get<{ items: InboxItem[] }>(`${this.base}/messages`, {params: {limit}})
+  list(query: InboxQuery = {}): Observable<InboxItem[]> {
+    let params = new HttpParams();
+    if (query.limit != null) params = params.set('limit', String(query.limit));
+    if (query.q) params = params.set('q', query.q);
+    if (query.from) params = params.set('from', query.from);
+    if (query.to) params = params.set('to', query.to);
+    if (query.subject) params = params.set('subject', query.subject);
+    if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
+    if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    if (query.unread) params = params.set('unread', '1');
+
+    return this.http
+      .get<{ items: InboxItem[] }>(`${this.base}/messages`, {params})
       .pipe(map(r => r.items || []));
   }
 
