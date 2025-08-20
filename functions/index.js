@@ -11,6 +11,7 @@ const {FieldValue} = require('firebase-admin/firestore');
 const {join} = require("node:path");
 const {createConversationsRouter} = require('./server-api');
 const {createInboxRouter} = require('./server-inbox');
+const {createMailRouter} = require('./server-mail');
 
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
@@ -379,5 +380,7 @@ const conversationsDbPath = join(__dirname, 'db-email.json');
 app.use(createConversationsRouter({dbPath: conversationsDbPath}));
 
 app.use(createInboxRouter({dbPath: conversationsDbPath, imapConfig}));
+
+app.use(createMailRouter({transportPromise: mailTransportPromise, appName: APP_NAME}));
 
 exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);

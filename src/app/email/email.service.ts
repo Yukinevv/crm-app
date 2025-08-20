@@ -9,6 +9,7 @@ import {map, switchMap} from 'rxjs/operators';
 @Injectable({providedIn: 'root'})
 export class EmailService {
   private apiUrl = '/api/emails';
+  private mailSendUrl = '/api/mail/send';
 
   constructor(
     private http: HttpClient,
@@ -26,7 +27,9 @@ export class EmailService {
   }
 
   /**
-   * Wysyła (zapisuje) mail i – jeśli włączono – taguje wszystkie linki w treści.
+   * Wysyła (fizycznie przez backend) mail i – jeśli włączono – taguje wszystkie linki w treści.
+   * Następnie zapisuje wiadomość w json-server (/api/emails) i loguje konwersację.
+   *
    * Do każdego URL dodawane są parametry:
    *  utm_source=crm-app
    *  utm_medium=email
@@ -52,26 +55,37 @@ export class EmailService {
       ? this.wrapWithTracking(withUtm, messageId, email.to)
       : withUtm;
 
-    const payload: Omit<Email, 'id'> = {
+    // Backend: fizyczna wysyłka (MailHog/SendGrid/Ethereal)
+    const send$ = this.http.post<{ ok: boolean }>(this.mailSendUrl, {
       from: email.from,
       to: email.to,
       subject: email.subject,
       body: withTracking,
-      date: new Date().toISOString(),
-      isRead: false,
-      messageId,
-      tags
-    };
+      messageId
+    });
 
-    // Zapisz maila
-    return this.http.post<Email>(this.apiUrl, payload).pipe(
-      // Spróbuj zalogować konwersację (nie blokuje wysyłki)
+    // Po sukcesie zapisz maila w json-server
+    return send$.pipe(
+      switchMap(() => {
+        const payload: Omit<Email, 'id'> = {
+          from: email.from,
+          to: email.to,
+          subject: email.subject,
+          body: withTracking,
+          date: new Date().toISOString(),
+          isRead: false,
+          messageId,
+          tags
+        };
+        return this.http.post<Email>(this.apiUrl, payload);
+      }),
+      // Spróbuj zalogować konwersację (nie blokuje zwrotu)
       switchMap(saved =>
         this.auth.user$.pipe(
           take(1),
           switchMap(user => {
             if (!user) return of(saved);
-            return this.conversations.logEmailAutoLink({
+            return this.conversations.logEmail({
               userId: user.uid,
               direction: 'out',
               subject: saved.subject,

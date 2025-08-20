@@ -415,6 +415,23 @@
         "utm_recipient": "gregory51@gmail.com"
       },
       "id": 9
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "wikt0r@gmail.com",
+      "subject": "Witaj Wiktor!",
+      "body": "Cześć Wiktor!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-20T10:27:11.934Z",
+      "isRead": true,
+      "messageId": "m_mejtw7io_g11m8eeh",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Witaj Wiktor!",
+        "utm_content": "m_mejtw7io_g11m8eeh",
+        "utm_recipient": "wikt0r@gmail.com"
+      },
+      "id": 10
     }
   ],
   "emailTemplates": [

@@ -4,7 +4,8 @@
       "/api/t",
       "/api/stats",
       "/api/conversations",
-      "/api/inbox"
+      "/api/inbox",
+      "/api/mail"
     ],
     "target": "http://localhost:5001/crm-app-e0108/us-central1",
     "secure": false,

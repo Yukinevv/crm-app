@@ -35,6 +35,30 @@
       "emailId": "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example",
       "leadId": "lead_mega2aid_ywnimvk2",
       "counterpartEmail": "no-reply@crm-app.example.com"
+    },
+    {
+      "id": "conv_mejtw7od_qnp1y513",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Witaj Wiktor!",
+      "preview": "Cześć Wiktor!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-20T10:27:11.934Z",
+      "emailId": 10,
+      "leadId": "lead_mejtw7od_4rxnpq73",
+      "counterpartEmail": "wikt0r@gmail.com"
+    },
+    {
+      "id": "conv_mejtx4gy_bkn8jsmt",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "in",
+      "subject": "Witaj Wiktor!",
+      "preview": "Cze=C5=9B=C4=87 Wiktor!\r\n\r\nDzi=C4=99kujemy za zainteresowanie firm=C4=85 =\r\nTestowa4.\r\n\r\nPozdrawiamy,\r\nZesp=C3=B3=C5=82 CRM-APP",
+      "date": "2025-08-20T10:27:11.000Z",
+      "emailId": "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example",
+      "contactId": "4242",
+      "counterpartEmail": "adrianrodzic33@gmail.com"
     }
   ],
   "leadsEmail": [
@@ -55,9 +79,19 @@
       "status": "Nowy",
       "source": "E-mail",
       "createdAt": "2025-08-17T22:48:44.725Z"
+    },
+    {
+      "id": "lead_mejtw7od_4rxnpq73",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "wikt0r@gmail.com",
+      "name": "wikt0r",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-08-20T10:27:11.965Z"
     }
   ],
   "inboxRead": {
-    "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example": true
+    "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example": true,
+    "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example": true
   }
 }
