@@ -59,6 +59,42 @@
       "emailId": "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example",
       "contactId": "4242",
       "counterpartEmail": "adrianrodzic33@gmail.com"
+    },
+    {
+      "id": "conv_melxhgys_yvgdff3y",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Testowy grupowy mail",
+      "preview": "Witamy Mariusz!\n\nTresc testowego grupowego maila",
+      "date": "2025-08-21T21:43:14.937Z",
+      "emailId": 11,
+      "contactId": "1211",
+      "counterpartEmail": "mariuszrodzic08@gmail.com"
+    },
+    {
+      "id": "conv_melxhh37_sqzshtvq",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Testowy grupowy mail",
+      "preview": "Witamy Adrian!\n\nTresc testowego grupowego maila",
+      "date": "2025-08-21T21:43:15.125Z",
+      "emailId": 12,
+      "contactId": "524e",
+      "counterpartEmail": "adrianrodzic33@gmail.com"
+    },
+    {
+      "id": "conv_melxj7fo_y77v4353",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "in",
+      "subject": "Testowy grupowy mail",
+      "preview": "Witamy Adrian!\r\n\r\nTresc testowego grupowego maila",
+      "date": "2025-08-21T21:43:15.000Z",
+      "emailId": "mh:mgd8acQtQgQ5caaMc-slifxDmvOT8OxTi-WP45lR72k=@mailhog.example",
+      "contactId": "4242",
+      "counterpartEmail": "adrianrodzic33@gmail.com"
     }
   ],
   "leadsEmail": [
@@ -92,6 +128,7 @@
   ],
   "inboxRead": {
     "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example": true,
-    "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example": true
+    "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example": true,
+    "mh:mgd8acQtQgQ5caaMc-slifxDmvOT8OxTi-WP45lR72k=@mailhog.example": true
   }
 }

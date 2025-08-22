@@ -9,6 +9,7 @@ import {EmailStatsComponent} from './email-stats/email-stats.component';
 import {EmailConversationsComponent} from './conversations/email-conversations/email-conversations.component';
 import {EmailThreadComponent} from './thread/email-thread/email-thread.component';
 import {InboxDetailComponent} from './inbox-detail/inbox-detail.component';
+import {EmailBulkComponent} from './email-bulk/email-bulk.component';
 
 @NgModule({
   declarations: [],
@@ -23,7 +24,8 @@ import {InboxDetailComponent} from './inbox-detail/inbox-detail.component';
     EmailStatsComponent,
     EmailConversationsComponent,
     EmailThreadComponent,
-    InboxDetailComponent
+    InboxDetailComponent,
+    EmailBulkComponent
   ]
 })
 export class EmailModule {

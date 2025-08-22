@@ -27,18 +27,14 @@ export class EmailService {
   }
 
   /**
-   * Wysyła (fizycznie przez backend) mail i – jeśli włączono – taguje wszystkie linki w treści.
-   * Następnie zapisuje wiadomość w json-server (/api/emails) i loguje konwersację.
+   * Wysyła mail (backend), opcjonalnie taguje linki UTM+tracking,
+   * zapisuje w json-server oraz loguje konwersację.
    *
-   * Do każdego URL dodawane są parametry:
-   *  utm_source=crm-app
-   *  utm_medium=email
-   *  utm_campaign=<subject>
-   *  utm_content=<messageId>
-   *  utm_recipient=<email odbiorcy>
+   * opts.contactId – jeżeli znany, przekażemy do logów konwersacji (dokładniejsze linkowanie).
    */
   sendEmail(
-    email: Omit<Email, 'id' | 'date' | 'isRead'> & { trackLinks?: boolean }
+    email: Omit<Email, 'id' | 'date' | 'isRead'> & { trackLinks?: boolean },
+    opts?: { contactId?: string }
   ): Observable<Email> {
     const messageId = this.generateMessageId();
 
@@ -92,7 +88,8 @@ export class EmailService {
               body: saved.body || '',
               date: saved.date,
               emailId: saved.id,
-              counterpartEmail: saved.to
+              counterpartEmail: saved.to,
+              contactId: opts?.contactId || undefined
             }).pipe(
               catchError(err => {
                 console.warn('⚠️ Log konwersacji nie zapisany', err);
@@ -122,9 +119,7 @@ export class EmailService {
    */
   private tagAllLinks(text: string, params: Record<string, string>): string {
     if (!text) return text;
-
     const urlRe = /\bhttps?:\/\/[^\s<>"']+/gi;
-
     return text.replace(urlRe, (url: string) => this.appendParams(url, params));
   }
 
