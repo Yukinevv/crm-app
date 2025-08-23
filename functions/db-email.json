@@ -95,6 +95,30 @@
       "emailId": "mh:mgd8acQtQgQ5caaMc-slifxDmvOT8OxTi-WP45lR72k=@mailhog.example",
       "contactId": "4242",
       "counterpartEmail": "adrianrodzic33@gmail.com"
+    },
+    {
+      "id": "conv_meo1hzt9_yvwrmtna",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Testowy grupowy mail",
+      "preview": "Witam Mariusz\n\nTresc testowego grupowego maila",
+      "date": "2025-08-23T09:11:10.179Z",
+      "emailId": 13,
+      "contactId": "1211",
+      "counterpartEmail": "mariuszrodzic08@gmail.com"
+    },
+    {
+      "id": "conv_meo1hzxw_njrld6h8",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Testowy grupowy mail",
+      "preview": "Witam Adrian\n\nTresc testowego grupowego maila",
+      "date": "2025-08-23T09:11:10.360Z",
+      "emailId": 14,
+      "contactId": "524e",
+      "counterpartEmail": "adrianrodzic33@gmail.com"
     }
   ],
   "leadsEmail": [

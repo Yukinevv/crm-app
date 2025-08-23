@@ -466,6 +466,40 @@
         "utm_recipient": "adrianrodzic33@gmail.com"
       },
       "id": 12
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "mariuszrodzic08@gmail.com",
+      "subject": "Testowy grupowy mail",
+      "body": "Witam Mariusz\n\nTresc testowego grupowego maila",
+      "date": "2025-08-23T09:11:10.179Z",
+      "isRead": false,
+      "messageId": "m_meo1hzkw_8gi52og4",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Testowy grupowy mail",
+        "utm_content": "m_meo1hzkw_8gi52og4",
+        "utm_recipient": "mariuszrodzic08@gmail.com"
+      },
+      "id": 13
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "adrianrodzic33@gmail.com",
+      "subject": "Testowy grupowy mail",
+      "body": "Witam Adrian\n\nTresc testowego grupowego maila",
+      "date": "2025-08-23T09:11:10.360Z",
+      "isRead": false,
+      "messageId": "m_meo1hzwr_zecf2leb",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Testowy grupowy mail",
+        "utm_content": "m_meo1hzwr_zecf2leb",
+        "utm_recipient": "adrianrodzic33@gmail.com"
+      },
+      "id": 14
     }
   ],
   "emailTemplates": [
