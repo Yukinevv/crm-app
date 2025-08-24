@@ -36,17 +36,67 @@
     }
   }
 
-  .social-links a {
-    font-size: .875rem;
-    border-color: var(--color-border);
-    color: var(--color-text);
-    background: var(--color-surface);
-    transition: background-color .15s, border-color .15s, transform .08s;
+  /* ===== Social buttons ===== */
+  .social-links {
+    /* brandowe zmienne lokalne */
+    --linkedin-blue: #0a66c2;
+    --github-dark: #24292f;
 
-    &:hover {
-      background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary-100) 15%);
-      border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
-      transform: translateY(-1px);
+    a {
+      font-size: .875rem;
+      border-color: var(--color-border);
+      color: var(--color-text);
+      background: var(--color-surface);
+      transition: background-color .15s, border-color .15s, transform .08s, color .15s, box-shadow .15s;
+
+      &:hover {
+        background: color-mix(in srgb, var(--color-surface) 85%, var(--color-primary-100) 15%);
+        border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+        transform: translateY(-1px);
+      }
+
+      &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .25);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    /* LinkedIn */
+    .btn-linkedin {
+      border-color: var(--linkedin-blue);
+      color: var(--linkedin-blue);
+      background: color-mix(in srgb, var(--color-surface) 95%, var(--linkedin-blue) 5%);
+
+      &:hover {
+        background: var(--linkedin-blue);
+        border-color: var(--linkedin-blue);
+        color: #fff;
+      }
+
+      &:focus-visible {
+        box-shadow: 0 0 0 .2rem rgba(10, 102, 194, .25);
+      }
+    }
+
+    /* GitHub */
+    .btn-github {
+      border-color: var(--github-dark);
+      color: var(--github-dark);
+      background: color-mix(in srgb, var(--color-surface) 96%, var(--github-dark) 4%);
+
+      &:hover {
+        background: var(--github-dark);
+        border-color: var(--github-dark);
+        color: #fff;
+      }
+
+      &:focus-visible {
+        box-shadow: 0 0 0 .2rem rgba(36, 41, 47, .25);
+      }
     }
   }
 
