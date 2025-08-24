@@ -56,8 +56,11 @@ export class EmailListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Domyślnie Odebrane
-    this.loadInbox();
+    if (this.active === 'inbox') {
+      this.loadInbox();
+    } else {
+      this.loadSent();
+    }
 
     // Debounce filtrów (tylko gdy zakładka Odebrane jest aktywna)
     this.inboxForm.valueChanges

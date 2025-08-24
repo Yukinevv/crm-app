@@ -1,23 +1,31 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <button class="btn btn-secondary" (click)="back()">← Powrót</button>
+<div class="container mt-4 inbox-detail">
+  <div class="detail-header d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-outline-secondary" (click)="back()">← Powrót</button>
     <div>
-      <button class="btn btn-outline-primary me-2" (click)="reply()" [disabled]="loading || !!error">Odpowiedz</button>
+      <button class="btn btn-outline-primary me-2 mr-2" (click)="reply()" [disabled]="loading || !!error">Odpowiedz
+      </button>
       <button class="btn btn-outline-secondary ml-2" (click)="importThread()" [disabled]="loading || !!error">
         Importuj wątek (beta)
       </button>
     </div>
   </div>
 
-  <div *ngIf="loading">Ładowanie...</div>
-  <div *ngIf="error" class="text-danger">{{ error }}</div>
+  <div *ngIf="loading" class="state state-loading">Ładowanie...</div>
+  <div *ngIf="error" class="state state-error alert alert-danger">{{ error }}</div>
 
-  <div *ngIf="!loading && msg">
-    <h3 class="mb-3">{{ msg.subject }}</h3>
-    <p><strong>Od:</strong> {{ msg.from }}</p>
-    <p><strong>Do:</strong> {{ msg.to }}</p>
-    <p><strong>Data:</strong> {{ msg.date | date:'full' }}</p>
-    <hr>
-    <div [innerHTML]="bodyHtml"></div>
+  <div *ngIf="!loading && msg" class="message-card card shadow-soft">
+    <div class="card-body">
+      <h3 class="subject mb-3">{{ msg.subject }}</h3>
+
+      <div class="meta small text-muted mb-2">
+        <span class="me-3 mr-3"><strong>Od:</strong> {{ msg.from }}</span>
+        <span class="me-3 mr-3"><strong>Do:</strong> {{ msg.to }}</span>
+        <span><strong>Data:</strong> {{ msg.date | date:'full' }}</span>
+      </div>
+
+      <hr class="soft">
+
+      <div class="rich-content" [innerHTML]="bodyHtml"></div>
+    </div>
   </div>
 </div>

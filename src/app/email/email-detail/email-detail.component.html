@@ -1,15 +1,24 @@
-<div class="container mt-4">
-    <button class="btn btn-secondary mb-4" (click)="back()">← Powrót</button>
+<div class="container mt-4 email-detail">
+  <div class="header d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-outline-secondary" (click)="back()">← Powrót</button>
+  </div>
 
-    <div *ngIf="loading">Ładowanie...</div>
-    <div *ngIf="error" class="text-danger">{{ error }}</div>
+  <div *ngIf="loading" class="state state-loading">Ładowanie...</div>
+  <div *ngIf="error" class="state state-error alert alert-danger">{{ error }}</div>
 
-    <div *ngIf="!loading && email">
-        <h3 class="mb-3">{{ email?.subject }}</h3>
-        <p><strong>Od:</strong> {{ email?.from }}</p>
-        <p><strong>Do:</strong> {{ email?.to }}</p>
-        <p><strong>Data:</strong> {{ email?.date | date:'full' }}</p>
-        <hr>
-        <div [innerHTML]="bodyHtml"></div>
+  <div *ngIf="!loading && email" class="message-card card shadow-soft">
+    <div class="card-body">
+      <h3 class="subject mb-3">{{ email?.subject }}</h3>
+
+      <div class="meta small text-muted mb-2">
+        <span class="me-3 mr-3"><strong>Od:</strong> {{ email?.from }}</span>
+        <span class="me-3 mr-3"><strong>Do:</strong> {{ email?.to }}</span>
+        <span><strong>Data:</strong> {{ email?.date | date:'full' }}</span>
+      </div>
+
+      <hr class="soft">
+
+      <div class="rich-content" [innerHTML]="bodyHtml"></div>
     </div>
+  </div>
 </div>
