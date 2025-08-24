@@ -9,9 +9,9 @@ const nodemailer = require('nodemailer');
 const {FieldValue} = require('firebase-admin/firestore');
 
 const {join} = require("node:path");
-const {createConversationsRouter} = require('./server-api');
-const {createInboxRouter} = require('./server-inbox');
-const {createMailRouter} = require('./server-mail');
+const {conversationsHandlers} = require('./server-api');
+const {inboxHandlers} = require('./server-inbox');
+const {mailHandlers} = require('./server-mail');
 
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
@@ -365,6 +365,7 @@ const summaryCsvHandler = async (req, res) => {
 
 const app = express();
 const middlewares = jsonServer.defaults();
+const router = jsonServer.router('db.json');
 
 app.use(middlewares);
 app.use(jsonServer.bodyParser);
@@ -376,11 +377,31 @@ app.get('/stats/clicks/summary', clicksSummaryHandler);
 app.get('/stats/clicks/csv', clicksCsvHandler);
 app.get('/stats/clicks/summary.csv', summaryCsvHandler);
 
+app.get('/api/t', trackingHandler);
+app.get('/api/stats/clicks', clicksListHandler);
+app.get('/api/stats/clicks/summary', clicksSummaryHandler);
+app.get('/api/stats/clicks/csv', clicksCsvHandler);
+app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
+
 const conversationsDbPath = join(__dirname, 'db-email.json');
-app.use(createConversationsRouter({dbPath: conversationsDbPath}));
+const conv = conversationsHandlers({dbPath: conversationsDbPath});
+app.post('/conversations/logEmail', conv.logEmail);
+app.post('/api/conversations/logEmail', conv.logEmail);
+app.get('/conversations', conv.list);
+app.get('/api/conversations', conv.list);
 
-app.use(createInboxRouter({dbPath: conversationsDbPath, imapConfig}));
+const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig});
+app.get('/inbox/messages', ih.list);
+app.get('/api/inbox/messages', ih.list);
+app.get('/inbox/message/:id', ih.getMessage);
+app.get('/api/inbox/message/:id', ih.getMessage);
+app.post('/inbox/markRead', ih.markRead);
+app.post('/api/inbox/markRead', ih.markRead);
 
-app.use(createMailRouter({transportPromise: mailTransportPromise, appName: APP_NAME}));
+const mh = mailHandlers({transportPromise: mailTransportPromise, appName: APP_NAME});
+app.post('/mail/send', mh.send);
+app.post('/api/mail/send', mh.send);
+
+app.use('/api', router);
 
 exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);

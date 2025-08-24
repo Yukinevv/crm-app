@@ -1,8 +1,12 @@
+'use strict';
+
 const express = require('express');
 const jsonServer = require('json-server');
 
-function createConversationsRouter({dbPath}) {
-  const r = express.Router();
+/**
+ * Tworzy kontekst pracy na bazie json-server (lowdb) + pomocnicze utilsy.
+ */
+function createContext(dbPath) {
   const routerDb = jsonServer.router(dbPath);
 
   function ensureCollection(name) {
@@ -12,16 +16,27 @@ function createConversationsRouter({dbPath}) {
   }
 
   function genId(prefix) {
-    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    return `${prefix}_${Date.now().toString(36)}_${Math.random()
+      .toString(36)
+      .slice(2, 10)}`;
   }
 
   function normalizeEmail(e) {
     return String(e || '').trim().toLowerCase();
   }
 
-  // POST /api/conversations/logEmail
-  r.post('/conversations/logEmail', (req, res) => {
+  return {routerDb, ensureCollection, genId, normalizeEmail};
+}
+
+/**
+ * Fabryka handlera: POST /conversations/logEmail
+ */
+function createLogEmailHandler({dbPath}) {
+  const ctx = createContext(dbPath);
+
+  return function logEmailHandler(req, res) {
     try {
+      const {routerDb, ensureCollection, genId, normalizeEmail} = ctx;
       ensureCollection('leadsEmail');
       ensureCollection('conversations');
 
@@ -33,7 +48,7 @@ function createConversationsRouter({dbPath}) {
         date,
         emailId,
         counterpartEmail,
-        contactId
+        contactId,
       } = req.body || {};
 
       if (!userId || !direction || !subject || !emailId || !counterpartEmail) {
@@ -42,19 +57,20 @@ function createConversationsRouter({dbPath}) {
 
       const ce = normalizeEmail(counterpartEmail);
 
-      // Jeśli już mamy konwersację dla (userId,emailId) to zwróć istniejącą
-      const convs = routerDb.db.get('conversations').filter({userId, emailId}).value() || [];
-      if (convs.length) {
-        return res.json({ok: true, conversation: convs[0]});
+      // Idempotencja: jeżeli (userId,emailId) już istnieje to zwróć istniejącą konwersację
+      const existing =
+        routerDb.db.get('conversations').filter({userId, emailId}).value() || [];
+      if (existing.length) {
+        return res.json({ok: true, conversation: existing[0]});
       }
 
       let finalContactId = contactId;
       let leadId;
 
-      // Gdy brak contactId – autolead (po emailu)
+      // Auto-lead po emailu gdy brak contactId
       if (!finalContactId) {
         const leads = routerDb.db.get('leadsEmail').filter({userId}).value() || [];
-        const foundLead = leads.find(l => normalizeEmail(l.email) === ce);
+        const foundLead = leads.find((l) => normalizeEmail(l.email) === ce);
         if (foundLead) {
           leadId = foundLead.id;
         } else {
@@ -65,7 +81,7 @@ function createConversationsRouter({dbPath}) {
             name: ce.split('@')[0],
             status: 'Nowy',
             source: 'E-mail',
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
           };
           routerDb.db.get('leadsEmail').push(newLead).write();
           leadId = newLead.id;
@@ -83,7 +99,7 @@ function createConversationsRouter({dbPath}) {
         emailId,
         contactId: finalContactId,
         leadId,
-        counterpartEmail: ce
+        counterpartEmail: ce,
       };
 
       routerDb.db.get('conversations').push(conv).write();
@@ -92,36 +108,54 @@ function createConversationsRouter({dbPath}) {
       console.error('❌ logEmail error', e);
       return res.status(500).json({error: 'internal'});
     }
-  });
+  };
+}
 
-  // GET /api/conversations
-  r.get('/conversations', (req, res) => {
+/**
+ * Fabryka handlera: GET /conversations
+ */
+function createListConversationsHandler({dbPath}) {
+  const ctx = createContext(dbPath);
+
+  return function listConversationsHandler(req, res) {
     try {
+      const {routerDb, ensureCollection, normalizeEmail} = ctx;
+
       ensureCollection('conversations');
       const userId = String(req.query.userId || '');
       if (!userId) return res.status(400).json({error: 'userId required'});
 
-      let list = routerDb.db.get('conversations').filter({userId}).value() || [];
+      let list =
+        routerDb.db.get('conversations').filter({userId}).value() || [];
 
       const contactId = req.query.contactId ? String(req.query.contactId) : null;
       const leadId = req.query.leadId ? String(req.query.leadId) : null;
-      const ce = req.query.counterpartEmail ? normalizeEmail(req.query.counterpartEmail) : null;
+      const ce = req.query.counterpartEmail
+        ? normalizeEmail(req.query.counterpartEmail)
+        : null;
       const q = req.query.q ? String(req.query.q).toLowerCase() : null;
 
-      if (contactId) list = list.filter(x => x.contactId === contactId);
-      if (leadId) list = list.filter(x => x.leadId === leadId);
-      if (ce) list = list.filter(x => normalizeEmail(x.counterpartEmail) === ce);
+      if (contactId) list = list.filter((x) => x.contactId === contactId);
+      if (leadId) list = list.filter((x) => x.leadId === leadId);
+      if (ce) list = list.filter((x) => normalizeEmail(x.counterpartEmail) === ce);
       if (q) {
-        list = list.filter(x =>
-          (x.subject || '').toLowerCase().includes(q) ||
-          (x.preview || '').toLowerCase().includes(q) ||
-          (x.counterpartEmail || '').toLowerCase().includes(q)
+        list = list.filter(
+          (x) =>
+            (x.subject || '').toLowerCase().includes(q) ||
+            (x.preview || '').toLowerCase().includes(q) ||
+            (x.counterpartEmail || '').toLowerCase().includes(q)
         );
       }
 
-      list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // sort malejąco po dacie, później limit
+      list.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
 
-      const limit = Math.min(parseInt(String(req.query.limit || '100'), 10) || 100, 2000);
+      const limit = Math.min(
+        parseInt(String(req.query.limit || '100'), 10) || 100,
+        2000
+      );
       list = list.slice(0, limit);
 
       res.json({items: list});
@@ -129,9 +163,18 @@ function createConversationsRouter({dbPath}) {
       console.error('❌ list conversations error', e);
       res.status(500).json({error: 'internal'});
     }
-  });
-
-  return r;
+  };
 }
 
-module.exports = {createConversationsRouter};
+function conversationsHandlers({dbPath}) {
+  return {
+    logEmail: createLogEmailHandler({dbPath}),
+    list: createListConversationsHandler({dbPath}),
+  };
+}
+
+module.exports = {
+  createLogEmailHandler,
+  createListConversationsHandler,
+  conversationsHandlers
+};

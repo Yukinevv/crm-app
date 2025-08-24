@@ -1,21 +1,18 @@
-const express = require('express');
+'use strict';
 
 /**
- * Router odpowiedzialny za fizyczną wysyłkę e-maili.
- * Używa przekazanego transportu (MailHog w emulatorze, SendGrid na prod, Ethereal fallback).
- *
- * POST /api/mail/send
+ * Fabryka handlera: POST /mail/send
  * body: { from: string, to: string, subject: string, body: string, messageId?: string }
  *  - body może być plain text albo HTML (wykrywane heurystyką).
  */
-function createMailRouter({transportPromise, appName}) {
-  const r = express.Router();
-
-  r.post('/mail/send', async (req, res) => {
+function createMailSendHandler({transportPromise, appName}) {
+  return async function mailSendHandler(req, res) {
     try {
       const {from, to, subject, body, messageId} = req.body || {};
       if (!from || !to || !subject || !body) {
-        return res.status(400).json({error: 'Missing required fields: from, to, subject, body'});
+        return res
+          .status(400)
+          .json({error: 'Missing required fields: from, to, subject, body'});
       }
 
       const transport = await transportPromise;
@@ -28,8 +25,11 @@ function createMailRouter({transportPromise, appName}) {
         headers: {}
       };
 
+      // Dodatkowe nagłówki pomocnicze (opcjonalne)
+      if (appName) {
+        msg.headers['X-CRM-App'] = String(appName);
+      }
       if (messageId) {
-        // Dodatkowy nagłówek pomocniczy do debugowania po stronie odbiorcy/logów SMTP
         msg.headers['X-CRM-Message-Id'] = messageId;
       }
 
@@ -52,9 +52,13 @@ function createMailRouter({transportPromise, appName}) {
       console.error('❌ /mail/send error', e);
       return res.status(500).json({error: 'mail_send_failed'});
     }
-  });
+  };
+}
 
-  return r;
+function mailHandlers({transportPromise, appName}) {
+  return {
+    send: createMailSendHandler({transportPromise, appName})
+  };
 }
 
 function stripHtml(html) {
@@ -71,4 +75,7 @@ function stripHtml(html) {
     .trim();
 }
 
-module.exports = {createMailRouter};
+module.exports = {
+  createMailSendHandler,
+  mailHandlers
+};

@@ -1,21 +1,13 @@
-const express = require('express');
+'use strict';
+
 const jsonServer = require('json-server');
 const {ImapFlow} = require('imapflow');
 const {simpleParser} = require('mailparser');
 const iconv = require('iconv-lite');
 
-/**
- * Router "Inbox" obsługuje:
- *   GET  /inbox/messages
- *   GET  /inbox/message/:id
- *   POST /inbox/markRead
- *
- * W emulatorze (FUNCTIONS_EMULATOR) korzysta z MailHog.
- * Na produkcji/parze zewnętrznej korzysta z IMAP (ImapFlow + mailparser).
- */
-function createInboxRouter({dbPath, imapConfig}) {
-  const r = express.Router();
+function createContext(dbPath, imapConfig) {
   const routerDb = jsonServer.router(dbPath);
+  const isEmu = !!process.env.FUNCTIONS_EMULATOR;
 
   function ensureCollection(name) {
     if (!routerDb.db.has(name).value()) {
@@ -29,13 +21,13 @@ function createInboxRouter({dbPath, imapConfig}) {
     }
   }
 
-  const isEmu = !!process.env.FUNCTIONS_EMULATOR;
-
   // ---------- Helpers: nagłówki / content-type / dekodowanie ----------
 
   function firstHeader(headers, name) {
     if (!headers) return null;
-    const key = Object.keys(headers).find(k => k.toLowerCase() === name.toLowerCase());
+    const key = Object.keys(headers).find(
+      (k) => k.toLowerCase() === name.toLowerCase()
+    );
     if (!key) return null;
     const v = headers[key];
     return Array.isArray(v) ? v[0] : v;
@@ -45,9 +37,11 @@ function createInboxRouter({dbPath, imapConfig}) {
     // "text/plain; charset=UTF-8"
     const res = {mime: null, charset: 'utf-8'};
     if (!ct) return res;
-    const [mime, ...rest] = String(ct).split(';').map(s => s.trim());
+    const [mime, ...rest] = String(ct)
+      .split(';')
+      .map((s) => s.trim());
     res.mime = mime?.toLowerCase() || null;
-    const cs = rest.find(p => /^charset=/i.test(p));
+    const cs = rest.find((p) => /^charset=/i.test(p));
     if (cs) {
       const val = cs.split('=')[1]?.trim()?.replace(/^"|"$/g, '');
       if (val) res.charset = val.toLowerCase();
@@ -59,7 +53,8 @@ function createInboxRouter({dbPath, imapConfig}) {
     const cte = (rawCte || '').toString().trim().toLowerCase();
     if (cte) return cte;
     // Heurystyka: jeśli wygląda jak QP z miękkim łamaniem/sekcjami =XX
-    if (/=[0-9a-f]{2}/i.test(body) || /=\r?\n/.test(body)) return 'quoted-printable';
+    if (/=[0-9a-f]{2}/i.test(body) || /=\r?\n/.test(body))
+      return 'quoted-printable';
     return '7bit';
   }
 
@@ -122,9 +117,9 @@ function createInboxRouter({dbPath, imapConfig}) {
 
   function chooseBestBody(parts) {
     // preferuj text/html, fallback text/plain
-    const html = parts.find(p => p.mime?.startsWith('text/html') && p.body);
+    const html = parts.find((p) => p.mime?.startsWith('text/html') && p.body);
     if (html) return {bodyHtml: html.body, bodyText: null};
-    const text = parts.find(p => p.mime?.startsWith('text/plain') && p.body);
+    const text = parts.find((p) => p.mime?.startsWith('text/plain') && p.body);
     if (text) return {bodyHtml: null, bodyText: text.body};
     // fallback cokolwiek
     if (parts[0]?.body) return {bodyHtml: null, bodyText: parts[0].body};
@@ -138,12 +133,14 @@ function createInboxRouter({dbPath, imapConfig}) {
     const resp = await fetch(url);
     if (!resp.ok) {
       const text = await resp.text().catch(() => '');
-      throw new Error(`MailHog list error: ${resp.status} ${resp.statusText} ${text}`);
+      throw new Error(
+        `MailHog list error: ${resp.status} ${resp.statusText} ${text}`
+      );
     }
     const data = await resp.json(); // { total, count, start, items: [...] }
     const items = (data.items || []).slice(0, limit);
 
-    const list = items.map(it => {
+    const list = items.map((it) => {
       const id = String(it.ID);
       const from = firstHeader(it.Content?.Headers, 'From') || '';
       const to = firstHeader(it.Content?.Headers, 'To') || '';
@@ -152,22 +149,34 @@ function createInboxRouter({dbPath, imapConfig}) {
       const date = new Date(dateStr).toISOString();
 
       // Podgląd - najlepiej z części text/plain lub z Content.Body, po dekodowaniu
-      let previewSrc = it.Content?.Body || '';
       let preview = '';
-      let cte = firstHeader(it.Content?.Headers, 'Content-Transfer-Encoding') || '';
-      let ct = firstHeader(it.Content?.Headers, 'Content-Type') || 'text/plain; charset=utf-8';
+      const cte =
+        firstHeader(it.Content?.Headers, 'Content-Transfer-Encoding') || '';
+      const ct =
+        firstHeader(it.Content?.Headers, 'Content-Type') ||
+        'text/plain; charset=utf-8';
 
       // Gdy MIME istnieje, spróbuj wziąć text/plain z Parts
       if (it.MIME && Array.isArray(it.MIME.Parts) && it.MIME.Parts.length) {
-        const p = it.MIME.Parts.find(p =>
-          /text\/plain/i.test(p?.MIME?.PartType || '') || /text\/plain/i.test(firstHeader(p?.MIME?.Headers, 'Content-Type') || '')
-        ) || it.MIME.Parts[0];
+        const p =
+          it.MIME.Parts.find(
+            (p) =>
+              /text\/plain/i.test(p?.MIME?.PartType || '') ||
+              /text\/plain/i.test(
+                firstHeader(p?.MIME?.Headers, 'Content-Type') || ''
+              )
+          ) || it.MIME.Parts[0];
 
-        const pCT = firstHeader(p?.MIME?.Headers, 'Content-Type') || p?.MIME?.PartType || 'text/plain; charset=utf-8';
-        const pCTE = firstHeader(p?.MIME?.Headers, 'Content-Transfer-Encoding') || '';
+        const pCT =
+          firstHeader(p?.MIME?.Headers, 'Content-Type') ||
+          p?.MIME?.PartType ||
+          'text/plain; charset=utf-8';
+        const pCTE =
+          firstHeader(p?.MIME?.Headers, 'Content-Transfer-Encoding') || '';
         const raw = p?.MIME?.Body || '';
         preview = decodeBest(raw, pCTE, pCT);
       } else {
+        const previewSrc = it.Content?.Body || '';
         preview = decodeBest(previewSrc, cte, ct);
       }
 
@@ -180,8 +189,8 @@ function createInboxRouter({dbPath, imapConfig}) {
         to,
         subject,
         date,
-        isRead: false, // nadpiszemy ze storage
-        preview
+        isRead: false, // zostanie nadpisane ze storage
+        preview,
       };
     });
 
@@ -193,11 +202,15 @@ function createInboxRouter({dbPath, imapConfig}) {
   async function mhMessage(id) {
     const rawId = String(id).replace(/^mh:/, '');
     // API v1 - szczegóły
-    const url = `http://localhost:8025/api/v1/messages/${encodeURIComponent(rawId)}`;
+    const url = `http://localhost:8025/api/v1/messages/${encodeURIComponent(
+      rawId
+    )}`;
     const resp = await fetch(url);
     if (!resp.ok) {
       const text = await resp.text().catch(() => '');
-      throw new Error(`MailHog get message error: ${resp.status} ${resp.statusText} ${text}`);
+      throw new Error(
+        `MailHog get message error: ${resp.status} ${resp.statusText} ${text}`
+      );
     }
     const it = await resp.json();
 
@@ -212,8 +225,12 @@ function createInboxRouter({dbPath, imapConfig}) {
 
     if (it.MIME && Array.isArray(it.MIME.Parts)) {
       for (const p of it.MIME.Parts) {
-        const pCT = firstHeader(p?.MIME?.Headers, 'Content-Type') || p?.MIME?.PartType || '';
-        const pCTE = firstHeader(p?.MIME?.Headers, 'Content-Transfer-Encoding') || '';
+        const pCT =
+          firstHeader(p?.MIME?.Headers, 'Content-Type') ||
+          p?.MIME?.PartType ||
+          '';
+        const pCTE =
+          firstHeader(p?.MIME?.Headers, 'Content-Transfer-Encoding') || '';
         const raw = p?.MIME?.Body || '';
         const decoded = decodeBest(raw, pCTE, pCT);
         const {mime} = parseContentType(pCT || 'text/plain; charset=utf-8');
@@ -223,8 +240,11 @@ function createInboxRouter({dbPath, imapConfig}) {
 
     // Fallback: Content.Body
     if (!decodedParts.length && it.Content?.Body) {
-      const cte = firstHeader(it.Content?.Headers, 'Content-Transfer-Encoding') || '';
-      const ct = firstHeader(it.Content?.Headers, 'Content-Type') || 'text/plain; charset=utf-8';
+      const cte =
+        firstHeader(it.Content?.Headers, 'Content-Transfer-Encoding') || '';
+      const ct =
+        firstHeader(it.Content?.Headers, 'Content-Type') ||
+        'text/plain; charset=utf-8';
       const decoded = decodeBest(it.Content.Body, cte, ct);
       const {mime} = parseContentType(ct);
       decodedParts.push({mime: mime || 'text/plain', body: decoded});
@@ -235,9 +255,12 @@ function createInboxRouter({dbPath, imapConfig}) {
     return {
       id: `mh:${it.ID}`,
       provider: 'mailhog',
-      from, to, subject, date,
+      from,
+      to,
+      subject,
+      date,
       bodyHtml,
-      bodyText
+      bodyText,
     };
   }
 
@@ -248,7 +271,7 @@ function createInboxRouter({dbPath, imapConfig}) {
       host: imapConfig.host,
       port: Number(imapConfig.port) || 993,
       secure: String(imapConfig.secure ?? 'true') === 'true',
-      auth: {user: imapConfig.user, pass: imapConfig.pass}
+      auth: {user: imapConfig.user, pass: imapConfig.pass},
     });
     try {
       await client.connect();
@@ -258,6 +281,7 @@ function createInboxRouter({dbPath, imapConfig}) {
       try {
         await client.logout();
       } catch {
+        // ignore
       }
     }
   }
@@ -276,13 +300,16 @@ function createInboxRouter({dbPath, imapConfig}) {
         source: false,
         bodyStructure: false,
         uid: true,
-        internalDate: true
+        internalDate: true,
       })) {
         const env = msg.envelope || {};
-        const from = (env.from && env.from.length)
-          ? `${env.from[0].name || env.from[0].address || ''} <${env.from[0].address || ''}>`
-          : '';
-        const to = (env.to && env.to.length) ? (env.to[0].address || '') : '';
+        const from =
+          env.from && env.from.length
+            ? `${env.from[0].name || env.from[0].address || ''} <${
+              env.from[0].address || ''
+            }>`
+            : '';
+        const to = env.to && env.to.length ? env.to[0].address || '' : '';
         const subject = env.subject || '';
         const date = (msg.internalDate ? new Date(msg.internalDate) : new Date()).toISOString();
         const isRead = (msg.flags || []).includes('\\Seen');
@@ -290,11 +317,17 @@ function createInboxRouter({dbPath, imapConfig}) {
         msgs.push({
           id: `imap:${msg.uid}`,
           provider: 'imap',
-          from, to, subject, date, isRead,
-          preview: '' // można rozszerzyć: pobranie małego fragmentu (BODY.PEEK[TEXT]<0.256>)
+          from,
+          to,
+          subject,
+          date,
+          isRead,
+          preview: '',
         });
       }
-      msgs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      msgs.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
       return msgs;
     });
   }
@@ -303,10 +336,8 @@ function createInboxRouter({dbPath, imapConfig}) {
     const uid = Number(String(id).replace(/^imap:/, ''));
     return withImap(async (client) => {
       const {content} = await client.download(uid, null, {uid: true});
-      let chunks = [];
-      for await (const chunk of content) {
-        chunks.push(chunk);
-      }
+      const chunks = [];
+      for await (const chunk of content) chunks.push(chunk);
       const raw = Buffer.concat(chunks);
 
       // mailparser załatwia poprawne dekodowanie treści + charsetów
@@ -318,15 +349,19 @@ function createInboxRouter({dbPath, imapConfig}) {
       const date = (mail.date ? new Date(mail.date) : new Date()).toISOString();
 
       // Preferuj HTML, potem TEXT
-      const bodyHtml = mail.html ? (typeof mail.html === 'string' ? mail.html : '') : null;
+      const bodyHtml =
+        mail.html ? (typeof mail.html === 'string' ? mail.html : '') : null;
       const bodyText = mail.text || null;
 
       return {
         id: `imap:${uid}`,
         provider: 'imap',
-        from, to, subject, date,
+        from,
+        to,
+        subject,
+        date,
         bodyHtml,
-        bodyText
+        bodyText,
       };
     });
   }
@@ -353,20 +388,39 @@ function createInboxRouter({dbPath, imapConfig}) {
     routerDb.db.set('inboxRead', map).write();
   }
 
-  // ================= ROUTES =================
+  return {
+    routerDb,
+    isEmu,
+    mhList,
+    mhMessage,
+    imapList,
+    imapMessage,
+    imapMarkSeen,
+    getReadMap,
+    setRead,
+  };
+}
 
-  // GET /inbox/messages?limit=50&q=&from=&to=&subject=&dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&unread=1
-  r.get('/inbox/messages', async (req, res) => {
+/**
+ * Handler: GET /inbox/messages
+ */
+function createInboxListHandler({dbPath, imapConfig}) {
+  const ctx = createContext(dbPath, imapConfig);
+
+  return async function inboxListHandler(req, res) {
     try {
-      const limit = Math.min(parseInt(String(req.query.limit || '50'), 10) || 50, 200);
+      const limit = Math.min(
+        parseInt(String(req.query.limit || '50'), 10) || 50,
+        200
+      );
 
       let list = [];
-      if (isEmu) list = await mhList(limit);
-      else list = await imapList(limit);
+      if (ctx.isEmu) list = await ctx.mhList(limit);
+      else list = await ctx.imapList(limit);
 
-      if (isEmu) {
-        const rm = getReadMap();
-        list = list.map(m => ({...m, isRead: !!rm[m.id]}));
+      if (ctx.isEmu) {
+        const rm = ctx.getReadMap();
+        list = list.map((m) => ({...m, isRead: !!rm[m.id]}));
       }
 
       // Filtrowanie
@@ -375,7 +429,8 @@ function createInboxRouter({dbPath, imapConfig}) {
       const toF = String(req.query.to || '').trim().toLowerCase();
       const subjF = String(req.query.subject || '').trim().toLowerCase();
       const unreadParam = String(req.query.unread || '').trim().toLowerCase();
-      const unreadOnly = unreadParam === '1' || unreadParam === 'true' || unreadParam === 'yes';
+      const unreadOnly =
+        unreadParam === '1' || unreadParam === 'true' || unreadParam === 'yes';
 
       const dfRaw = String(req.query.dateFrom || '').trim();
       const dtRaw = String(req.query.dateTo || '').trim();
@@ -388,58 +443,87 @@ function createInboxRouter({dbPath, imapConfig}) {
       let filtered = list;
 
       if (q) {
-        filtered = filtered.filter(m => {
-          const bucket = `${m.from} ${m.to} ${m.subject} ${m.preview || ''}`.toLowerCase();
+        filtered = filtered.filter((m) => {
+          const bucket = `${m.from} ${m.to} ${m.subject} ${
+            m.preview || ''
+          }`.toLowerCase();
           return bucket.includes(q);
         });
       }
-      if (fromF) filtered = filtered.filter(m => norm(m.from).includes(fromF));
-      if (toF) filtered = filtered.filter(m => norm(m.to).includes(toF));
-      if (subjF) filtered = filtered.filter(m => norm(m.subject).includes(subjF));
-      if (dateFrom) filtered = filtered.filter(m => new Date(m.date) >= dateFrom);
-      if (dateTo) filtered = filtered.filter(m => new Date(m.date) <= dateTo);
-      if (unreadOnly) filtered = filtered.filter(m => !m.isRead);
+      if (fromF) filtered = filtered.filter((m) => norm(m.from).includes(fromF));
+      if (toF) filtered = filtered.filter((m) => norm(m.to).includes(toF));
+      if (subjF) filtered = filtered.filter((m) =>
+        norm(m.subject).includes(subjF)
+      );
+      if (dateFrom) filtered = filtered.filter((m) => new Date(m.date) >= dateFrom);
+      if (dateTo) filtered = filtered.filter((m) => new Date(m.date) <= dateTo);
+      if (unreadOnly) filtered = filtered.filter((m) => !m.isRead);
 
-      filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      filtered.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
 
       res.json({items: filtered});
     } catch (e) {
       console.error('❌ /inbox/messages error', e);
       res.status(500).json({error: 'internal'});
     }
-  });
+  };
+}
 
-  // GET /inbox/message/:id
-  r.get('/inbox/message/:id', async (req, res) => {
+/**
+ * Handler: GET /inbox/message/:id
+ */
+function createInboxGetMessageHandler({dbPath, imapConfig}) {
+  const ctx = createContext(dbPath, imapConfig);
+
+  return async function inboxGetMessageHandler(req, res) {
     try {
       const id = String(req.params.id);
-      const data = isEmu ? await mhMessage(id) : await imapMessage(id);
+      const data = ctx.isEmu ? await ctx.mhMessage(id) : await ctx.imapMessage(id);
       res.json(data);
     } catch (e) {
-      console.error('/inbox/message error', e);
+      console.error('❌ /inbox/message error', e);
       res.status(500).json({error: 'internal'});
     }
-  });
+  };
+}
 
-  // POST /inbox/markRead { id }
-  r.post('/inbox/markRead', async (req, res) => {
+/**
+ * Handler: POST /inbox/markRead  { id }
+ */
+function createInboxMarkReadHandler({dbPath, imapConfig}) {
+  const ctx = createContext(dbPath, imapConfig);
+
+  return async function inboxMarkReadHandler(req, res) {
     try {
       const id = String(req.body?.id || '');
       if (!id) return res.status(400).json({error: 'id required'});
 
-      if (isEmu) {
-        setRead(id, true);
+      if (ctx.isEmu) {
+        ctx.setRead(id, true);
         return res.json({ok: true});
       }
-      await imapMarkSeen(id);
+      await ctx.imapMarkSeen(id);
       res.json({ok: true});
     } catch (e) {
       console.error('❌ /inbox/markRead error', e);
       res.status(500).json({error: 'internal'});
     }
-  });
-
-  return r;
+  };
 }
 
-module.exports = {createInboxRouter};
+function inboxHandlers({dbPath, imapConfig}) {
+  return {
+    list: createInboxListHandler({dbPath, imapConfig}),
+    getMessage: createInboxGetMessageHandler({dbPath, imapConfig}),
+    markRead: createInboxMarkReadHandler({dbPath, imapConfig}),
+  };
+}
+
+module.exports = {
+  createInboxListHandler,
+  createInboxGetMessageHandler,
+  createInboxMarkReadHandler,
+  inboxHandlers,
+};
