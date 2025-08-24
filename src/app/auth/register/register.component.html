@@ -1,35 +1,46 @@
-<div class="container mt-4" style="max-width:400px">
-  <h2 class="mt-5">Rejestracja</h2>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="mb-3 mt-4">
-      <label>Email</label>
-      <input type="email" formControlName="email" class="form-control">
-      <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
-           class="text-danger small">
-        Wprowadź poprawny email
-      </div>
-    </div>
-    <div class="mb-3">
-      <label>Hasło</label>
-      <input type="password" formControlName="password" class="form-control">
-      <div *ngIf="form.get('password')?.errors?.['required'] && form.get('password')?.touched"
-           class="text-danger small">Hasło jest wymagane
-      </div>
-      <div *ngIf="form.get('password')?.errors?.['minlength'] && form.get('password')?.touched"
-           class="text-danger small">Min. 6 znaków
-      </div>
-    </div>
-    <div class="mb-3">
-      <label>Potwierdź hasło</label>
-      <input type="password" formControlName="confirm" class="form-control">
-      <div *ngIf="form.errors?.['mismatch'] && form.get('confirm')?.touched"
-           class="text-danger small">Hasła nie są zgodne
-      </div>
-    </div>
+<div class="auth-container container mt-4">
+  <div class="auth-card card shadow-soft p-4 p-md-5 mt-5">
+    <h2 class="auth-title mb-1">Rejestracja</h2>
+    <p class="auth-subtitle text-muted mb-4">Załóż konto i zacznij działać 🚀</p>
 
-    <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="mb-3 mt-2">
+        <label class="form-label">Email</label>
+        <input type="email" formControlName="email" class="form-control">
+        <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+             class="text-danger small mt-1">
+          Wprowadź poprawny email
+        </div>
+      </div>
 
-    <button class="btn btn-primary mt-2" type="submit" [disabled]="form.invalid">Zarejestruj się</button>
-    <a routerLink="/login" class="btn btn-link">Masz już konto? Zaloguj się</a>
-  </form>
+      <div class="mb-3">
+        <label class="form-label">Hasło</label>
+        <input type="password" formControlName="password" class="form-control">
+        <div *ngIf="form.get('password')?.errors?.['required'] && form.get('password')?.touched"
+             class="text-danger small mt-1">
+          Hasło jest wymagane
+        </div>
+        <div *ngIf="form.get('password')?.errors?.['minlength'] && form.get('password')?.touched"
+             class="text-danger small mt-1">
+          Min. 6 znaków
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Potwierdź hasło</label>
+        <input type="password" formControlName="confirm" class="form-control">
+        <div *ngIf="form.errors?.['mismatch'] && form.get('confirm')?.touched"
+             class="text-danger small mt-1">
+          Hasła nie są zgodne
+        </div>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+
+      <div class="d-flex align-items-center gap-2 mt-4">
+        <button class="btn btn-primary" type="submit" [disabled]="form.invalid">Zarejestruj się</button>
+        <a routerLink="/login" class="btn btn-link ms-2">Masz już konto? Zaloguj się</a>
+      </div>
+    </form>
+  </div>
 </div>

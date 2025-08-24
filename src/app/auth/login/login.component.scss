@@ -1,0 +1,35 @@
+.auth-container {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.auth-title {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.auth-subtitle {
+  margin-top: .1rem;
+}
+
+.btn-link {
+  color: var(--color-primary);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-primary-700);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--ring-primary);
+    border-radius: .4rem;
+  }
+}
