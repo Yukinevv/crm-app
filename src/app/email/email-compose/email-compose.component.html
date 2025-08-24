@@ -1,88 +1,109 @@
 <div class="container mt-4">
-    <h2>Nowa wiadomość</h2>
-    <form [formGroup]="form" (ngSubmit)="send()">
+  <h2>Nowa wiadomość</h2>
+  <form [formGroup]="form" (ngSubmit)="send()">
 
-        <!-- Wybór szablonu -->
-        <div class="mb-3 mt-4">
-            <label>Szablon</label>
-            <select formControlName="templateId" class="form-select ml-2">
-                <option value="">(Brak)</option>
-                <option *ngFor="let t of templates" [value]="t.id">{{ t.name }}</option>
-            </select>
-            <small class="text-muted d-block mt-1">
-                Pola typu data/godzina wybierzesz z kalendarza i zegara.
-            </small>
-        </div>
-        <!-- Zmienne z szablonu -->
-        <div *ngIf="placeholderKeys.length" formGroupName="variables" class="mb-3">
-            <div *ngFor="let key of placeholderKeys" class="mb-3">
-                <label class="form-label">{{ key }}</label>
-                <ng-container [ngSwitch]="variableTypes[key]">
-                    <!-- DATA -->
-                    <input
-                            *ngSwitchCase="'date'"
-                            [formControlName]="key"
-                            class="form-control"
-                            type="date"
-                    />
-                    <!-- GODZINA -->
-                    <input
-                            *ngSwitchCase="'time'"
-                            [formControlName]="key"
-                            class="form-control"
-                            type="time"
-                    />
-                    <!-- TEKST -->
-                    <input
-                            *ngSwitchDefault
-                            [formControlName]="key"
-                            class="form-control"
-                            type="text"
-                    />
-                </ng-container>
-            </div>
-        </div>
-        <hr>
+    <!-- Wybór szablonu -->
+    <div class="mb-3 mt-4">
+      <label>Szablon</label>
+      <select formControlName="templateId" class="form-select ml-2">
+        <option value="">(Brak)</option>
+        <option *ngFor="let t of templates" [value]="t.id">{{ t.name }}</option>
+      </select>
+      <small class="text-muted d-block mt-1">
+        Pola typu data/godzina wybierzesz z kalendarza i zegara.
+      </small>
+    </div>
 
-        <div class="mb-3 mt-4">
-            <label>Do</label>
-            <input formControlName="to" class="form-control">
-            <div *ngIf="form.get('to')?.invalid && form.get('to')?.touched" class="text-danger small">
-                Podaj poprawny adres email
-            </div>
-        </div>
-        <div class="mb-3">
-            <label>Temat</label>
-            <input formControlName="subject" class="form-control">
-            <div *ngIf="form.get('subject')?.invalid && form.get('subject')?.touched" class="text-danger small">
-                Podaj temat
-            </div>
-        </div>
-        <div class="mb-4">
-            <label>Treść</label>
-            <textarea formControlName="body" rows="8" class="form-control"></textarea>
-            <div *ngIf="form.get('body')?.invalid && form.get('body')?.touched" class="text-danger small">
-                Wpisz treść wiadomości
-            </div>
-            <small class="text-muted d-block mt-1">
-                Daty są automatycznie formatowane po polsku (np. "sobota, 9 sierpnia 2025").
-            </small>
-        </div>
+    <!-- Zmienne z szablonu -->
+    <div *ngIf="placeholderKeys.length" formGroupName="variables" class="mb-3">
+      <div *ngFor="let key of placeholderKeys" class="mb-3">
+        <label class="form-label">{{ key }}</label>
+        <ng-container [ngSwitch]="variableTypes[key]">
+          <!-- DATA -->
+          <input *ngSwitchCase="'date'" [formControlName]="key" class="form-control" type="date"/>
+          <!-- GODZINA -->
+          <input *ngSwitchCase="'time'" [formControlName]="key" class="form-control" type="time"/>
+          <!-- TEKST -->
+          <input *ngSwitchDefault [formControlName]="key" class="form-control" type="text"/>
+        </ng-container>
+        <small class="text-muted">Zmiana wartości nie nadpisze Twoich ręcznych edycji, jeśli wyłączysz auto-aktualizację
+          poniżej.</small>
+      </div>
+    </div>
+    <hr>
 
-        <!-- Tagowanie linków -->
-        <div class="form-check mb-3">
-            <input id="trackLinks" type="checkbox" class="form-check-input" formControlName="trackLinks">
-            <label for="trackLinks" class="form-check-label">
-                Taguj linki parametrami UTM (zalecane)
-            </label>
-            <small class="text-muted d-block">
-                Do każdego linku zostaną dodane: utm_source=crm-app, utm_medium=email,
-                utm_campaign=(temat), utm_content=(ID wiadomości), utm_recipient=(adresat).
-            </small>
-        </div>
+    <!-- Adresat -->
+    <div class="mb-3 mt-4">
+      <label>Do</label>
+      <input formControlName="to" class="form-control">
+      <div *ngIf="form.get('to')?.invalid && form.get('to')?.touched" class="text-danger small">
+        Podaj poprawny adres email
+      </div>
+    </div>
 
-        <button class="btn btn-primary" type="submit" [disabled]="form.invalid || sending">Wyślij</button>
-        <button class="btn btn-secondary ms-2 ml-2" type="button" (click)="cancel()">Anuluj</button>
-        <div *ngIf="error" class="text-danger mt-3">{{ error }}</div>
-    </form>
+    <!-- Temat + przełącznik auto-sync -->
+    <div class="mb-2 d-flex align-items-center justify-content-between">
+      <label class="mb-0">Temat</label>
+      <div class="form-check form-switch">
+        <input id="syncSubject" class="form-check-input" type="checkbox"
+               [checked]="syncSubject"
+               (change)="onToggleSync('subject', $any($event.target).checked)">
+        <label class="form-check-label small" for="syncSubject">
+          Aktualizuj z szablonu
+        </label>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-2 ml-3"
+                (click)="applyTemplateNow('subject')">
+          Zastosuj teraz
+        </button>
+      </div>
+    </div>
+    <div class="mb-3">
+      <input formControlName="subject" class="form-control">
+      <div *ngIf="form.get('subject')?.invalid && form.get('subject')?.touched" class="text-danger small">
+        Podaj temat
+      </div>
+    </div>
+
+    <!-- Treść + przełącznik auto-sync -->
+    <div class="mb-2 d-flex align-items-center justify-content-between">
+      <label class="mb-0">Treść</label>
+      <div class="form-check form-switch">
+        <input id="syncBody" class="form-check-input" type="checkbox"
+               [checked]="syncBody"
+               (change)="onToggleSync('body', $any($event.target).checked)">
+        <label class="form-check-label small" for="syncBody">
+          Aktualizuj z szablonu
+        </label>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-2 ml-3"
+                (click)="applyTemplateNow('body')">
+          Zastosuj teraz
+        </button>
+      </div>
+    </div>
+    <div class="mb-4">
+      <textarea formControlName="body" rows="8" class="form-control"></textarea>
+      <div *ngIf="form.get('body')?.invalid && form.get('body')?.touched" class="text-danger small">
+        Wpisz treść wiadomości
+      </div>
+      <small class="text-muted d-block mt-1">
+        Daty są automatycznie formatowane po polsku (np. "sobota, 9 sierpnia 2025").
+      </small>
+    </div>
+
+    <!-- Tagowanie linków -->
+    <div class="form-check mb-3">
+      <input id="trackLinks" type="checkbox" class="form-check-input" formControlName="trackLinks">
+      <label for="trackLinks" class="form-check-label">
+        Taguj linki parametrami UTM (zalecane)
+      </label>
+      <small class="text-muted d-block">
+        Do każdego linku zostaną dodane: utm_source=crm-app, utm_medium=email,
+        utm_campaign=(temat), utm_content=(ID wiadomości), utm_recipient=(adresat).
+      </small>
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="form.invalid || sending">Wyślij</button>
+    <button class="btn btn-secondary ms-2 ml-2" type="button" (click)="cancel()">Anuluj</button>
+    <div *ngIf="error" class="text-danger mt-3">{{ error }}</div>
+  </form>
 </div>

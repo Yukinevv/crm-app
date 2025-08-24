@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {EmailService} from '../email.service';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
 import {AuthService} from "../../auth/auth.service";
-import {Subscription, take} from "rxjs";
+import {distinctUntilChanged, Subscription, take} from "rxjs";
 import {Template} from "../template.model";
 import {TemplateService} from "../template.service";
 
@@ -21,7 +21,8 @@ type VarType = 'text' | 'date' | 'time';
     NgSwitchCase,
     NgSwitchDefault
   ],
-  styleUrls: ['./email-compose.component.scss']
+  styleUrls: ['./email-compose.component.scss'],
+  standalone: true
 })
 export class EmailComposeComponent implements OnInit, OnDestroy {
   form: FormGroup;
@@ -34,14 +35,25 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   placeholderKeys: string[] = [];
   variableTypes: Record<string, VarType> = {};
 
+  // Subskrypcje
   private varsSub?: Subscription;
+  private subjSub?: Subscription;
+  private bodySub?: Subscription;
+
+  // Flagi auto-sync z szablonu
+  syncSubject = true;
+  syncBody = true;
+
+  // Flaga by odróżniać zmiany programistyczne od użytkownika
+  private programmaticPatching = 0;
 
   constructor(
-      private fb: FormBuilder,
-      private emailService: EmailService,
-      private templateService: TemplateService,
-      private router: Router,
-      private auth: AuthService
+    private fb: FormBuilder,
+    private emailService: EmailService,
+    private templateService: TemplateService,
+    private router: Router,
+    private auth: AuthService,
+    private route: ActivatedRoute
   ) {
     this.form = this.fb.group({
       templateId: [''],
@@ -54,21 +66,52 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Pobierz listę szablonów
+    // Prefill z query params (np. odpowiedź)
+    const qp = this.route.snapshot.queryParamMap;
+    const to = qp.get('to') || '';
+    const subject = qp.get('subject') || '';
+    const body = qp.get('body') || '';
+    if (to || subject || body) {
+      this.patchProgrammatically(() => this.form.patchValue({to, subject, body}, {emitEvent: true}));
+      // skoro user przyszedł z Reply, domyślnie nie nadpisuj tego z szablonu
+      if (subject) this.syncSubject = false;
+      if (body) this.syncBody = false;
+    }
+
+    // Pobierz szablony
     this.templateService.getTemplates().subscribe(list => {
       this.templates = list;
     });
 
-    // Gdy użytkownik wybierze szablon
+    // Reakcja na wybór szablonu
     this.form.get('templateId')?.valueChanges.subscribe(id => {
       this.onTemplateSelect(id);
     });
+
+    // Jeśli użytkownik ręcznie zmieni temat/treść to wyłącz auto-sync
+    const subjCtrl = this.form.get('subject')!;
+    const bodyCtrl = this.form.get('body')!;
+
+    this.subjSub = subjCtrl.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe(() => {
+        if (!this.isProgrammatic()) this.syncSubject = false;
+      });
+
+    this.bodySub = bodyCtrl.valueChanges
+      .pipe(distinctUntilChanged())
+      .subscribe(() => {
+        if (!this.isProgrammatic()) this.syncBody = false;
+      });
   }
 
   ngOnDestroy(): void {
     this.varsSub?.unsubscribe();
+    this.subjSub?.unsubscribe();
+    this.bodySub?.unsubscribe();
   }
 
+  // ====== Obsługa wyboru szablonu ======
   private onTemplateSelect(id: string): void {
     // wyczyść poprzednią subskrypcję zmiennych
     this.varsSub?.unsubscribe();
@@ -77,15 +120,14 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       this.currentTemplate = undefined;
       this.placeholderKeys = [];
       this.variableTypes = {};
-      this.form.setControl('variables', this.fb.group({}));
-      this.form.patchValue({subject: '', body: ''}, {emitEvent: false});
+      this.patchProgrammatically(() => this.form.setControl('variables', this.fb.group({})));
       return;
     }
 
     this.templateService.getTemplate(id).subscribe(temp => {
       this.currentTemplate = temp;
 
-      // wykryj klucze zmiennych z subject + body
+      // wykryj klucze zmiennych z subject oraz body
       const keys = Array.from(new Set([
         ...this.extractKeys(temp.subject),
         ...this.extractKeys(temp.body)
@@ -100,21 +142,23 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       // zbuduj grupę formularza dla zmiennych
       const varsGroup: Record<string, any> = {};
       keys.forEach(k => (varsGroup[k] = ''));
-      this.form.setControl('variables', this.fb.group(varsGroup));
+      this.patchProgrammatically(() => this.form.setControl('variables', this.fb.group(varsGroup)));
 
       // dynamiczna aktualizacja subject/body przy zmianach zmiennych
       this.varsSub = this.form.get('variables')!.valueChanges.subscribe(() => {
-        this.updateFromTemplate();
+        this.updateFromTemplate(); // uwzględnia syncSubject/syncBody
       });
 
-      // inicjalne podstawienie
+      // Pierwsze podstawienie - tylko jeśli sync włączony
       this.updateFromTemplate();
     });
   }
 
-  /** Zamienia {{klucz}} na wartości z formularza, formatując date/time po polsku */
-  private updateFromTemplate(): void {
-    if (!this.currentTemplate) return;
+  /** Zbuduj teksty z szablonu + zmiennych (nie zapisuje jeszcze do form) */
+  private buildFromTemplate(): { subject: string; body: string } {
+    if (!this.currentTemplate) {
+      return {subject: this.form.get('subject')?.value || '', body: this.form.get('body')?.value || ''};
+    }
 
     let subj = this.currentTemplate.subject;
     let body = this.currentTemplate.body;
@@ -125,9 +169,9 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       let val = vars[key] || '';
 
       if (type === 'date' && val) {
-        val = this.formatDatePL(val); // 'YYYY-MM-DD' -> np. 'sobota, 9 sierpnia 2025'
+        val = this.formatDatePL(val); // 'YYYY-MM-DD' -> 'sobota, 9 sierpnia 2025'
       } else if (type === 'time' && val) {
-        val = this.formatTime(val);   // 'HH:mm' -> 'HH:mm'
+        val = this.formatTime(val);   // 'HH:mm'
       }
 
       const re = new RegExp(`{{\\s*${this.escapeRegExp(key)}\\s*}}`, 'g');
@@ -135,10 +179,77 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
       body = body.replace(re, val);
     });
 
-    this.form.patchValue({subject: subj, body: body}, {emitEvent: false});
+    return {subject: subj, body};
   }
 
-  /** Proste wykrywanie typu pola po nazwie zmiennej */
+  /** Aktualizuje pola z szablonu tylko gdy włączone syncSubject/syncBody */
+  private updateFromTemplate(): void {
+    const result = this.buildFromTemplate();
+    const subjCtrl = this.form.get('subject')!;
+    const bodyCtrl = this.form.get('body')!;
+
+    this.patchProgrammatically(() => {
+      if (this.syncSubject) subjCtrl.setValue(result.subject, {emitEvent: true});
+      if (this.syncBody) bodyCtrl.setValue(result.body, {emitEvent: true});
+    });
+  }
+
+  // ====== Publiczne akcje z UI ======
+
+  /** Ręczne zastosowanie szablonu teraz (nie zmienia stanu „sync”) */
+  applyTemplateNow(field: 'subject' | 'body' | 'both' = 'both'): void {
+    const result = this.buildFromTemplate();
+    this.patchProgrammatically(() => {
+      if (field === 'subject' || field === 'both') {
+        this.form.get('subject')!.setValue(result.subject, {emitEvent: true});
+      }
+      if (field === 'body' || field === 'both') {
+        this.form.get('body')!.setValue(result.body, {emitEvent: true});
+      }
+    });
+  }
+
+  /** Zmiana przełączników „Aktualizuj z szablonu” */
+  onToggleSync(field: 'subject' | 'body', checked: boolean): void {
+    if (field === 'subject') {
+      this.syncSubject = checked;
+    } else {
+      this.syncBody = checked;
+    }
+    // Jeśli użytkownik włączył sync to od razu nadpisujemy bieżącą wartość z szablonu
+    if (checked) {
+      if (field === 'subject') this.applyTemplateNow('subject');
+      if (field === 'body') this.applyTemplateNow('body');
+    }
+  }
+
+  // ====== Wysyłka / Anuluj ======
+  send(): void {
+    if (this.form.invalid) return;
+    this.sending = true;
+    this.error = null;
+
+    this.auth.user$.pipe(take(1)).subscribe(user => {
+      const fromEmail = user?.email ?? '';
+      const {to, subject, body, trackLinks} = this.form.value;
+
+      this.emailService.sendEmail({from: fromEmail, to, subject, body, trackLinks})
+        .subscribe({
+          next: () => this.router.navigate(['/email']),
+          error: () => {
+            this.error = 'Błąd wysyłki wiadomości';
+            this.sending = false;
+          }
+        });
+    });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/email']);
+  }
+
+  // ====== Utils ======
+
   private detectType(key: string): VarType {
     const k = key.trim().toLowerCase();
     if (['data', 'date', 'termin', 'dzień', 'dzien', 'day'].includes(k)) return 'date';
@@ -178,27 +289,16 @@ export class EmailComposeComponent implements OnInit, OnDestroy {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  send(): void {
-    if (this.form.invalid) return;
-    this.sending = true;
-    this.error = null;
-
-    this.auth.user$.pipe(take(1)).subscribe(user => {
-      const fromEmail = user?.email ?? '';
-      const {to, subject, body, trackLinks} = this.form.value;
-
-      this.emailService.sendEmail({from: fromEmail, to, subject, body, trackLinks})
-          .subscribe({
-            next: () => this.router.navigate(['/email']),
-            error: () => {
-              this.error = 'Błąd wysyłki wiadomości';
-              this.sending = false;
-            }
-          });
-    });
+  private patchProgrammatically(fn: () => void): void {
+    this.programmaticPatching++;
+    try {
+      fn();
+    } finally {
+      this.programmaticPatching--;
+    }
   }
 
-  cancel(): void {
-    this.router.navigate(['/email']);
+  private isProgrammatic(): boolean {
+    return this.programmaticPatching > 0;
   }
 }

@@ -1,0 +1,130 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Wyślij do wybranych kontaktów</h2>
+    <a routerLink="/email" class="btn btn-outline-secondary">← Skrzynka</a>
+  </div>
+
+  <!-- Wybór kontaktów -->
+  <div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <div>Odbiorcy</div>
+      <div class="d-flex" style="gap:.5rem;">
+        <input class="form-control form-control-sm" placeholder="Szukaj kontaktów…" [(ngModel)]="search"
+               (ngModelChange)="applyFilter()">
+        <button class="btn btn-sm btn-outline-primary" (click)="selectAllVisible()">Zaznacz widoczne</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearSelection()">Wyczyść</button>
+      </div>
+    </div>
+    <div class="card-body" style="max-height: 260px; overflow: auto;">
+      <table class="table table-sm align-middle">
+        <thead>
+        <tr>
+          <th style="width:32px;"></th>
+          <th>Kontakt</th>
+          <th>Email</th>
+          <th>Firma</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let c of filtered">
+          <td>
+            <input type="checkbox" [checked]="isSelected(c.id)" (change)="toggle(c.id, $event)">
+          </td>
+          <td><strong>{{ c.firstName }} {{ c.lastName }}</strong></td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.company }}</td>
+        </tr>
+        <tr *ngIf="!filtered.length">
+          <td colspan="4" class="text-center text-muted">Brak wyników</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer text-muted">
+      Wybrano: <strong>{{ selectedIds.size }}</strong> z {{ contacts.length }}
+    </div>
+  </div>
+
+  <!-- Formularz wiadomości -->
+  <form [formGroup]="form" (ngSubmit)="startSend()">
+    <div class="mb-3">
+      <label>Temat</label>
+      <input class="form-control" formControlName="subject" placeholder="Np. Szybkie podsumowanie">
+    </div>
+    <div class="mb-3">
+      <label>Treść</label>
+      <textarea class="form-control"
+                rows="8"
+                formControlName="body"
+                [attr.placeholder]="placeholderHint"></textarea>
+      <small class="text-muted d-block mt-1">
+        W temacie i treści działają zmienne:
+        <code>{{ '{' }}{{ 'firstName' }}{{ '}' }}</code>,
+        <code>{{ '{' }}{{ 'lastName' }}{{ '}' }}</code>,
+        <code>{{ '{' }}{{ 'company' }}{{ '}' }}</code>,
+        <code>{{ '{' }}{{ 'email' }}{{ '}' }}</code>,
+        <code>{{ '{' }}{{ 'position' }}{{ '}' }}</code>.
+      </small>
+    </div>
+
+    <div class="form-check mb-3">
+      <input id="trackLinks" type="checkbox" class="form-check-input" formControlName="trackLinks">
+      <label for="trackLinks" class="form-check-label">
+        Taguj linki parametrami UTM i śledź kliknięcia
+      </label>
+    </div>
+
+    <button class="btn btn-primary" type="submit" [disabled]="form.invalid || selectedIds.size===0 || sending">
+      Wyślij {{ selectedIds.size }} wiadomości
+    </button>
+    <button class="btn btn-outline-secondary ms-2 ml-2" type="button" (click)="cancel()" [disabled]="!sending">
+      Przerwij
+    </button>
+    <button class="btn btn-outline-secondary ms-2 ml-2" type="button" (click)="reset()"
+            [disabled]="sending || !rows.length">Resetuj
+    </button>
+  </form>
+
+  <!-- Postęp -->
+  <div class="mt-4" *ngIf="rows.length">
+    <div class="mb-2">
+      <div class="progress" style="height: 10px;">
+        <div class="progress-bar" role="progressbar" [style.width.%]="progress*100"></div>
+      </div>
+      <div class="small text-muted mt-1">
+        Wysłano: {{ summary.ok }} | Błędy: {{ summary.fail }} | Razem: {{ summary.total }}
+      </div>
+    </div>
+
+    <div class="table-responsive" style="max-height: 320px; overflow:auto;">
+      <table class="table table-sm align-middle">
+        <thead>
+        <tr>
+          <th>Odbiorca</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Błąd</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let r of rows">
+          <td>{{ r.name }}</td>
+          <td>{{ r.email }}</td>
+          <td>
+              <span class="badge"
+                    [ngClass]="{
+                      'bg-secondary': r.status==='pending',
+                      'bg-info': r.status==='sending',
+                      'bg-success': r.status==='sent',
+                      'bg-danger': r.status==='error'
+                    }">
+                {{ r.status }}
+              </span>
+          </td>
+          <td class="text-muted small">{{ r.error || '—' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
