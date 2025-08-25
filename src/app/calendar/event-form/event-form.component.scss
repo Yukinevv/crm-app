@@ -1,35 +1,185 @@
+:host {
+  display: block;
+}
+
 .container {
   max-width: 600px;
 }
 
+h2 {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* Karta formularza */
+form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 1rem 1.25rem;
+
+  @media (min-width: 576px) {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+}
+
+/* Labelki i inputs */
+label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.form-control,
+.form-select {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: .6rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--ring-primary);
+  outline: none;
+}
+
+/* Datetime */
+input[type="datetime-local"].form-control,
+input[type="number"].form-control {
+  min-height: 2.5rem;
+}
+
+/* Checkbox */
+.form-check-input {
+  border-radius: .5rem;
+  border-color: var(--color-border);
+
+  &:focus {
+    box-shadow: var(--ring-primary);
+    border-color: var(--color-primary);
+  }
+}
+
+/* Uczestnicy */
+
 .participants-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: .5rem;
+  margin-top: .5rem;
 }
 
+/* Chip (edycja twórcy) */
 .participant-chip {
   display: inline-flex;
   align-items: center;
-  background-color: #e9f7ef;
-  color: #155724;
-  border-radius: 16px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.875rem;
+  gap: .5rem;
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, var(--color-primary) 40%);
+  background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+  color: var(--color-text);
+  font-size: .875rem;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: color-mix(in srgb, var(--color-border) 45%, var(--color-primary) 55%);
+  }
+
+  .btn-remove {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+
+    &:hover {
+      background: color-mix(in srgb, #ef4444 16%, var(--color-surface) 84%);
+      color: #b91c1c;
+      border-color: color-mix(in srgb, var(--color-border) 40%, #ef4444 60%);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--ring-danger);
+    }
+  }
 }
 
-.participant-chip .btn-remove {
-  background: transparent;
-  border: none;
-  margin-left: 0.5rem;
-  font-size: 1rem;
-  line-height: 1;
-  color: inherit;
-  cursor: pointer;
+/* Lista uczestników (read-only) */
+.list-group {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  background: var(--color-surface);
 }
 
-.participant-chip .btn-remove:hover {
-  opacity: 0.7;
-  color: crimson;
+.list-group-item {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  transition: background-color var(--transition-fast);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary-100) 8%);
+  }
+
+  .btn.btn-outline-primary {
+    border-color: var(--color-border);
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+      background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+    }
+  }
+}
+
+/* Wiersze dat i akcji */
+.row {
+  row-gap: .75rem;
+}
+
+/* Przyciski akcji */
+.btn {
+  border-radius: .6rem;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Sekcja ładowania (ng-template) */
+:host ::ng-deep .text-center .spinner-border {
+  color: var(--color-primary);
+}
+
+/* Walidacja */
+.text-danger.small {
+  margin-top: .25rem;
+}
+
+/* Drobne korekty spacingu w nagłówkach sekcji formularza */
+.mb-3.mt-4 > label {
+  margin-bottom: .35rem;
 }

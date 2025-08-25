@@ -1,23 +1,161 @@
+:host {
+  display: block;
+}
+
+h2 {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* Przyciski */
+.btn {
+  border-radius: .6rem;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Etapy (kolumny) */
+
+/* Rząd kolumn */
 .stage-row {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding-bottom: .25rem;
 }
 
+/* Pojedyncza kolumna etapu */
 .stage-column {
-  width: 220px;
-  flex-shrink: 0;
+  flex: 1 1 280px; /* baza do wyliczania kolumn w rzędzie */
+  min-width: 260px;
+  max-width: 320px;
+
+  h5 {
+    text-align: center;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: .5rem;
+  }
 }
 
+/* Lista (obszar drop) w kolumnie */
 .list-container {
-  min-height: 200px;
-  border: 2px dashed #ced4da;
-  padding: 0.5rem;
-  background-color: #f8f9fa;
+  min-height: 260px;
+  padding: .6rem;
+  border: 1px dashed color-mix(in srgb, var(--color-border) 60%, var(--color-primary) 40%);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 95%, var(--color-primary-100) 5%);
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: color-mix(in srgb, var(--color-border) 45%, var(--color-primary) 55%);
+  }
+
+  &.cdk-drop-list-dragging,
+  &.cdk-drop-list-receiving {
+    border-style: solid;
+    background: color-mix(in srgb, var(--color-surface) 90%, var(--color-primary-100) 10%);
+    box-shadow: var(--shadow-md);
+  }
 }
 
+/* Karta leada (element drag) */
 .lead-card {
-  border: 1px solid #adb5bd;
-  padding: 0.5rem;
-  background-color: #fff;
-  border-radius: 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: .75rem .8rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
   cursor: move;
+  transition: transform var(--transition-fast),
+  box-shadow var(--transition-fast),
+  border-color var(--transition-fast),
+  background-color var(--transition-fast);
+
+  strong {
+    display: block;
+    color: var(--color-text);
+  }
+
+  small {
+    color: var(--color-muted);
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+  }
+
+  &.cdk-drag-dragging {
+    opacity: .6;
+  }
+
+  .btn.btn-outline-secondary {
+    border-color: var(--color-border);
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+      background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+    }
+  }
+}
+
+/* Podgląd przeciągania (renderowany poza layoutem) */
+.cdk-drag-preview {
+  border: 1px solid color-mix(in srgb, var(--color-border) 40%, var(--color-primary) 60%);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  padding: .75rem .8rem;
+  transform: rotate(1deg);
+}
+
+/* Placeholder w miejscu przenoszonego elementu */
+.cdk-drag-placeholder {
+  opacity: .15;
+  border: 2px dashed color-mix(in srgb, var(--color-border) 45%, var(--color-primary) 55%);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+  min-height: 48px;
+}
+
+/* Płynność animacji */
+.cdk-drag-animating {
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+/* Alert pustych etapów */
+.alert.alert-info {
+  margin: 1rem 0 1.25rem;
+}
+
+@media (max-width: 991.98px) {
+  .stage-column {
+    flex: 1 1 320px; /* odrobinę szersze, by częściej były 2 w rzędzie */
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .stage-row {
+    gap: .85rem;
+  }
+  .stage-column {
+    flex: 1 1 100%;
+    min-width: min(420px, 100%);
+    max-width: 100%;
+  }
 }

@@ -1,9 +1,9 @@
 <div class="container mt-4" style="max-width:600px" *ngIf="!loading; else loadingTpl">
-  <h2 *ngIf="!editId">Nowe spotkanie</h2>
-  <h2 *ngIf="editId">{{ isCreator ? 'Edycja spotkania' : 'Szczegóły spotkania' }}</h2>
+  <h2 class="mb-4" *ngIf="!editId">Nowe spotkanie</h2>
+  <h2 class="mb-4" *ngIf="editId">{{ isCreator ? 'Edycja spotkania' : 'Szczegóły spotkania' }}</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="mb-3 mt-4">
+    <div class="mb-3 mt-2">
       <label>Tytuł</label>
       <input formControlName="title" class="form-control">
       <div *ngIf="form.get('title')?.invalid && form.get('title')?.touched"
@@ -76,7 +76,7 @@
       <label for="allDay" class="form-check-label">Cały dzień</label>
     </div>
 
-    <div class="mb-3 mt-3">
+    <div class="mb-4 mt-3">
       <label>Przypomnienie (min przed)</label>
       <input type="number" formControlName="reminderMinutesBefore" class="form-control">
     </div>
