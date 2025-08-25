@@ -1,23 +1,69 @@
+/* Strona statystyk kliknięć */
+.container {
+  max-width: 1100px;
+}
+
+/* Nagłówek strony */
+.d-flex.align-items-center.mb-3 {
+  h2 {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .btn {
+    border-radius: .6rem;
+    box-shadow: var(--shadow-xs);
+
+    &:hover {
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+/* Stan ładowania / błąd */
+.spinner-border {
+  vertical-align: middle;
+}
+
+.text-danger {
+  font-weight: 500;
+}
+
+/* Karty child-komponentów korzystają z globalnych styli .card/.card-header,
+   tu tylko drobne dopieszczenia odstępów */
+app-email-stats-overview,
+app-email-stats-details {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+/* Tabele – ujednolicone pionowe centrowanie */
 .table {
   th, td {
     vertical-align: middle;
   }
 }
 
+/* Wspólny kontener na wykresy */
 .chart-holder {
   position: relative;
   width: 100%;
   height: 300px;
   min-height: 300px;
-}
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 
-.chart-holder.small-chart {
-  height: 260px;
-  min-height: 260px;
-}
+  &.small-chart {
+    height: 260px;
+    min-height: 260px;
+  }
 
-.chart-holder > canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
+  > canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
 }

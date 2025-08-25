@@ -1,0 +1,216 @@
+:host {
+  display: block;
+}
+
+/* Layout strony */
+.container {
+  max-width: 920px;
+}
+
+h2 {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+/* Karta formularza */
+form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 1.25rem;
+
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+/* Etykiety i drobne opisy */
+label,
+.form-label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+small.text-muted {
+  color: var(--color-muted) !important;
+}
+
+/* Separator sekcji */
+hr {
+  margin: 1rem 0 1.25rem;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  opacity: 1;
+}
+
+/* Pola formularza */
+.form-control,
+.form-select {
+  border-radius: .6rem;
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: none;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: var(--ring-primary);
+    outline: none;
+  }
+}
+
+textarea.form-control {
+  min-height: 10rem;
+  line-height: 1.45;
+}
+
+/* Sekcja "Wybór szablonu" */
+.mb-3.mt-4 > .form-select {
+  margin-left: .25rem; /* delikatne wyrównanie z etykietą */
+}
+
+/* Sekcja zmiennych z szablonu */
+[formGroupName='variables'] {
+  border: 1px dashed color-mix(in srgb, var(--color-border) 70%, var(--color-primary) 30%);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 96%, var(--color-primary-100) 4%);
+  padding: .75rem .75rem .25rem;
+
+  > div {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    padding: .75rem;
+    margin-bottom: .5rem;
+    box-shadow: var(--shadow-xs);
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+    &:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+    }
+
+    .form-label {
+      margin-bottom: .35rem;
+      color: var(--color-muted);
+      font-weight: 600;
+    }
+  }
+}
+
+/* Przełączniki auto-sync (Temat/Treść) */
+.form-check.form-switch {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding-left: 0;
+
+  .form-check-input {
+    width: 1.5rem;
+    height: 1.1rem;
+    margin-left: -28px;
+    margin-bottom: 2px;
+    cursor: pointer;
+
+    &:focus {
+      box-shadow: var(--ring-primary);
+    }
+  }
+
+  .form-check-label {
+    margin-left: .25rem;
+    color: var(--color-muted);
+  }
+
+  .btn.btn-sm {
+    border-radius: .5rem;
+  }
+}
+
+/* Wiersze nagłówków sekcji (etykieta + przełącznik) */
+.mb-2.d-flex.align-items-center.justify-content-between {
+  padding: .35rem .5rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg) 6%);
+  border: 1px solid var(--color-border);
+
+  label.mb-0 {
+    font-weight: 700;
+  }
+}
+
+/* Checkbox UTM */
+.form-check {
+  .form-check-input {
+    cursor: pointer;
+
+    &:focus {
+      box-shadow: var(--ring-primary);
+    }
+  }
+
+  .form-check-label {
+    margin-left: .35rem;
+    color: var(--color-text);
+  }
+}
+
+/* Walidacje / błędy */
+.text-danger.small,
+.text-danger.mt-3 {
+  font-weight: 500;
+}
+
+.text-danger.mt-3 {
+  padding: .5rem .75rem;
+  background: color-mix(in srgb, var(--color-surface) 85%, var(--color-danger) 15%);
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-danger) 30%);
+  border-radius: var(--radius-sm);
+}
+
+/* Przyciski akcji */
+.btn {
+  border-radius: .6rem;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  background: color-mix(in srgb, var(--color-surface) 90%, var(--color-bg) 10%);
+  border-color: var(--color-border);
+  color: var(--color-text);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-surface) 84%, var(--color-primary-100) 16%);
+    border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+  }
+}
+
+/* Responsywność */
+@media (max-width: 575.98px) {
+  form {
+    padding: 1rem;
+  }
+
+  .mb-2.d-flex.align-items-center.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+
+  .form-check.form-switch {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
