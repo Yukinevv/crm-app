@@ -1,222 +1,826 @@
 {
   "contacts": [
     {
-      "id": "4242",
+      "id": "ct_001",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "firstName": "Adrian",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "883640881",
-      "email": "adrianrodzic33@gmail.com",
-      "address": "Szarych Szeregów 19/33",
-      "notes": "",
+      "firstName": "Piotr",
+      "lastName": "Zając",
+      "company": "ACME Sp. z o.o.",
+      "companyId": null,
+      "position": "CEO",
+      "phone": "+48 501 000 001",
+      "email": "piotr.zajac@acme.pl",
+      "address": "ul. Prosta 10, 00-850 Warszawa",
+      "notes": "Główny decydent po stronie ACME.",
       "tags": [
-        [
-          "VIP"
-        ]
+        "VIP",
+        "Kluczowy"
       ],
-      "status": "",
-      "createdAt": "2025-07-16T12:15:00.000Z",
-      "source": "",
-      "region": "Kujawsko-Pomorskie",
-      "managerId": "b756",
-      "decisionMakerId": "a01c"
+      "status": "Klient",
+      "createdAt": "2024-01-10T09:15:00.000Z",
+      "source": "Polecenie",
+      "region": "Mazowieckie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
     },
     {
-      "id": "a01c",
-      "firstName": "Mariusz",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "693559906",
-      "email": "mariuszrodzic08@gmail.com",
-      "address": "Szarych Szeregów, 19, 33",
-      "notes": "",
-      "tags": [],
-      "status": "",
-      "createdAt": "2025-07-16T12:21:00.000Z",
-      "source": "",
-      "region": "",
-      "managerId": "4242",
-      "linkedUid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
-    },
-    {
-      "id": "654b",
+      "id": "ct_002",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "firstName": "Adrian",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "883640881",
-      "email": "adrianrodzic33@gmail.com",
-      "address": "Szarych Szeregów 19/33",
-      "notes": "",
-      "tags": [],
-      "status": "",
-      "createdAt": "2025-07-17T07:54:00.000Z",
-      "source": "",
-      "region": "Kujawsko-Pomorskie"
+      "firstName": "Anna",
+      "lastName": "Wójcik",
+      "company": "ACME Sp. z o.o.",
+      "companyId": "ct_001",
+      "position": "Procurement Manager",
+      "phone": "+48 501 000 002",
+      "email": "anna.wojcik@acme.pl",
+      "address": "ul. Prosta 10, 00-850 Warszawa",
+      "notes": "Kontakt operacyjny. Zarządza zapytaniami ofertowymi.",
+      "tags": [
+        "Lead",
+        "Newsletter"
+      ],
+      "status": "W trakcie",
+      "createdAt": "2024-02-02T11:30:00.000Z",
+      "source": "WWW",
+      "region": "Mazowieckie",
+      "managerId": "ct_001",
+      "decisionMakerId": "ct_001",
+      "linkedUid": null
     },
     {
-      "id": "1211",
+      "id": "ct_003",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "firstName": "Mariusz",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "693559906",
-      "email": "mariuszrodzic08@gmail.com",
-      "address": "Szarych Szeregów, 19, 33",
-      "notes": "",
-      "tags": [],
-      "status": "",
-      "createdAt": "2025-07-17T07:55:00.000Z",
-      "source": "",
-      "region": ""
+      "firstName": "Marek",
+      "lastName": "Lewandowski",
+      "company": "ACME Sp. z o.o.",
+      "companyId": "ct_001",
+      "position": "IT Lead",
+      "phone": "+48 501 000 003",
+      "email": "marek.lewandowski@acme.pl",
+      "address": "ul. Prosta 10, 00-850 Warszawa",
+      "notes": "Techniczne wymagania i integracje.",
+      "tags": [
+        "Techniczny"
+      ],
+      "status": "Prospekt",
+      "createdAt": "2024-02-15T08:00:00.000Z",
+      "source": "Kampania",
+      "region": "Mazowieckie",
+      "managerId": "ct_001",
+      "decisionMakerId": "ct_001",
+      "linkedUid": null
     },
     {
-      "id": "524e",
+      "id": "ct_004",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "firstName": "Adrian",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "883640881",
-      "email": "adrianrodzic33@gmail.com",
-      "address": "Szarych Szeregów 19/33",
-      "notes": "",
-      "tags": [],
-      "status": "",
-      "createdAt": "2025-07-17T07:56:00.000Z",
-      "source": "",
-      "region": "Kujawsko-Pomorskie"
+      "firstName": "Monika",
+      "lastName": "Jabłońska",
+      "company": "ACME Sp. z o.o.",
+      "companyId": "ct_001",
+      "position": "HR Business Partner",
+      "phone": "+48 501 000 004",
+      "email": "monika.jablonska@acme.pl",
+      "address": "ul. Prosta 10, 00-850 Warszawa",
+      "notes": "Współpraca przy wdrożeniu szkoleniowym.",
+      "tags": [
+        "HR"
+      ],
+      "status": "Prospekt",
+      "createdAt": "2024-03-05T13:45:00.000Z",
+      "source": "Targi",
+      "region": "Mazowieckie",
+      "managerId": "ct_001",
+      "decisionMakerId": "ct_001",
+      "linkedUid": null
     },
     {
-      "id": "4b0e",
+      "id": "ct_005",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "firstName": "Mariusz",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "693559906",
-      "email": "mariuszrodzic08@gmail.com",
-      "address": "Szarych Szeregów, 19, 33",
-      "notes": "",
-      "tags": [],
-      "status": "",
-      "createdAt": "2025-07-17T07:56:00.000Z",
-      "source": "",
-      "region": ""
+      "firstName": "Tomasz",
+      "lastName": "Krawczyk",
+      "company": "Northwind S.A.",
+      "companyId": null,
+      "position": "CTO",
+      "phone": "+48 502 100 001",
+      "email": "t.krawczyk@northwind.com.pl",
+      "address": "ul. Długa 20, 31-147 Kraków",
+      "notes": "Decydent technologiczny.",
+      "tags": [
+        "Kluczowy"
+      ],
+      "status": "Klient",
+      "createdAt": "2024-01-22T10:00:00.000Z",
+      "source": "LinkedIn",
+      "region": "Małopolskie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
     },
     {
-      "firstName": "Mariusz",
-      "lastName": "Rodzic",
-      "company": "",
-      "position": "",
-      "phone": "",
-      "email": "mariuszrodzic08@gmail.com",
-      "address": "",
-      "notes": "",
-      "tags": [],
-      "status": "",
-      "createdAt": "2025-08-01T16:45:38.865Z",
-      "source": "Z zaproszenia",
-      "region": "",
+      "id": "ct_006",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "firstName": "Karolina",
+      "lastName": "Dąbrowska",
+      "company": "Northwind S.A.",
+      "companyId": "ct_005",
+      "position": "Project Manager",
+      "phone": "+48 502 100 002",
+      "email": "k.dabrowska@northwind.com.pl",
+      "address": "ul. Długa 20, 31-147 Kraków",
+      "notes": "Koordynuje rollout.",
+      "tags": [
+        "PM",
+        "Newsletter"
+      ],
+      "status": "W trakcie",
+      "createdAt": "2024-03-12T09:20:00.000Z",
+      "source": "WWW",
+      "region": "Małopolskie",
+      "managerId": "ct_005",
+      "decisionMakerId": "ct_005",
+      "linkedUid": null
+    },
+    {
+      "id": "ct_007",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "firstName": "Adam",
+      "lastName": "Nowicki",
+      "company": "Globex",
+      "companyId": null,
+      "position": "Sales Director",
+      "phone": "+48 503 200 001",
+      "email": "adam.nowicki@globex.io",
+      "address": "al. Grunwaldzka 100, 80-244 Gdańsk",
+      "notes": "Prowadzi negocjacje.",
+      "tags": [
+        "Negocjacje"
+      ],
+      "status": "Prospekt",
+      "createdAt": "2024-02-01T15:10:00.000Z",
+      "source": "Targi",
+      "region": "Pomorskie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
+    },
+    {
+      "id": "ct_008",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "firstName": "Julia",
+      "lastName": "Piątek",
+      "company": "Globex",
+      "companyId": "ct_007",
+      "position": "Business Analyst",
+      "phone": "+48 503 200 002",
+      "email": "julia.piatek@globex.io",
+      "address": "al. Grunwaldzka 100, 80-244 Gdańsk",
+      "notes": "Analiza procesów, zbiera wymagania.",
+      "tags": [
+        "Analiza"
+      ],
+      "status": "Nowy",
+      "createdAt": "2024-03-20T12:00:00.000Z",
+      "source": "WWW",
+      "region": "Pomorskie",
+      "managerId": "ct_007",
+      "decisionMakerId": "ct_007",
+      "linkedUid": null
+    },
+    {
+      "id": "ct_009",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "firstName": "Michał",
+      "lastName": "Pawlak",
+      "company": "Initech",
+      "companyId": null,
+      "position": "Operations Director",
+      "phone": "+48 504 300 001",
+      "email": "m.pawlak@initech.com",
+      "address": "ul. Powstańców 12, 50-030 Wrocław",
+      "notes": "Decydent operacyjny.",
+      "tags": [
+        "Ops"
+      ],
+      "status": "Prospekt",
+      "createdAt": "2024-01-28T08:45:00.000Z",
+      "source": "Polecenie",
+      "region": "Dolnośląskie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
+    },
+    {
+      "id": "ct_010",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "firstName": "Katarzyna",
+      "lastName": "Mazur",
+      "company": "Initech",
+      "companyId": "ct_009",
+      "position": "Senior Engineer",
+      "phone": "+48 504 300 002",
+      "email": "k.mazur@initech.com",
+      "address": "ul. Powstańców 12, 50-030 Wrocław",
+      "notes": "Weryfikacja techniczna POC.",
+      "tags": [
+        "Techniczny",
+        "POC"
+      ],
+      "status": "W trakcie",
+      "createdAt": "2024-03-08T14:25:00.000Z",
+      "source": "LinkedIn",
+      "region": "Dolnośląskie",
+      "managerId": "ct_009",
+      "decisionMakerId": "ct_009",
+      "linkedUid": null
+    },
+    {
+      "id": "ct_011",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "firstName": "Ewelina",
+      "lastName": "Sikora",
+      "company": "Freelance",
+      "companyId": null,
+      "position": "Consultant",
+      "phone": "+48 505 400 001",
+      "email": "ewelina.sikora@example.com",
+      "address": "ul. Leśna 3, 05-500 Piaseczno",
+      "notes": "Doradza w wyborze rozwiązania.",
+      "tags": [
+        "Doradca"
+      ],
+      "status": "Prospekt",
+      "createdAt": "2024-04-01T10:10:00.000Z",
+      "source": "WWW",
+      "region": "Mazowieckie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
+    },
+    {
+      "id": "ct_201",
       "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
-      "id": "ITPo-qt"
+      "firstName": "Alicja",
+      "lastName": "Kaczmarek",
+      "company": "Umbrella S.A.",
+      "companyId": null,
+      "position": "CFO",
+      "phone": "+48 511 900 001",
+      "email": "a.kaczmarek@umbrella.pl",
+      "address": "ul. Wspólna 5, 00-940 Warszawa",
+      "notes": "Konta drugiego użytkownika (separacja danych).",
+      "tags": [
+        "Finanse"
+      ],
+      "status": "Klient",
+      "createdAt": "2024-01-12T09:00:00.000Z",
+      "source": "Polecenie",
+      "region": "Mazowieckie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
+    },
+    {
+      "id": "ct_202",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "firstName": "Paweł",
+      "lastName": "Lis",
+      "company": "Umbrella S.A.",
+      "companyId": "ct_201",
+      "position": "Buyer",
+      "phone": "+48 511 900 002",
+      "email": "p.lis@umbrella.pl",
+      "address": "ul. Wspólna 5, 00-940 Warszawa",
+      "notes": "Zakupy operacyjne.",
+      "tags": [
+        "Zakupy"
+      ],
+      "status": "W trakcie",
+      "createdAt": "2024-02-10T10:00:00.000Z",
+      "source": "WWW",
+      "region": "Mazowieckie",
+      "managerId": "ct_201",
+      "decisionMakerId": "ct_201",
+      "linkedUid": null
+    },
+    {
+      "id": "ct_203",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "firstName": "Bartosz",
+      "lastName": "Król",
+      "company": "Soylent",
+      "companyId": null,
+      "position": "Head of Operations",
+      "phone": "+48 511 900 003",
+      "email": "b.krol@soylent.pl",
+      "address": "ul. Portowa 7, 81-001 Gdynia",
+      "notes": "Drugi tenant – inna firma i region.",
+      "tags": [
+        "Ops"
+      ],
+      "status": "Prospekt",
+      "createdAt": "2024-03-15T12:40:00.000Z",
+      "source": "LinkedIn",
+      "region": "Pomorskie",
+      "managerId": null,
+      "decisionMakerId": null,
+      "linkedUid": null
+    },
+    {
+      "firstName": "Mariusz",
+      "lastName": "Rodzic",
+      "company": "",
+      "position": "",
+      "phone": "693559906",
+      "email": "mariuszrodzic08@gmail.com",
+      "address": "Szarych Szeregów, 19, 33",
+      "notes": "",
+      "tags": [],
+      "status": "",
+      "createdAt": "2025-08-26T08:42:00.000Z",
+      "source": "",
+      "region": "",
+      "linkedUid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "id": "2UgD140"
     }
   ],
   "stages": [
     {
-      "id": "a6cc",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "name": "Etap drugi",
+      "id": "stg_new",
+      "name": "Nowy",
       "order": 1
     },
     {
-      "id": "b385",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "name": "Etap drugi nowy",
+      "id": "stg_qual",
+      "name": "Kwalifikacja",
       "order": 2
     },
     {
-      "id": "fac8",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "name": "Etap trzeci",
-      "order": 4
-    },
-    {
-      "id": "9db2",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "name": "Etap czwarty",
+      "id": "stg_discovery",
+      "name": "Discovery",
       "order": 3
     },
     {
-      "id": "970a",
+      "id": "stg_proposal",
       "name": "Oferta",
-      "order": 5,
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
+      "order": 4
+    },
+    {
+      "id": "stg_negotiation",
+      "name": "Negocjacje",
+      "order": 5
+    },
+    {
+      "id": "stg_won",
+      "name": "Wygrane",
+      "order": 6
+    },
+    {
+      "id": "stg_lost",
+      "name": "Przegrane",
+      "order": 7
     }
   ],
   "leads": [
     {
-      "id": "ea59",
+      "id": "lead_001",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "title": "Lead 1",
-      "description": "Testowy opis",
-      "stageId": "fac8",
-      "createdAt": "2025-07-18T20:26:07.364Z",
-      "stageChangedAt": "2025-07-19T12:23:51.578Z",
+      "title": "ACME - wdrożenie CRM (pilotaż)",
+      "description": "Pilotaż dla zespołu sprzedaży, integracja z e-mail.",
+      "stageId": "stg_discovery",
+      "createdAt": "2024-02-01T09:15:00.000Z",
+      "stageChangedAt": "2024-02-10T12:00:00.000Z",
       "notes": [
         {
-          "id": "ee587cf3-2d07-4ed6-a1fc-194d3b6793a0",
-          "text": "Testowa notatka",
-          "createdAt": "2025-07-18T20:26:27.360Z"
+          "id": "note_001a",
+          "text": "Kickoff z ACME - zdefiniowano zakres pilotażu.",
+          "createdAt": "2024-02-01T10:00:00.000Z"
+        },
+        {
+          "id": "note_001b",
+          "text": "Potwierdzone osoby testujące: Anna, Marek, Monika.",
+          "createdAt": "2024-02-05T14:20:00.000Z"
         }
       ],
       "checklist": [
         {
-          "id": "2d570870-10d0-47da-ae7e-edb375d244cd",
-          "text": "Checklista 1",
+          "id": "cl_001a",
+          "text": "Dostęp do skrzynek IMAP",
+          "done": true
+        },
+        {
+          "id": "cl_001b",
+          "text": "Przygotowanie szablonów e-mail",
+          "done": false
+        },
+        {
+          "id": "cl_001c",
+          "text": "Import kontaktów próbnych",
+          "done": true
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_001a",
+          "fileName": "zakres-pilotazu.txt",
+          "dataUrl": "data:text/plain;base64,WmFrcmVzIHBpbG90YXp1IC0gZG9nYWR6aWU="
+        }
+      ]
+    },
+    {
+      "id": "lead_002",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "title": "Northwind - PoC integracji",
+      "description": "Dowód koncepcji dla integracji z kalendarzem.",
+      "stageId": "stg_proposal",
+      "createdAt": "2024-02-12T08:30:00.000Z",
+      "stageChangedAt": "2024-02-18T16:45:00.000Z",
+      "notes": [
+        {
+          "id": "note_002a",
+          "text": "Zamknięto discovery - przejście do oferty.",
+          "createdAt": "2024-02-15T11:10:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_002a",
+          "text": "Opis integracji ICS",
+          "done": true
+        },
+        {
+          "id": "cl_002b",
+          "text": "Kalkulacja kosztów",
+          "done": true
+        },
+        {
+          "id": "cl_002c",
+          "text": "Warianty SLA",
+          "done": false
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_002a",
+          "fileName": "oferta-v1.txt",
+          "dataUrl": "data:text/plain;base64,T2ZlcnRhIHYxIC0gcmFtY292ZXI="
+        }
+      ]
+    },
+    {
+      "id": "lead_003",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "title": "Globex - pilotaż + szkolenia",
+      "description": "Pilotaż systemu i szkolenia dla zespołu sprzedaży.",
+      "stageId": "stg_negotiation",
+      "createdAt": "2024-03-01T10:00:00.000Z",
+      "stageChangedAt": "2024-03-12T09:40:00.000Z",
+      "notes": [
+        {
+          "id": "note_003a",
+          "text": "Globex prosi o rabat za szkolenia.",
+          "createdAt": "2024-03-08T13:05:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_003a",
+          "text": "Termin szkoleń",
+          "done": false
+        },
+        {
+          "id": "cl_003b",
+          "text": "Lista uczestników",
+          "done": true
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_003a",
+          "fileName": "harmonogram.txt",
+          "dataUrl": "data:text/plain;base64,aGFybW9ub2dyYW0gU0hE"
+        }
+      ]
+    },
+    {
+      "id": "lead_004",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "title": "Initech - analiza potrzeb",
+      "description": "Wstępna analiza procesów operacyjnych.",
+      "stageId": "stg_qual",
+      "createdAt": "2024-01-25T08:00:00.000Z",
+      "stageChangedAt": "2024-01-29T17:10:00.000Z",
+      "notes": [
+        {
+          "id": "note_004a",
+          "text": "Zidentyfikowano POC w dziale operacji.",
+          "createdAt": "2024-01-26T12:30:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_004a",
+          "text": "Mapa procesów",
+          "done": false
+        },
+        {
+          "id": "cl_004b",
+          "text": "Lista integracji",
           "done": true
         }
       ],
       "attachments": []
     },
     {
-      "id": "e0e9",
+      "id": "lead_005",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "title": "Lead 2",
-      "description": "Opis 2",
-      "stageId": "b385",
-      "createdAt": "2025-07-19T10:22:35.166Z",
-      "stageChangedAt": "2025-07-20T15:07:24.903Z",
+      "title": "ACME - odnowienie licencji",
+      "description": "Odnowienie i rozszerzenie zakresu.",
+      "stageId": "stg_won",
+      "createdAt": "2024-03-10T09:00:00.000Z",
+      "stageChangedAt": "2024-03-22T15:25:00.000Z",
+      "notes": [
+        {
+          "id": "note_005a",
+          "text": "Wygrane - podpisana umowa 12m.",
+          "createdAt": "2024-03-22T15:30:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_005a",
+          "text": "Umowa podpisana",
+          "done": true
+        },
+        {
+          "id": "cl_005b",
+          "text": "Faktura proforma",
+          "done": true
+        },
+        {
+          "id": "cl_005c",
+          "text": "Onboarding",
+          "done": false
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_005a",
+          "fileName": "umowa-podpisana.txt",
+          "dataUrl": "data:text/plain;base64,dW1vd2EgcG9kcGlzYW5hIC0gUERG"
+        }
+      ]
+    },
+    {
+      "id": "lead_006",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "title": "Initech - oferta full-stack",
+      "description": "Szerszy zakres niż POC, jednak brak budżetu.",
+      "stageId": "stg_lost",
+      "createdAt": "2024-02-20T11:45:00.000Z",
+      "stageChangedAt": "2024-03-01T08:10:00.000Z",
+      "notes": [
+        {
+          "id": "note_006a",
+          "text": "Przegrane - budżet przesunięty na Q4.",
+          "createdAt": "2024-03-01T08:15:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_006a",
+          "text": "Retrospekcja oferty",
+          "done": true
+        }
+      ],
+      "attachments": []
+    },
+    {
+      "id": "lead_007",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "title": "Freelance - konsulting CRM",
+      "description": "Mini-projekt doradczy (2 dni).",
+      "stageId": "stg_new",
+      "createdAt": "2024-04-05T09:30:00.000Z",
+      "stageChangedAt": "2024-04-05T09:30:00.000Z",
       "notes": [],
-      "checklist": [],
+      "checklist": [
+        {
+          "id": "cl_007a",
+          "text": "Ustalić termin",
+          "done": false
+        }
+      ],
+      "attachments": []
+    },
+    {
+      "id": "lead_008",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "title": "Globex - finalizacja negocjacji",
+      "description": "Zamknięcie warunków rabatowych.",
+      "stageId": "stg_negotiation",
+      "createdAt": "2024-03-15T10:15:00.000Z",
+      "stageChangedAt": "2024-03-28T17:00:00.000Z",
+      "notes": [
+        {
+          "id": "note_008a",
+          "text": "Oczekujemy na akcept menedżera sprzedaży.",
+          "createdAt": "2024-03-27T09:00:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_008a",
+          "text": "Zaktualizowana oferta",
+          "done": true
+        },
+        {
+          "id": "cl_008b",
+          "text": "Zgoda prawna",
+          "done": false
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_008a",
+          "fileName": "oferta-v2.txt",
+          "dataUrl": "data:text/plain;base64,b2ZlcnRhIHYyIC0gZG9kYXRraQ=="
+        }
+      ]
+    },
+    {
+      "id": "lead_201",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "title": "Umbrella - onboarding zespołu",
+      "description": "Wdrożenie + szkolenie podstawowe.",
+      "stageId": "stg_won",
+      "createdAt": "2024-01-18T10:00:00.000Z",
+      "stageChangedAt": "2024-02-01T16:00:00.000Z",
+      "notes": [
+        {
+          "id": "note_201a",
+          "text": "Wygrane - start wdrożenia od 05.02.",
+          "createdAt": "2024-02-01T16:05:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_201a",
+          "text": "Dostępy SSO",
+          "done": true
+        },
+        {
+          "id": "cl_201b",
+          "text": "Szkolenie 1/2",
+          "done": true
+        },
+        {
+          "id": "cl_201c",
+          "text": "Szkolenie 2/2",
+          "done": false
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_201a",
+          "fileName": "plan-onboardingu.txt",
+          "dataUrl": "data:text/plain;base64,cGxhbiBvbmJvYXJkaW5ndQ=="
+        }
+      ]
+    },
+    {
+      "id": "lead_202",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "title": "Umbrella - cross-sell automatyzacje",
+      "description": "Automatyczne kampanie e-mail + lead scoring.",
+      "stageId": "stg_proposal",
+      "createdAt": "2024-03-05T09:45:00.000Z",
+      "stageChangedAt": "2024-03-11T13:30:00.000Z",
+      "notes": [
+        {
+          "id": "note_202a",
+          "text": "Prezentacja zakresu automatyzacji.",
+          "createdAt": "2024-03-08T11:00:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_202a",
+          "text": "Makiety kampanii",
+          "done": false
+        },
+        {
+          "id": "cl_202b",
+          "text": "Wycena",
+          "done": true
+        }
+      ],
+      "attachments": []
+    },
+    {
+      "id": "lead_203",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "title": "Soylent - propozycja wdrożenia",
+      "description": "Kompletna oferta rozwiązania.",
+      "stageId": "stg_proposal",
+      "createdAt": "2024-03-20T08:30:00.000Z",
+      "stageChangedAt": "2024-03-25T14:00:00.000Z",
+      "notes": [
+        {
+          "id": "note_203a",
+          "text": "Wysłana oferta + case studies.",
+          "createdAt": "2024-03-25T14:10:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_203a",
+          "text": "Załączniki case study",
+          "done": true
+        },
+        {
+          "id": "cl_203b",
+          "text": "Plan wdrożenia",
+          "done": true
+        }
+      ],
+      "attachments": [
+        {
+          "id": "att_203a",
+          "fileName": "case-study.txt",
+          "dataUrl": "data:text/plain;base64,Y2FzZS1zdHVkeSBzdHJlc3Q="
+        }
+      ]
+    },
+    {
+      "id": "lead_204",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "title": "Soylent - ograniczony budżet",
+      "description": "Wniosek budżetowy odrzucony.",
+      "stageId": "stg_lost",
+      "createdAt": "2024-04-01T09:00:00.000Z",
+      "stageChangedAt": "2024-04-09T16:20:00.000Z",
+      "notes": [
+        {
+          "id": "note_204a",
+          "text": "Przegrane - budżet zamknięty do Q1 2025.",
+          "createdAt": "2024-04-09T16:25:00.000Z"
+        }
+      ],
+      "checklist": [
+        {
+          "id": "cl_204a",
+          "text": "Follow-up na Q1 2025",
+          "done": false
+        }
+      ],
       "attachments": []
     }
   ],
   "events": [
     {
-      "title": "Rezerwacja: Jan Polak",
-      "participants": [],
-      "location": "",
-      "virtualLink": "",
-      "start": "2025-07-30T10:00:00.000Z",
-      "end": "2025-07-30T10:30:00.000Z",
-      "allDay": false,
-      "reminderMinutesBefore": 0,
-      "id": 2
+      "id": 1,
+      "title": "Status sprzedaży - Q3",
+      "participants": [
+        "ct_010",
+        "ct_005",
+        "ct_009"
+      ],
+      "invitedUserIds": [],
+      "creatorName": "adrianrodzic33@gmail.com",
+      "participantsSnapshot": [
+        {
+          "uid": null,
+          "name": "Katarzyna Mazur",
+          "email": "k.mazur@initech.com"
+        },
+        {
+          "uid": null,
+          "name": "Tomasz Krawczyk",
+          "email": "t.krawczyk@northwind.com.pl"
+        },
+        {
+          "uid": null,
+          "name": "Michał Pawlak",
+          "email": "m.pawlak@initech.com"
+        }
+      ],
+      "location": "Biuro główne, s. B12",
+      "virtualLink": "https://meet.example.com/q3-sync",
+      "start": "2025-08-05T09:00",
+      "end": "2025-08-05T09:45",
+      "allDay": true,
+      "reminderMinutesBefore": 15,
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     },
     {
-      "id": 3,
-      "title": "Spotkanie 1",
+      "id": 2,
+      "title": "Demo produktu - Beta S.A.",
       "participants": [
-        "4242",
-        "4b0e",
-        "a01c"
+        "ct_002",
+        "ct_008",
+        "2UgD140"
       ],
       "invitedUserIds": [
         "usAkkEtLXbYp47knYpMjDIgkR6u2"
@@ -224,12 +828,14 @@
       "creatorName": "adrianrodzic33@gmail.com",
       "participantsSnapshot": [
         {
-          "name": "Adrian Rodzic",
-          "email": "adrianrodzic33@gmail.com"
+          "uid": null,
+          "name": "Anna Wójcik",
+          "email": "anna.wojcik@acme.pl"
         },
         {
-          "name": "Mariusz Rodzic",
-          "email": "mariuszrodzic08@gmail.com"
+          "uid": null,
+          "name": "Julia Piątek",
+          "email": "julia.piatek@globex.io"
         },
         {
           "uid": "usAkkEtLXbYp47knYpMjDIgkR6u2",
@@ -238,34 +844,99 @@
         }
       ],
       "location": "",
-      "virtualLink": "",
-      "start": "2025-08-12T03:00",
-      "end": "2025-08-13T00:00",
+      "virtualLink": "https://meet.example.com/demo-beta",
+      "start": "2025-08-08T13:30",
+      "end": "2025-08-09T14:30",
       "allDay": true,
-      "reminderMinutesBefore": 15,
+      "reminderMinutesBefore": 30,
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2"
     },
     {
-      "title": "Spotkanie 2",
+      "title": "Warsztaty Discovery - Delta",
       "participants": [
-        "654b"
+        "ct_003",
+        "ct_011"
       ],
       "invitedUserIds": [],
       "creatorName": "adrianrodzic33@gmail.com",
       "participantsSnapshot": [
         {
-          "name": "Adrian Rodzic",
-          "email": "adrianrodzic33@gmail.com"
+          "uid": null,
+          "name": "Marek Lewandowski",
+          "email": "marek.lewandowski@acme.pl"
+        },
+        {
+          "uid": null,
+          "name": "Ewelina Sikora",
+          "email": "ewelina.sikora@example.com"
+        }
+      ],
+      "location": "Delta HQ, s. 3.21",
+      "virtualLink": "",
+      "start": "2025-08-28T08:00",
+      "end": "2025-08-29T11:00",
+      "allDay": true,
+      "reminderMinutesBefore": 60,
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "id": 3
+    },
+    {
+      "title": "Targi branżowe - dzień 1",
+      "participants": [
+        "ct_201",
+        "ct_203"
+      ],
+      "invitedUserIds": [],
+      "creatorName": "mariuszrodzic08@gmail.com",
+      "participantsSnapshot": [
+        {
+          "uid": null,
+          "name": "Alicja Kaczmarek",
+          "email": "a.kaczmarek@umbrella.pl"
+        },
+        {
+          "uid": null,
+          "name": "Bartosz Król",
+          "email": "b.krol@soylent.pl"
+        }
+      ],
+      "location": "Expo",
+      "virtualLink": "",
+      "start": "2025-08-14T00:00",
+      "end": "2025-08-14T23:59",
+      "allDay": true,
+      "reminderMinutesBefore": null,
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "id": 4
+    },
+    {
+      "title": "Warsztaty Angular",
+      "participants": [
+        "ct_202",
+        "ct_203"
+      ],
+      "invitedUserIds": [],
+      "creatorName": "mariuszrodzic08@gmail.com",
+      "participantsSnapshot": [
+        {
+          "uid": null,
+          "name": "Paweł Lis",
+          "email": "p.lis@umbrella.pl"
+        },
+        {
+          "uid": null,
+          "name": "Bartosz Król",
+          "email": "b.krol@soylent.pl"
         }
       ],
       "location": "",
-      "virtualLink": "",
-      "start": "2025-08-14T01:00",
-      "end": "2025-08-15T00:00",
+      "virtualLink": "https://meet.example.com/warsztaty-angular",
+      "start": "2025-08-18T12:00",
+      "end": "2025-08-19T13:45",
       "allDay": true,
       "reminderMinutesBefore": 15,
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "id": 4
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "id": 5
     }
   ],
   "slots": [
@@ -279,7 +950,7 @@
       "id": "2",
       "start": "2025-07-30T10:00:00.000Z",
       "end": "2025-07-30T10:30:00.000Z",
-      "booked": true
+      "booked": false
     },
     {
       "id": "3",
@@ -296,42 +967,6 @@
   ],
   "emails": [
     {
-      "from": "me@example.com",
-      "to": "mariuszrodzic08@gmail.com",
-      "subject": "Testowy temat",
-      "body": "testowa tresc maila",
-      "date": "2025-08-07T21:42:23.775Z",
-      "isRead": true,
-      "id": 1
-    },
-    {
-      "from": "adrianrodzic33@gmail.com",
-      "to": "mariuszrodzic08@gmail.com",
-      "subject": "Testowy mail 2",
-      "body": "Tresc 2",
-      "date": "2025-08-08T15:12:15.552Z",
-      "isRead": true,
-      "id": 2
-    },
-    {
-      "from": "adrianrodzic33@gmail.com",
-      "to": "jantestowy@gmail.com",
-      "subject": "Przypomnienie: spotkanie w dniu 25.08.2025",
-      "body": "Cześć Jan!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na 25.08.2025 o godzinie 14:00.\n\nDo zobaczenia,\nZespół CRM-APP",
-      "date": "2025-08-08T23:19:03.542Z",
-      "isRead": true,
-      "id": 3
-    },
-    {
-      "from": "adrianrodzic33@gmail.com",
-      "to": "franio23@gmail.com",
-      "subject": "Przypomnienie: spotkanie w dniu środa, 20 sierpnia 2025",
-      "body": "Cześć Franek!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na środa, 20 sierpnia 2025 o godzinie 16:10.\n\nDo zobaczenia,\nZespół CRM-APP",
-      "date": "2025-08-09T11:10:26.447Z",
-      "isRead": true,
-      "id": 4
-    },
-    {
       "from": "adrianrodzic33@gmail.com",
       "to": "stefank@gmail.com",
       "subject": "Przypomnienie: spotkanie w dniu niedziela, 10 sierpnia 2025",
@@ -346,7 +981,7 @@
         "utm_content": "m_me4w2xlc_z3ccrr02",
         "utm_recipient": "stefank@gmail.com"
       },
-      "id": 5
+      "id": 1
     },
     {
       "from": "adrianrodzic33@gmail.com",
@@ -363,7 +998,7 @@
         "utm_content": "m_me5vh969_dn802wtk",
         "utm_recipient": "jan25@gmail.com"
       },
-      "id": 6
+      "id": 2
     },
     {
       "from": "adrianrodzic33@gmail.com",
@@ -380,92 +1015,109 @@
         "utm_content": "m_me772zmq_jvqp2oy2",
         "utm_recipient": "bartoszrp@gmail.com"
       },
-      "id": 7
+      "id": 3
     },
     {
       "from": "adrianrodzic33@gmail.com",
-      "to": "mariuszrodzic08@gmail.com",
-      "subject": "Witaj Mariusz!",
-      "body": "Cześć Mariusz!\n\nDziękujemy za zainteresowanie firmą Testowa3.\n\nPozdrawiamy,\nZespół CRM-APP",
-      "date": "2025-08-14T18:11:13.075Z",
-      "isRead": true,
-      "messageId": "m_mebptu0j_277ahj9y",
+      "to": "justy92@gmail.com",
+      "subject": "Witaj Justyna!",
+      "body": "Cześć Justyna!\n\nDziękujemy za zainteresowanie firmą Dizajlo.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-26T11:27:47.548Z",
+      "isRead": false,
+      "messageId": "m_mesgp8tk_m1a3g9cx",
       "tags": {
         "utm_source": "crm-app",
         "utm_medium": "email",
-        "utm_campaign": "Witaj Mariusz!",
-        "utm_content": "m_mebptu0j_277ahj9y",
-        "utm_recipient": "mariuszrodzic08@gmail.com"
+        "utm_campaign": "Witaj Justyna!",
+        "utm_content": "m_mesgp8tk_m1a3g9cx",
+        "utm_recipient": "justy92@gmail.com"
+      },
+      "id": 4
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "marek.lewandowski@acme.pl",
+      "subject": "Podsumowanie pracy - Marek Lewandowski",
+      "body": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku IT Lead w firmie ACME Sp. z o.o..\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.442Z",
+      "isRead": false,
+      "messageId": "m_mesiklwv_ruwdtdx6",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Podsumowanie pracy - Marek Lewandowski",
+        "utm_content": "m_mesiklwv_ruwdtdx6",
+        "utm_recipient": "marek.lewandowski@acme.pl"
+      },
+      "id": 5
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "t.krawczyk@northwind.com.pl",
+      "subject": "Podsumowanie pracy - Tomasz Krawczyk",
+      "body": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku CTO w firmie Northwind S.A..\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.611Z",
+      "isRead": false,
+      "messageId": "m_mesikm3d_8f48c4ax",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Podsumowanie pracy - Tomasz Krawczyk",
+        "utm_content": "m_mesikm3d_8f48c4ax",
+        "utm_recipient": "t.krawczyk@northwind.com.pl"
+      },
+      "id": 6
+    },
+    {
+      "from": "adrianrodzic33@gmail.com",
+      "to": "k.mazur@initech.com",
+      "subject": "Podsumowanie pracy - Katarzyna Mazur",
+      "body": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku Senior Engineer w firmie Initech.\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.777Z",
+      "isRead": true,
+      "messageId": "m_mesikm7z_362obv74",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Podsumowanie pracy - Katarzyna Mazur",
+        "utm_content": "m_mesikm7z_362obv74",
+        "utm_recipient": "k.mazur@initech.com"
+      },
+      "id": 7
+    },
+    {
+      "from": "mariuszrodzic08@gmail.com",
+      "to": "a.kaczmarek@umbrella.pl",
+      "subject": "Przypomnienie: spotkanie w dniu czwartek, 14 sierpnia 2025",
+      "body": "Cześć Alicja!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na czwartek, 14 sierpnia 2025 o godzinie 12:00.\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-26T12:27:36.370Z",
+      "isRead": false,
+      "messageId": "m_mesiu609_xl9eay73",
+      "tags": {
+        "utm_source": "crm-app",
+        "utm_medium": "email",
+        "utm_campaign": "Przypomnienie: spotkanie w dniu czwartek, 14 sierpnia 2025",
+        "utm_content": "m_mesiu609_xl9eay73",
+        "utm_recipient": "a.kaczmarek@umbrella.pl"
       },
       "id": 8
     },
     {
       "from": "adrianrodzic33@gmail.com",
-      "to": "gregory51@gmail.com",
-      "subject": "Witaj Grzegorz!",
-      "body": "Cześć Grzegorz!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
-      "date": "2025-08-14T18:12:43.609Z",
-      "isRead": true,
-      "messageId": "m_mebpvrvd_ok9fk1u8",
+      "to": "marek.lewandowski@acme.pl",
+      "subject": "Rozliczenie za lipiec 2025",
+      "body": "Dzień dobry Marek!\n\nPrzesyłamy rozliczenie za lipiec 2025.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-26T12:35:46.059Z",
+      "isRead": false,
+      "messageId": "m_mesj4nv7_3rt57lfy",
       "tags": {
         "utm_source": "crm-app",
         "utm_medium": "email",
-        "utm_campaign": "Witaj Grzegorz!",
-        "utm_content": "m_mebpvrvd_ok9fk1u8",
-        "utm_recipient": "gregory51@gmail.com"
+        "utm_campaign": "Rozliczenie za lipiec 2025",
+        "utm_content": "m_mesj4nv7_3rt57lfy",
+        "utm_recipient": "marek.lewandowski@acme.pl"
       },
       "id": 9
-    },
-    {
-      "from": "adrianrodzic33@gmail.com",
-      "to": "wikt0r@gmail.com",
-      "subject": "Witaj Wiktor!",
-      "body": "Cześć Wiktor!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
-      "date": "2025-08-20T10:27:11.934Z",
-      "isRead": true,
-      "messageId": "m_mejtw7io_g11m8eeh",
-      "tags": {
-        "utm_source": "crm-app",
-        "utm_medium": "email",
-        "utm_campaign": "Witaj Wiktor!",
-        "utm_content": "m_mejtw7io_g11m8eeh",
-        "utm_recipient": "wikt0r@gmail.com"
-      },
-      "id": 10
-    },
-    {
-      "from": "adrianrodzic33@gmail.com",
-      "to": "mariuszrodzic08@gmail.com",
-      "subject": "Testowy grupowy mail",
-      "body": "Czesc Mariusz!\n\nTresc testowego grupowego maila",
-      "date": "2025-08-24T19:17:06.823Z",
-      "isRead": false,
-      "messageId": "m_meq2l2av_wkhyylrr",
-      "tags": {
-        "utm_source": "crm-app",
-        "utm_medium": "email",
-        "utm_campaign": "Testowy grupowy mail",
-        "utm_content": "m_meq2l2av_wkhyylrr",
-        "utm_recipient": "mariuszrodzic08@gmail.com"
-      },
-      "id": 11
-    },
-    {
-      "from": "adrianrodzic33@gmail.com",
-      "to": "adrianrodzic33@gmail.com",
-      "subject": "Testowy grupowy mail",
-      "body": "Czesc Adrian!\n\nTresc testowego grupowego maila",
-      "date": "2025-08-24T19:17:06.987Z",
-      "isRead": false,
-      "messageId": "m_meq2l3iv_hvt1er7e",
-      "tags": {
-        "utm_source": "crm-app",
-        "utm_medium": "email",
-        "utm_campaign": "Testowy grupowy mail",
-        "utm_content": "m_meq2l3iv_hvt1er7e",
-        "utm_recipient": "adrianrodzic33@gmail.com"
-      },
-      "id": 12
     }
   ],
   "emailTemplates": [
