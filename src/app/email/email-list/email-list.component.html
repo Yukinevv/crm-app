@@ -1,16 +1,16 @@
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>Skrzynka</h2>
-    <div>
+<div class="mailbox container mt-4">
+  <div class="header d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Skrzynka</h2>
+    <div class="header-actions">
       <button class="btn btn-outline-secondary me-2" (click)="compose()">Napisz maila</button>
       <a class="btn btn-outline-secondary ml-2" routerLink="/email/bulk">Wyślij do kontaktów</a>
-      <a class="btn btn-primary ml-2" routerLink="/email/stats">Statystyki klików</a>
+      <a class="btn btn-primary ml-2" routerLink="/email/stats">Statystyki kliknięć</a>
       <a class="btn btn-outline-primary ml-2" routerLink="/email/conversations">Logi konwersacji</a>
     </div>
   </div>
 
   <!-- Tabs -->
-  <ul class="nav nav-tabs mb-3">
+  <ul class="nav nav-tabs mb-3 tabs-wrap">
     <li class="nav-item">
       <a class="nav-link" [class.active]="active==='inbox'" (click)="setTab('inbox')" role="button">
         Odebrane
@@ -26,7 +26,7 @@
   <!-- INBOX -->
   <ng-container *ngIf="active==='inbox'">
     <!-- Filtry -->
-    <form [formGroup]="inboxForm" class="mb-4">
+    <form [formGroup]="inboxForm" class="filters mb-4">
       <div class="row mb-3">
         <div class="col">
           <input formControlName="q" class="form-control form-control-sm" placeholder="Szukaj (nadawca, temat, treść)…">
@@ -38,7 +38,7 @@
           <input formControlName="subject" class="form-control form-control-sm" placeholder="Temat">
         </div>
       </div>
-      <div class="row">
+      <div class="row g-2">
         <div class="col">
           <input type="date" formControlName="dateFrom" class="form-control form-control-sm" title="Od dnia">
         </div>
@@ -46,75 +46,78 @@
           <input type="date" formControlName="dateTo" class="form-control form-control-sm" title="Do dnia">
         </div>
         <div class="col d-flex align-items-center">
-          <div class="form-check">
+          <div class="form-check m-0">
             <input id="unreadOnly" type="checkbox" class="form-check-input" formControlName="unread">
             <label for="unreadOnly" class="form-check-label small">Tylko nieprzecz.</label>
           </div>
         </div>
         <div class="col d-flex align-items-center">
-          <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetInboxFilters()">Wyczyść
+          <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="resetInboxFilters()">
+            Wyczyść
           </button>
         </div>
       </div>
     </form>
 
-    <div *ngIf="inboxLoading">Ładowanie...</div>
-    <div *ngIf="inboxError" class="text-danger">{{ inboxError }}</div>
+    <div *ngIf="inboxLoading" class="state state-loading">Ładowanie...</div>
+    <div *ngIf="inboxError" class="state state-error text-danger">{{ inboxError }}</div>
 
-    <table *ngIf="!inboxLoading && inbox.length" class="table">
-      <thead>
-      <tr>
-        <th>Od</th>
-        <th>Temat</th>
-        <th>Data</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let m of inbox"
-          [class.font-weight-bold]="!m.isRead"
-          (click)="openInbox(m)"
-          style="cursor: pointer;">
-        <td>{{ m.from }}</td>
-        <td>
-          {{ m.subject }}
-          <div class="text-muted small" *ngIf="m.preview">{{ m.preview }}</div>
-        </td>
-        <td>{{ m.date | date:'short' }}</td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="table-wrap" *ngIf="!inboxLoading && inbox.length">
+      <table class="table mailbox-table">
+        <thead>
+        <tr>
+          <th>Od</th>
+          <th>Temat</th>
+          <th>Data</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let m of inbox"
+            [class.unread]="!m.isRead"
+            (click)="openInbox(m)">
+          <td>{{ m.from }}</td>
+          <td>
+            {{ m.subject }}
+            <div class="text-muted small" *ngIf="m.preview">{{ m.preview }}</div>
+          </td>
+          <td>{{ m.date | date:'short' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div *ngIf="!inboxLoading && !inbox.length" class="text-center">
+    <div *ngIf="!inboxLoading && !inbox.length" class="state state-empty text-center">
       Brak wiadomości w Odebranych dla zastosowanych filtrów.
     </div>
   </ng-container>
 
   <!-- SENT -->
   <ng-container *ngIf="active==='sent'">
-    <div *ngIf="sentLoading">Ładowanie...</div>
-    <div *ngIf="sentError" class="text-danger">{{ sentError }}</div>
+    <div *ngIf="sentLoading" class="state state-loading">Ładowanie...</div>
+    <div *ngIf="sentError" class="state state-error text-danger">{{ sentError }}</div>
 
-    <table *ngIf="!sentLoading && emails.length" class="table">
-      <thead>
-      <tr>
-        <th>Od</th>
-        <th>Temat</th>
-        <th>Data</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let email of emails"
-          [class.font-weight-bold]="!email.isRead"
-          (click)="openEmail(email)"
-          style="cursor: pointer;">
-        <td>{{ email.from }}</td>
-        <td>{{ email.subject }}</td>
-        <td>{{ email.date | date:'short' }}</td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="table-wrap" *ngIf="!sentLoading && emails.length">
+      <table class="table mailbox-table">
+        <thead>
+        <tr>
+          <th>Od</th>
+          <th>Temat</th>
+          <th>Data</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let email of emails"
+            [class.unread]="!email.isRead"
+            (click)="openEmail(email)">
+          <td>{{ email.from }}</td>
+          <td>{{ email.subject }}</td>
+          <td>{{ email.date | date:'short' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div *ngIf="!sentLoading && !emails.length" class="text-center">
+    <div *ngIf="!sentLoading && !emails.length" class="state state-empty text-center">
       Brak wiadomości.
     </div>
   </ng-container>

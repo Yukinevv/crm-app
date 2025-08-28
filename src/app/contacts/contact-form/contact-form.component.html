@@ -57,11 +57,11 @@
       <div class="input-group">
         <input [(ngModel)]="searchEmail" [ngModelOptions]="{standalone: true}" placeholder="Email użytkownika"
                class="form-control">
-        <button type="button" class="btn btn-outline-secondary" (click)="searchUser()">Wyszukaj</button>
+        <button type="button" class="btn btn-outline-secondary ml-1" (click)="searchUser()">Wyszukaj</button>
       </div>
       <div *ngIf="foundUser" class="mt-2">
         <span>Znaleziono: {{ foundUser.email }}</span>
-        <button type="button" class="btn btn-sm btn-success ms-2" (click)="linkUser()">Powiąż</button>
+        <button type="button" class="btn btn-sm btn-success ms-2 ml-2" (click)="linkUser()">Powiąż</button>
       </div>
       <div *ngIf="form.get('linkedUid')?.value" class="mt-2">
         <small>Powiązany UID: {{ form.get('linkedUid')?.value }}</small>

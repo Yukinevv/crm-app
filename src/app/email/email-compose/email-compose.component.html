@@ -1,9 +1,9 @@
 <div class="container mt-4">
-  <h2>Nowa wiadomość</h2>
+  <h2 class="mb-4">Nowa wiadomość</h2>
   <form [formGroup]="form" (ngSubmit)="send()">
 
     <!-- Wybór szablonu -->
-    <div class="mb-3 mt-4">
+    <div class="mb-3 mt-3">
       <label>Szablon</label>
       <select formControlName="templateId" class="form-select ml-2">
         <option value="">(Brak)</option>
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Tagowanie linków -->
-    <div class="form-check mb-3">
+    <div class="form-check mb-4">
       <input id="trackLinks" type="checkbox" class="form-check-input" formControlName="trackLinks">
       <label for="trackLinks" class="form-check-label">
         Taguj linki parametrami UTM (zalecane)

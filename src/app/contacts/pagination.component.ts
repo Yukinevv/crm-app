@@ -6,36 +6,98 @@ import {CommonModule} from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <nav aria-label="Paginacja">
+    <nav aria-label="Paginacja" class="app-pagination">
       <ul class="pagination justify-content-center">
         <li class="page-item" [class.disabled]="currentPage === 1">
-          <button class="page-link" (click)="setPage(1)" [disabled]="currentPage === 1">Pierwsza</button>
+          <button class="page-link" (click)="setPage(1)" [disabled]="currentPage === 1" aria-label="Pierwsza strona">
+            Pierwsza
+          </button>
         </li>
+
         <li class="page-item" [class.disabled]="currentPage === 1">
-          <button class="page-link" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">Poprzednia
+          <button class="page-link" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1"
+                  aria-label="Poprzednia strona">
+            Poprzednia
           </button>
         </li>
+
         <li class="page-item" *ngFor="let page of pages" [class.active]="page === currentPage">
-          <button class="page-link" (click)="setPage(page)">{{ page }}</button>
-        </li>
-        <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <button class="page-link" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">Następna
+          <button class="page-link" (click)="setPage(page)" [attr.aria-current]="page === currentPage ? 'page' : null">
+            {{ page }}
           </button>
         </li>
+
         <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <button class="page-link" (click)="setPage(totalPages)" [disabled]="currentPage === totalPages">Ostatnia
+          <button class="page-link" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                  aria-label="Następna strona">
+            Następna
+          </button>
+        </li>
+
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" (click)="setPage(totalPages)" [disabled]="currentPage === totalPages"
+                  aria-label="Ostatnia strona">
+            Ostatnia
           </button>
         </li>
       </ul>
     </nav>
   `,
   styles: [`
-    .pagination {
+    .app-pagination {
       margin: 1rem 0;
     }
 
+    .pagination {
+      gap: .25rem;
+      background: transparent;
+    }
+
     .page-item {
-      margin: 0 0.25rem;
+      transition: transform var(--transition-fast);
+    }
+
+    .page-item:not(.disabled):hover {
+      transform: translateY(-1px);
+    }
+
+    .page-link {
+      border-radius: .6rem;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      padding: .4rem .75rem;
+      box-shadow: var(--shadow-xs);
+      transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .page-link:hover {
+      background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+      border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .page-link:focus-visible {
+      outline: none;
+      box-shadow: var(--ring-primary);
+    }
+
+    .page-item.active .page-link {
+      color: #fff;
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+      cursor: default;
+    }
+
+    .page-item.disabled .page-link,
+    .page-link[disabled] {
+      color: var(--color-muted);
+      background: color-mix(in srgb, var(--color-surface) 96%, var(--color-bg) 4%);
+      border-color: var(--color-border);
+      box-shadow: none;
+      pointer-events: none;
     }
   `]
 })
@@ -51,9 +113,7 @@ export class PaginationComponent {
 
   get pages(): number[] {
     const pages: number[] = [];
-    for (let i = 1; i <= this.totalPages; i++) {
-      pages.push(i);
-    }
+    for (let i = 1; i <= this.totalPages; i++) pages.push(i);
     return pages;
   }
 

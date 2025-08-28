@@ -1,11 +1,67 @@
-.container {
-  max-width: 900px;
-}
+.contacts-page {
+  max-width: 1080px;
 
-.actions button {
-  min-width: 80px;
-}
+  .page-title {
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
 
-.list-group-item + .list-group-item {
-  margin-top: 0.5rem;
+  .actions {
+    gap: .5rem;
+
+    .btn {
+      min-width: 100px;
+    }
+  }
+
+  .filter-form {
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+
+    .form-label {
+      color: var(--color-muted);
+    }
+  }
+
+  .contact-list {
+    .contact-item {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: .5rem;
+      padding: .85rem 1rem;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-xs);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+
+      &:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--color-border) 55%, var(--color-primary) 45%);
+        box-shadow: var(--shadow-md);
+      }
+    }
+
+    .contact-name {
+      font-size: 1rem;
+    }
+
+    .contact-company {
+      margin-top: .15rem;
+      color: var(--color-muted);
+    }
+
+    .contact-meta {
+      margin-top: .15rem;
+      color: var(--color-muted);
+    }
+
+    .contact-actions {
+      min-width: 280px;
+
+      .btn-outline-secondary {
+        border-color: var(--color-border);
+      }
+    }
+  }
 }

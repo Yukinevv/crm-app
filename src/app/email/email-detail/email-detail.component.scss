@@ -1,0 +1,127 @@
+:host {
+  display: block;
+}
+
+.email-detail {
+  max-width: 1000px;
+
+  .header {
+    .btn {
+      min-width: 120px;
+    }
+  }
+
+  .state {
+    &.state-loading {
+      color: var(--color-muted);
+    }
+
+    &.state-error {
+      margin-bottom: .75rem;
+    }
+  }
+
+  .message-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .subject {
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+
+  .meta {
+    strong {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+  }
+
+  hr.soft {
+    margin: .75rem 0 1rem;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* Wspólne formatowanie treści HTML */
+  .rich-content {
+    color: var(--color-text);
+    line-height: 1.55;
+
+    a {
+      color: var(--color-primary);
+      text-decoration: underline;
+      transition: color var(--transition-fast);
+
+      &:hover {
+        color: var(--color-primary-700);
+      }
+    }
+
+    p {
+      margin-bottom: .75rem;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-xs);
+      margin: .25rem 0;
+    }
+
+    blockquote {
+      margin: .75rem 0;
+      padding: .5rem .75rem;
+      background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+      border-left: 3px solid var(--color-primary);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+    }
+
+    pre, code, kbd, samp {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    pre {
+      background: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg) 8%);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: .75rem;
+      overflow: auto;
+      box-shadow: var(--shadow-xs);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: .75rem 0;
+
+      th, td {
+        border: 1px solid var(--color-border);
+        padding: .5rem .6rem;
+      }
+
+      thead th {
+        background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+        font-weight: 600;
+      }
+
+      tbody tr:hover {
+        background: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary-100) 8%);
+      }
+    }
+
+    ul, ol {
+      padding-left: 1.25rem;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--color-border);
+    }
+  }
+}

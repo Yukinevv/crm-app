@@ -1,0 +1,130 @@
+:host {
+  display: block;
+}
+
+.mailbox {
+  max-width: 1100px;
+}
+
+/* ===== Header ===== */
+.header {
+  .header-actions .btn {
+    min-width: 150px;
+  }
+
+  h2 {
+    font-weight: 700;
+    letter-spacing: .2px;
+  }
+}
+
+/* ===== Tabs ===== */
+.tabs-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: .25rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.nav-tabs {
+  border-bottom: 0;
+
+  .nav-link {
+    border: 0;
+    color: var(--color-muted);
+    border-radius: .55rem;
+    padding: .45rem 1rem;
+    transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-surface) 86%, var(--color-primary-100) 14%);
+      color: var(--color-text);
+      text-decoration: none;
+    }
+
+    &.active {
+      color: #fff;
+      background: var(--color-primary);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+/* ===== Filters card ===== */
+.filters {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: .75rem .75rem .6rem;
+
+  .form-control,
+  .form-check-input {
+    box-shadow: none;
+  }
+
+  .form-check-input:focus {
+    box-shadow: var(--ring-primary);
+  }
+}
+
+/* ===== States ===== */
+.state {
+  &.state-loading {
+    color: var(--color-muted);
+  }
+
+  &.state-error {
+    /* .text-danger już nadaje kolor; zostawiamy spacing */
+  }
+
+  &.state-empty {
+    color: var(--color-muted);
+    padding: .75rem 0;
+  }
+}
+
+/* ===== Tables ===== */
+.table-wrap {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden; /* zaokrąglenia dla tabeli */
+}
+
+.mailbox-table {
+  margin: 0; /* usuń defaultowy margines tabeli */
+  color: var(--color-text);
+
+  thead th {
+    background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary-100) 12%);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 600;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-surface) 90%, var(--color-primary-100) 10%);
+    }
+
+    &.unread {
+      font-weight: 600;
+      /* subtelny akcent po lewej */
+      box-shadow: inset 3px 0 0 0 var(--color-primary);
+    }
+  }
+
+  td {
+    vertical-align: middle;
+  }
+
+  .small {
+    color: var(--color-muted) !important;
+  }
+}

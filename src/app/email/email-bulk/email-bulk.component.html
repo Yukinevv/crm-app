@@ -9,10 +9,10 @@
     <div class="card-header d-flex align-items-center justify-content-between">
       <div>Odbiorcy</div>
       <div class="d-flex" style="gap:.5rem;">
-        <input class="form-control form-control-sm" placeholder="Szukaj kontaktów…" [(ngModel)]="search"
+        <input class="form-control" placeholder="Szukaj kontaktów…" [(ngModel)]="search"
                (ngModelChange)="applyFilter()">
-        <button class="btn btn-sm btn-outline-primary" (click)="selectAllVisible()">Zaznacz widoczne</button>
-        <button class="btn btn-sm btn-outline-secondary" (click)="clearSelection()">Wyczyść</button>
+        <button class="btn btn-sm btn-outline-primary ml-2" (click)="selectAllVisible()">Zaznacz widoczne</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearSelection()">Odznacz wszystkie</button>
       </div>
     </div>
     <div class="card-body" style="max-height: 260px; overflow: auto;">

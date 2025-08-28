@@ -1,158 +1,142 @@
 {
   "conversations": [
     {
-      "id": "conv_mebptu27_svxr3brc",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "type": "email",
-      "direction": "out",
-      "subject": "Witaj Mariusz!",
-      "preview": "Cześć Mariusz!\n\nDziękujemy za zainteresowanie firmą Testowa3.\n\nPozdrawiamy,\nZespół CRM-APP",
-      "date": "2025-08-14T18:11:13.075Z",
-      "emailId": 8,
-      "contactId": "a01c",
-      "counterpartEmail": "mariuszrodzic08@gmail.com"
-    },
-    {
-      "id": "conv_mebpvt47_bq8d1gc4",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "type": "email",
-      "direction": "out",
-      "subject": "Witaj Grzegorz!",
-      "preview": "Cześć Grzegorz!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
-      "date": "2025-08-14T18:12:43.609Z",
-      "emailId": 9,
-      "leadId": "lead_mebpvt46_7ptxandn",
-      "counterpartEmail": "gregory51@gmail.com"
-    },
-    {
-      "id": "conv_mega2aid_auguxag5",
+      "id": "conv_mesg5k7k_a4jd2ktj",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "type": "email",
       "direction": "in",
       "subject": "Zaproszenie na spotkanie",
-      "preview": "Zosta=C5=82e=C5=9B zaproszony na spotkanie przez adrianrodzic33@gmail.com:\r\n  =E2=80=A2 Tytu=C5=82: Spotkanie 1\r\n  =E2=80=A2 Termin: wtorek, 12 sierpnia=\r\n 2025 03:00 =E2=80=93 00:00\r\n\r\nSpotkanie pojawi si=C4=99 w Twoim kalendarzu =\r\npo zalogowaniu.\r\n\r\nPozdrawiamy,\r\nZesp=C3=B3=C5=82 CRM-APP",
-      "date": "2025-08-06T23:01:53.000Z",
-      "emailId": "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example",
-      "leadId": "lead_mega2aid_ywnimvk2",
+      "preview": "Zostałeś zaproszony na spotkanie przez adrianrodzic33@gmail.com:\n• Tytuł: Demo produktu - Beta S.A.\n• Termin: piątek, 8 sierpnia 2025 13:30 – 14:30\n\nSpotkanie pojawi się w Twoim kalendarzu po zalogowaniu.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-26T10:44:19.000Z",
+      "emailId": "mh:Cx7eyyqvr_OyLK8JqfDyw1SC4TEGgqL5aas-6VD1-dw=@mailhog.example",
+      "leadId": "lead_mesg5k7j_zeh0dmzp",
       "counterpartEmail": "no-reply@crm-app.example.com"
     },
     {
-      "id": "conv_mejtw7od_qnp1y513",
+      "id": "conv_mesgp8xe_5tpmbpth",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "type": "email",
       "direction": "out",
-      "subject": "Witaj Wiktor!",
-      "preview": "Cześć Wiktor!\n\nDziękujemy za zainteresowanie firmą Testowa4.\n\nPozdrawiamy,\nZespół CRM-APP",
-      "date": "2025-08-20T10:27:11.934Z",
-      "emailId": 10,
-      "leadId": "lead_mejtw7od_4rxnpq73",
-      "counterpartEmail": "wikt0r@gmail.com"
+      "subject": "Witaj Justyna!",
+      "preview": "Cześć Justyna!\n\nDziękujemy za zainteresowanie firmą Dizajlo.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-26T11:27:47.548Z",
+      "emailId": 4,
+      "leadId": "lead_mesgp8xd_8xu0u14a",
+      "counterpartEmail": "justy92@gmail.com"
     },
     {
-      "id": "conv_mejtx4gy_bkn8jsmt",
+      "id": "conv_mesiklzx_u9gdxmra",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Podsumowanie pracy - Marek Lewandowski",
+      "preview": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku IT Lead w firmie ACME Sp. z o.o..\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.442Z",
+      "emailId": 5,
+      "contactId": "ct_003",
+      "counterpartEmail": "marek.lewandowski@acme.pl"
+    },
+    {
+      "id": "conv_mesikm4j_wo54g6yr",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Podsumowanie pracy - Tomasz Krawczyk",
+      "preview": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku CTO w firmie Northwind S.A..\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.611Z",
+      "emailId": 6,
+      "contactId": "ct_005",
+      "counterpartEmail": "t.krawczyk@northwind.com.pl"
+    },
+    {
+      "id": "conv_mesikm99_htggacf3",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Podsumowanie pracy - Katarzyna Mazur",
+      "preview": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku Senior Engineer w firmie Initech.\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.777Z",
+      "emailId": 7,
+      "contactId": "ct_010",
+      "counterpartEmail": "k.mazur@initech.com"
+    },
+    {
+      "id": "conv_mesiu62u_w1eot9w4",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "type": "email",
+      "direction": "out",
+      "subject": "Przypomnienie: spotkanie w dniu czwartek, 14 sierpnia 2025",
+      "preview": "Cześć Alicja!\n\nPrzypominamy o naszym spotkaniu zaplanowanym na czwartek, 14 sierpnia 2025 o godzinie 12:00.\n\nDo zobaczenia,\nZespół CRM-APP",
+      "date": "2025-08-26T12:27:36.370Z",
+      "emailId": 8,
+      "leadId": "lead_mesiu62t_c63ejpf7",
+      "counterpartEmail": "a.kaczmarek@umbrella.pl"
+    },
+    {
+      "id": "conv_mesiuxdd_xbb73xhi",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "type": "email",
       "direction": "in",
-      "subject": "Witaj Wiktor!",
-      "preview": "Cze=C5=9B=C4=87 Wiktor!\r\n\r\nDzi=C4=99kujemy za zainteresowanie firm=C4=85 =\r\nTestowa4.\r\n\r\nPozdrawiamy,\r\nZesp=C3=B3=C5=82 CRM-APP",
-      "date": "2025-08-20T10:27:11.000Z",
-      "emailId": "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example",
-      "contactId": "4242",
+      "subject": "Podsumowanie pracy - Katarzyna Mazur",
+      "preview": "Szanowni Państwo,\n\nZapraszam na spotkanie dotyczące podsumowania Pańskiej pracy na stanowisku Senior Engineer w firmie Initech.\n\nZ wyrazami szacunku,\nAdrian Rodzic",
+      "date": "2025-08-26T12:20:10.000Z",
+      "emailId": "mh:XhXeQlzQBwKcWmVMHB0GWlqk05qkFmdfaNssNVZXhtI=@mailhog.example",
+      "leadId": "lead_mesiuxdc_zdszkpgv",
       "counterpartEmail": "adrianrodzic33@gmail.com"
     },
     {
-      "id": "conv_melxhgys_yvgdff3y",
+      "id": "conv_mesj4nx4_7hrji633",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "type": "email",
       "direction": "out",
-      "subject": "Testowy grupowy mail",
-      "preview": "Witamy Mariusz!\n\nTresc testowego grupowego maila",
-      "date": "2025-08-21T21:43:14.937Z",
-      "emailId": 11,
-      "contactId": "1211",
-      "counterpartEmail": "mariuszrodzic08@gmail.com"
-    },
-    {
-      "id": "conv_melxhh37_sqzshtvq",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "type": "email",
-      "direction": "out",
-      "subject": "Testowy grupowy mail",
-      "preview": "Witamy Adrian!\n\nTresc testowego grupowego maila",
-      "date": "2025-08-21T21:43:15.125Z",
-      "emailId": 12,
-      "contactId": "524e",
-      "counterpartEmail": "adrianrodzic33@gmail.com"
-    },
-    {
-      "id": "conv_melxj7fo_y77v4353",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "type": "email",
-      "direction": "in",
-      "subject": "Testowy grupowy mail",
-      "preview": "Witamy Adrian!\r\n\r\nTresc testowego grupowego maila",
-      "date": "2025-08-21T21:43:15.000Z",
-      "emailId": "mh:mgd8acQtQgQ5caaMc-slifxDmvOT8OxTi-WP45lR72k=@mailhog.example",
-      "contactId": "4242",
-      "counterpartEmail": "adrianrodzic33@gmail.com"
-    },
-    {
-      "id": "conv_meo1hzt9_yvwrmtna",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "type": "email",
-      "direction": "out",
-      "subject": "Testowy grupowy mail",
-      "preview": "Witam Mariusz\n\nTresc testowego grupowego maila",
-      "date": "2025-08-23T09:11:10.179Z",
-      "emailId": 13,
-      "contactId": "1211",
-      "counterpartEmail": "mariuszrodzic08@gmail.com"
-    },
-    {
-      "id": "conv_meo1hzxw_njrld6h8",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "type": "email",
-      "direction": "out",
-      "subject": "Testowy grupowy mail",
-      "preview": "Witam Adrian\n\nTresc testowego grupowego maila",
-      "date": "2025-08-23T09:11:10.360Z",
-      "emailId": 14,
-      "contactId": "524e",
-      "counterpartEmail": "adrianrodzic33@gmail.com"
+      "subject": "Rozliczenie za lipiec 2025",
+      "preview": "Dzień dobry Marek!\n\nPrzesyłamy rozliczenie za lipiec 2025.\n\nPozdrawiamy,\nZespół CRM-APP",
+      "date": "2025-08-26T12:35:46.059Z",
+      "emailId": 9,
+      "contactId": "ct_003",
+      "counterpartEmail": "marek.lewandowski@acme.pl"
     }
   ],
   "leadsEmail": [
     {
-      "id": "lead_mebpvt46_7ptxandn",
-      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "email": "gregory51@gmail.com",
-      "name": "gregory51",
-      "status": "Nowy",
-      "source": "E-mail",
-      "createdAt": "2025-08-14T18:12:45.222Z"
-    },
-    {
-      "id": "lead_mega2aid_ywnimvk2",
+      "id": "lead_mesg5k7j_zeh0dmzp",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
       "email": "no-reply@crm-app.example.com",
       "name": "no-reply",
       "status": "Nowy",
       "source": "E-mail",
-      "createdAt": "2025-08-17T22:48:44.725Z"
+      "createdAt": "2025-08-26T11:12:29.071Z"
     },
     {
-      "id": "lead_mejtw7od_4rxnpq73",
+      "id": "lead_mesgp8xd_8xu0u14a",
       "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
-      "email": "wikt0r@gmail.com",
-      "name": "wikt0r",
+      "email": "justy92@gmail.com",
+      "name": "justy92",
       "status": "Nowy",
       "source": "E-mail",
-      "createdAt": "2025-08-20T10:27:11.965Z"
+      "createdAt": "2025-08-26T11:27:47.569Z"
+    },
+    {
+      "id": "lead_mesiu62t_c63ejpf7",
+      "userId": "usAkkEtLXbYp47knYpMjDIgkR6u2",
+      "email": "a.kaczmarek@umbrella.pl",
+      "name": "a.kaczmarek",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-08-26T12:27:36.389Z"
+    },
+    {
+      "id": "lead_mesiuxdc_zdszkpgv",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "adrianrodzic33@gmail.com",
+      "name": "adrianrodzic33",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-08-26T12:28:11.760Z"
     }
   ],
   "inboxRead": {
-    "mh:G0eWHEdA33n1F4sG597IvX638kL96EDtBmTaFf3pAmE=@mailhog.example": true,
-    "mh:BS7uVhzOMRdHectMIIZXqnalhwYkbwVhMVm6_r7mK98=@mailhog.example": true,
-    "mh:mgd8acQtQgQ5caaMc-slifxDmvOT8OxTi-WP45lR72k=@mailhog.example": true
+    "mh:Cx7eyyqvr_OyLK8JqfDyw1SC4TEGgqL5aas-6VD1-dw=@mailhog.example": true,
+    "mh:XhXeQlzQBwKcWmVMHB0GWlqk05qkFmdfaNssNVZXhtI=@mailhog.example": true
   }
 }
