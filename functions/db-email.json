@@ -165,8 +165,8 @@
     "port": "993",
     "secure": "true",
     "user": "adrianrodzicsh@gmail.com",
-    "pass": "tubedziezaszyfrowanehaslo",
+    "passEnc": "v1.wK+tFmniOCOqZoR1.5WpNH7CQZqRJBxuGAnA0pw==.pjdq4sL9sO55hYfu1WNcHw==",
     "mailbox": "[Gmail]/Wszystkie",
-    "updatedAt": "2025-09-04T16:17:57.188Z"
+    "updatedAt": "2025-09-04T18:10:30.791Z"
   }
 }

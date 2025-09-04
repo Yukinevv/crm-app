@@ -8,7 +8,6 @@ const admin = require('firebase-admin');
 const express = require('express');
 const jsonServer = require('json-server');
 const nodemailer = require('nodemailer');
-const {FieldValue} = require('firebase-admin/firestore');
 
 const {join} = require('node:path');
 const {conversationsHandlers} = require('./server-api');
@@ -30,6 +29,9 @@ admin.initializeApp();
 
 // === Secrets ===
 const SENDGRID_KEY = defineSecret('SENDGRID_KEY');
+// Klucz/hasło do szyfrowania IMAP
+const IMAP_ENC_KEY = defineSecret('IMAP_ENC_KEY');
+const IMAP_ENC_PASSWORD = defineSecret('IMAP_ENC_PASSWORD');
 
 // Transport email zależny od środowiska
 async function createMailTransport() {
@@ -410,4 +412,4 @@ app.post('/api/mail/send', mh.send);
 
 app.use('/api', router);
 
-exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);
+exports.api = onRequest({secrets: [SENDGRID_KEY, IMAP_ENC_KEY, IMAP_ENC_PASSWORD]}, app);

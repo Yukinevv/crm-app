@@ -4,6 +4,40 @@ const jsonServer = require('json-server');
 const {ImapFlow} = require('imapflow');
 const {simpleParser} = require('mailparser');
 const iconv = require('iconv-lite');
+const crypto = require('crypto');
+
+/* -------------- szyfrowanie -------------- */
+const ENC_VERSION = 'v1';
+const SCRYPT_SALT = 'imap_cfg_salt_v1';
+
+function getCryptoKey() {
+  const rawKeyB64 = process.env.IMAP_ENC_KEY;
+  if (rawKeyB64) {
+    const key = Buffer.from(rawKeyB64, 'base64');
+    if (key.length === 32) return key;
+    console.warn('⚠️ IMAP_ENC_KEY nie ma 32 bajtów po base64 – fallback do scrypt z IMAP_ENC_PASSWORD');
+  }
+  const pass = process.env.IMAP_ENC_PASSWORD || 'dev-only-not-secure';
+  return crypto.scryptSync(pass, SCRYPT_SALT, 32);
+}
+
+function decryptSecret(token) {
+  if (!token) return '';
+  try {
+    const [ver, ivB64, tagB64, dataB64] = String(token).split('.');
+    if (ver !== ENC_VERSION) return '';
+    const key = getCryptoKey();
+    const iv = Buffer.from(ivB64, 'base64');
+    const tag = Buffer.from(tagB64, 'base64');
+    const data = Buffer.from(dataB64, 'base64');
+    const dec = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    dec.setAuthTag(tag);
+    const out = Buffer.concat([dec.update(data), dec.final()]);
+    return out.toString('utf8');
+  } catch {
+    return '';
+  }
+}
 
 /* ----------------------------- utils ------------------------------ */
 
@@ -132,113 +166,25 @@ function createContext(dbPath, imapConfigRef) {
     return name ? `${name} <${email}>` : email;
   }
 
-  /* ---------- MailHog (opcjonalnie przy emulatorze) ---------- */
-
-  async function mhList(limit = 50) {
-    const url = 'http://localhost:8025/api/v2/messages';
-    const resp = await fetch(url);
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => '');
-      throw new Error(`MailHog list error: ${resp.status} ${resp.statusText} ${text}`);
-    }
-    const data = await resp.json();
-    const items = (data.items || []).slice(0, limit);
-
-    const list = items.map((it) => {
-      const id = String(it.ID);
-      const from = firstHeader(it.Content?.Headers, 'From') || '';
-      const to = firstHeader(it.Content?.Headers, 'To') || '';
-      const subject = firstHeader(it.Content?.Headers, 'Subject') || '';
-      const dateStr = firstHeader(it.Content?.Headers, 'Date') || it.Created;
-      const date = new Date(dateStr).toISOString();
-
-      let preview = '';
-      const cte = firstHeader(it.Content?.Headers, 'Content-Transfer-Encoding') || '';
-      const ct = firstHeader(it.Content?.Headers, 'Content-Type') || 'text/plain; charset=utf-8';
-
-      if (it.MIME && Array.isArray(it.MIME.Parts) && it.MIME.Parts.length) {
-        const p = it.MIME.Parts.find(
-          (p) =>
-            /text\/plain/i.test(p?.MIME?.PartType || '') ||
-            /text\/plain/i.test(firstHeader(p?.MIME?.Headers, 'Content-Type') || '')
-        ) || it.MIME.Parts[0];
-
-        const pCT = firstHeader(p?.MIME?.Headers, 'Content-Type') || p?.MIME?.PartType || 'text/plain; charset=utf-8';
-        const pCTE = firstHeader(p?.MIME?.Headers, 'Content-Transfer-Encoding') || '';
-        const raw = p?.MIME?.Body || '';
-        preview = decodeBest(raw, pCTE, pCT);
-      } else {
-        const previewSrc = it.Content?.Body || '';
-        preview = decodeBest(previewSrc, cte, ct);
-      }
-
-      if (preview.length > 240) preview = preview.slice(0, 240) + '…';
-
-      return {id: `mh:${id}`, provider: 'mailhog', from, to, subject, date, isRead: false, preview};
-    });
-
-    return list;
-  }
-
-  async function mhMessage(id) {
-    const rawId = String(id).replace(/^mh:/, '');
-    const url = `http://localhost:8025/api/v1/messages/${encodeURIComponent(rawId)}`;
-    const resp = await fetch(url);
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => '');
-      throw new Error(`MailHog get message error: ${resp.status} ${resp.statusText} ${text}`);
-    }
-    const it = await resp.json();
-
-    const from = firstHeader(it.Content?.Headers, 'From') || '';
-    const to = firstHeader(it.Content?.Headers, 'To') || '';
-    const subject = firstHeader(it.Content?.Headers, 'Subject') || '';
-    const dateStr = firstHeader(it.Content?.Headers, 'Date') || it.Created;
-    const date = new Date(dateStr).toISOString();
-
-    const decodedParts = [];
-    if (it.MIME && Array.isArray(it.MIME.Parts)) {
-      for (const p of it.MIME.Parts) {
-        const pCT = firstHeader(p?.MIME?.Headers, 'Content-Type') || p?.MIME?.PartType || '';
-        const pCTE = firstHeader(p?.MIME?.Headers, 'Content-Transfer-Encoding') || '';
-        const raw = p?.MIME?.Body || '';
-        const decoded = decodeBest(raw, pCTE, pCT);
-        const {mime} = parseContentType(pCT || 'text/plain; charset=utf-8');
-        decodedParts.push({mime: mime || 'text/plain', body: decoded});
-      }
-    }
-    if (!decodedParts.length && it.Content?.Body) {
-      const cte = firstHeader(it.Content?.Headers, 'Content-Transfer-Encoding') || '';
-      const ct = firstHeader(it.Content?.Headers, 'Content-Type') || 'text/plain; charset=utf-8';
-      const decoded = decodeBest(it.Content.Body, cte, ct);
-      const {mime} = parseContentType(ct);
-      decodedParts.push({mime: mime || 'text/plain', body: decoded});
-    }
-
-    const {bodyHtml, bodyText} = chooseBestBody(decodedParts);
-    return {id: `mh:${it.ID}`, provider: 'mailhog', from, to, subject, date, bodyHtml, bodyText};
-  }
-
-  /* --------------- IMAP konfiguracja ---------------- */
+  /* --------------- IMAP: efektywna konfiguracja ---------------- */
 
   function resolveImapConfig() {
     ensureMap('imapConfig');
     const stored = routerDb.db.get('imapConfig').value() || {};
     const state = imapConfigRef || {};
 
-    // Priorytet: najpierw wartości ZAPISANE (stored), dopiero potem stan (state).
     const host = String((stored.host || state.host || '')).trim();
     const user = String((stored.user || state.user || '')).trim();
-    const pass = String((stored.pass || state.pass || '')).trim();
-    const mailbox = String((stored.mailbox || 'INBOX')).trim();
 
-    const port = toNum(
-      (stored.port != null ? stored.port : (state.port != null ? state.port : 993)),
-      993
-    );
-    const secure = toBool(
-      (stored.secure != null ? stored.secure : (state.secure != null ? state.secure : true))
-    );
+    // Rozszyfruj passEnc, jeśli brak - legacy pass
+    let pass = '';
+    if (stored.passEnc) pass = decryptSecret(stored.passEnc);
+    else if (state.passEnc) pass = decryptSecret(state.passEnc);
+    else pass = String((stored.pass || state.pass || '')).trim();
+
+    const mailbox = String((stored.mailbox || 'INBOX')).trim();
+    const port = toNum((stored.port != null ? stored.port : (state.port != null ? state.port : 993)), 993);
+    const secure = toBool((stored.secure != null ? stored.secure : (state.secure != null ? state.secure : true)));
 
     return {host, user, pass, mailbox, port, secure};
   }
@@ -249,7 +195,6 @@ function createContext(dbPath, imapConfigRef) {
       port: effectiveCfg.port,
       secure: effectiveCfg.secure,
       auth: {user: effectiveCfg.user, pass: effectiveCfg.pass},
-      // logger: true, // do debugowania
     });
     try {
       await client.connect();
@@ -257,7 +202,7 @@ function createContext(dbPath, imapConfigRef) {
     } finally {
       try {
         await client.logout();
-      } catch { /* ignore */
+      } catch {
       }
     }
   }
@@ -265,14 +210,12 @@ function createContext(dbPath, imapConfigRef) {
   async function imapList(limit = 50) {
     const cfg = resolveImapConfig();
     if (!cfg.host || !cfg.user || !cfg.pass) {
-      // Brak pełnej konfiguracji - nie łączymy się
       return [];
     }
 
     return withImap(cfg, async (client) => {
       await client.mailboxOpen(cfg.mailbox || 'INBOX');
 
-      // użyjemy bieżącego stanu skrzynki po otwarciu
       const total = client.mailbox?.exists || 0;
       if (!total) return [];
 
@@ -364,7 +307,6 @@ function createContext(dbPath, imapConfigRef) {
     const uid = Number(String(id).replace(/^imap:/, ''));
     return withImap(cfg, async (client) => {
       await client.mailboxOpen(cfg.mailbox || 'INBOX');
-      // bezpieczniejsza wersja z jawnie wskazanym UID
       await client.messageFlagsAdd({uid}, ['\\Seen'], {uid: true});
       return {ok: true};
     });
@@ -387,8 +329,6 @@ function createContext(dbPath, imapConfigRef) {
   return {
     routerDb,
     isEmu,
-    mhList,
-    mhMessage,
     imapList,
     imapMessage,
     imapMarkSeen,
@@ -406,15 +346,7 @@ function createInboxListHandler({dbPath, imapConfig}) {
     try {
       const limit = Math.min(parseInt(String(req.query.limit || '50'), 10) || 50, 200);
 
-      let list = [];
-      // list = ctx.isEmu ? await ctx.mhList(limit) : await ctx.imapList(limit);
-      list = await ctx.imapList(limit);
-
-      // (opcjonalnie) zewnętrzny stan "przeczytane" dla MailHog
-      if (ctx.isEmu) {
-        const rm = ctx.getReadMap();
-        list = list.map((m) => ({...m, isRead: !!rm[m.id]}));
-      }
+      let list = await ctx.imapList(limit);
 
       // Filtrowanie
       const q = String(req.query.q || '').trim().toLowerCase();
