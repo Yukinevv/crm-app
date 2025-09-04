@@ -1,3 +1,5 @@
+'use strict';
+
 const {onRequest, onCall, HttpsError} = require('firebase-functions/v2/https');
 const {defineSecret} = require('firebase-functions/params');
 const {setGlobalOptions} = require('firebase-functions/v2');
@@ -8,10 +10,15 @@ const jsonServer = require('json-server');
 const nodemailer = require('nodemailer');
 const {FieldValue} = require('firebase-admin/firestore');
 
-const {join} = require("node:path");
+const {join} = require('node:path');
 const {conversationsHandlers} = require('./server-api');
 const {inboxHandlers} = require('./server-inbox');
 const {mailHandlers} = require('./server-mail');
+
+const {
+  createImapStateFromEnv,
+  imapConfigHandlers
+} = require('./server-imap-config');
 
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
@@ -24,18 +31,8 @@ admin.initializeApp();
 // === Secrets ===
 const SENDGRID_KEY = defineSecret('SENDGRID_KEY');
 
-const imapConfig = {
-  host: process.env.IMAP_HOST || '',
-  port: process.env.IMAP_PORT || '993',
-  secure: process.env.IMAP_SECURE || 'true',
-  user: process.env.IMAP_USER || '',
-  pass: process.env.IMAP_PASS || ''
-};
-
-// Transport email zależny od środowiska (MailHog w emulatorze, SendGrid na produkcji,
-// Ethereal jako fallback).
+// Transport email zależny od środowiska
 async function createMailTransport() {
-  // Emulator: MailHog na localhost:1025
   if (process.env.FUNCTIONS_EMULATOR) {
     console.log('⚙️ Używam lokalnego MailHog na porcie 1025');
     return nodemailer.createTransport({
@@ -45,7 +42,6 @@ async function createMailTransport() {
     });
   }
 
-  // Produkcja: SendGrid przez sekret
   const sgKey = process.env.SENDGRID_KEY;
   if (sgKey) {
     console.log('⚙️ Używam SendGrid SMTP (sekret SENDGRID_KEY obecny)');
@@ -59,7 +55,6 @@ async function createMailTransport() {
     });
   }
 
-  // Fallback: Ethereal test account (tylko do podglądu)
   console.log('⚙️ Brak SENDGRID_KEY – tworzę konto Ethereal (test)');
   const testAccount = await nodemailer.createTestAccount();
   console.log('ℹ️ Ethereal user/pass:', testAccount.user, testAccount.pass);
@@ -78,7 +73,6 @@ const APP_NAME = 'CRM-APP';
 
 // ========== CALLABLES ==========
 
-// getUserByEmail (by powiązać kontakt po emailu z Firebase Auth UID)
 exports.getUserByEmail = onCall(async (request) => {
   const data = request.data || {};
   const email = typeof data.email === 'string' ? data.email : data?.data?.email;
@@ -95,7 +89,6 @@ exports.getUserByEmail = onCall(async (request) => {
   }
 });
 
-// sendBookingConfirmation – potwierdzenie rezerwacji
 exports.sendBookingConfirmation = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
   const payload = request.data || {};
   const {email, start, end} = payload;
@@ -134,7 +127,6 @@ Zespół ${APP_NAME}`
   }
 });
 
-// sendInvitationEmail – powiadomienie dla zaproszonego użytkownika
 exports.sendInvitationEmail = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
   const payload = request.data || {};
   const {email, title, start, end, inviterEmail} = payload;
@@ -201,7 +193,7 @@ const trackingHandler = async (req, res) => {
       url: u,
       userAgent: ua,
       ip,
-      ts: FieldValue.serverTimestamp()
+      ts: admin.firestore.FieldValue.serverTimestamp()
     });
 
     console.log('📝 zapisano kliknięcie → redirect 302');
@@ -212,7 +204,7 @@ const trackingHandler = async (req, res) => {
   }
 };
 
-// ====== STATYSTYKI: LISTA KLIKÓW, PODSUMOWANIA, CSV ======
+// ====== STATYSTYKI ======
 
 function tsToIso(ts) {
   if (!ts) return null;
@@ -224,7 +216,6 @@ function tsToIso(ts) {
   }
 }
 
-// Lista kliknięć dla messageId
 const clicksListHandler = async (req, res) => {
   try {
     const messageId = String(req.query.messageId || '');
@@ -383,14 +374,28 @@ app.get('/api/stats/clicks/summary', clicksSummaryHandler);
 app.get('/api/stats/clicks/csv', clicksCsvHandler);
 app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
 
+// === Ścieżka do bazy e-mail/konwersacji i stan IMAP ===
 const conversationsDbPath = join(__dirname, 'db-email.json');
+
+// Inicjalizacja stanu IMAP + handlery konfiguracji IMAP
+const imapState = createImapStateFromEnv(process.env);
+const ic = imapConfigHandlers({dbPath: conversationsDbPath, state: imapState});
+app.get('/imap/config', ic.get);
+app.get('/api/imap/config', ic.get);
+app.post('/imap/config', ic.set);
+app.post('/api/imap/config', ic.set);
+app.post('/imap/test', ic.test);
+app.post('/api/imap/test', ic.test);
+
+// Konwersacje (server-api)
 const conv = conversationsHandlers({dbPath: conversationsDbPath});
 app.post('/conversations/logEmail', conv.logEmail);
 app.post('/api/conversations/logEmail', conv.logEmail);
 app.get('/conversations', conv.list);
 app.get('/api/conversations', conv.list);
 
-const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig});
+// Inbox (server-inbox) – korzysta z imapState (mutowalny obiekt)
+const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig: imapState});
 app.get('/inbox/messages', ih.list);
 app.get('/api/inbox/messages', ih.list);
 app.get('/inbox/message/:id', ih.getMessage);
@@ -398,6 +403,7 @@ app.get('/api/inbox/message/:id', ih.getMessage);
 app.post('/inbox/markRead', ih.markRead);
 app.post('/api/inbox/markRead', ih.markRead);
 
+// Wysyłka maili (server-mail)
 const mh = mailHandlers({transportPromise: mailTransportPromise, appName: APP_NAME});
 app.post('/mail/send', mh.send);
 app.post('/api/mail/send', mh.send);

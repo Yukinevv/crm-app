@@ -95,6 +95,18 @@
       "emailId": 9,
       "contactId": "ct_003",
       "counterpartEmail": "marek.lewandowski@acme.pl"
+    },
+    {
+      "id": "conv_mf5nww7b_hyg4g298",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "in",
+      "subject": "Trent Alexander-Arnold w stylizacjach Calvin Klein",
+      "preview": "\n",
+      "date": "2025-09-03T13:55:42.000Z",
+      "emailId": "imap:1768",
+      "leadId": "lead_mf5nww7a_7dg7czle",
+      "counterpartEmail": "news@mailing.calvinklein.com"
     }
   ],
   "leadsEmail": [
@@ -133,10 +145,28 @@
       "status": "Nowy",
       "source": "E-mail",
       "createdAt": "2025-08-26T12:28:11.760Z"
+    },
+    {
+      "id": "lead_mf5nww7a_7dg7czle",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "news@mailing.calvinklein.com",
+      "name": "news",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-09-04T17:10:41.926Z"
     }
   ],
   "inboxRead": {
     "mh:Cx7eyyqvr_OyLK8JqfDyw1SC4TEGgqL5aas-6VD1-dw=@mailhog.example": true,
     "mh:XhXeQlzQBwKcWmVMHB0GWlqk05qkFmdfaNssNVZXhtI=@mailhog.example": true
+  },
+  "imapConfig": {
+    "host": "imap.gmail.com",
+    "port": "993",
+    "secure": "true",
+    "user": "adrianrodzicsh@gmail.com",
+    "pass": "tubedziezaszyfrowanehaslo",
+    "mailbox": "[Gmail]/Wszystkie",
+    "updatedAt": "2025-09-04T16:17:57.188Z"
   }
 }

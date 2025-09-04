@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {map, Observable} from 'rxjs';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {from, map, Observable, switchMap} from 'rxjs';
+import {Auth} from '@angular/fire/auth';
 
 export interface InboxItem {
   id: string;            // "mh:<id>" lub "imap:<uid>"
@@ -39,8 +40,35 @@ export interface InboxQuery {
 export class InboxService {
   private base = '/api/inbox';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private auth: Auth) {
   }
+
+  // --- helpers ---
+
+  /** Zwraca token ID lub null jeśli brak użytkownika. */
+  private idToken$(): Observable<string | null> {
+    const p = this.auth.currentUser
+      ? this.auth.currentUser.getIdToken()
+      : Promise.resolve(null);
+    return from(p);
+  }
+
+  /**
+   * Buduje typowane opcje dla HttpClient (wymusza observe: 'body'),
+   * aby uniknąć przeciążenia zwracającego HttpEvent<T>.
+   */
+  private buildOptions(token: string | null, params?: HttpParams) {
+    const headers = token
+      ? new HttpHeaders({Authorization: `Bearer ${token}`})
+      : undefined;
+    return {
+      headers,
+      params,
+      observe: 'body' as const
+    };
+  }
+
+  // --- API ---
 
   list(query: InboxQuery = {}): Observable<InboxItem[]> {
     let params = new HttpParams();
@@ -53,16 +81,37 @@ export class InboxService {
     if (query.dateTo) params = params.set('dateTo', query.dateTo);
     if (query.unread) params = params.set('unread', '1');
 
-    return this.http
-      .get<{ items: InboxItem[] }>(`${this.base}/messages`, {params})
-      .pipe(map(r => r.items || []));
+    return this.idToken$().pipe(
+      switchMap(token =>
+        this.http.get<{ items: InboxItem[] }>(
+          `${this.base}/messages`,
+          this.buildOptions(token, params)
+        )
+      ),
+      map(r => r.items || [])
+    );
   }
 
   getMessage(id: string): Observable<InboxMessage> {
-    return this.http.get<InboxMessage>(`${this.base}/message/${encodeURIComponent(id)}`);
+    return this.idToken$().pipe(
+      switchMap(token =>
+        this.http.get<InboxMessage>(
+          `${this.base}/message/${encodeURIComponent(id)}`,
+          this.buildOptions(token)
+        )
+      )
+    );
   }
 
   markRead(id: string): Observable<{ ok: true }> {
-    return this.http.post<{ ok: true }>(`${this.base}/markRead`, {id});
+    return this.idToken$().pipe(
+      switchMap(token =>
+        this.http.post<{ ok: true }>(
+          `${this.base}/markRead`,
+          {id},
+          this.buildOptions(token)
+        )
+      )
+    );
   }
 }

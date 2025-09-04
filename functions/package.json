@@ -17,7 +17,7 @@
     "firebase-admin": "^12.6.0",
     "firebase-functions": "^6.0.1",
     "iconv-lite": "^0.7.0",
-    "imapflow": "^1.0.194",
+    "imapflow": "^1.0.195",
     "json-server": "^0.16.1",
     "mailparser": "^3.7.4",
     "nodemailer": "^7.0.5"
