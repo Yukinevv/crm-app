@@ -1,204 +1,59 @@
 'use strict';
 
-const jsonServer = require('json-server');
 const {ImapFlow} = require('imapflow');
 const {simpleParser} = require('mailparser');
 const iconv = require('iconv-lite');
-const crypto = require('crypto');
+const {
+  createContext,
+  toBool,
+  toNum,
+  decryptSecret,
+  readImapConfigForUid,
+} = require('./utils');
 
-/* -------------- szyfrowanie -------------- */
-const ENC_VERSION = 'v1';
-const SCRYPT_SALT = 'imap_cfg_salt_v1';
-
-function getCryptoKey() {
-  const rawKeyB64 = process.env.IMAP_ENC_KEY;
-  if (rawKeyB64) {
-    const key = Buffer.from(rawKeyB64, 'base64');
-    if (key.length === 32) return key;
-    console.warn('⚠️ IMAP_ENC_KEY nie ma 32 bajtów po base64 – fallback do scrypt z IMAP_ENC_PASSWORD');
-  }
-  const pass = process.env.IMAP_ENC_PASSWORD || 'dev-only-not-secure';
-  return crypto.scryptSync(pass, SCRYPT_SALT, 32);
+/* ----------------------------- helpers ------------------------------ */
+function addrToString(list) {
+  if (!list || !list.length) return '';
+  const a = list[0];
+  const name = a.name ? `${a.name}` : '';
+  const email = a.address ? `${a.address}` : '';
+  return name ? `${name} <${email}>` : email;
 }
 
-function decryptSecret(token) {
-  if (!token) return '';
-  try {
-    const [ver, ivB64, tagB64, dataB64] = String(token).split('.');
-    if (ver !== ENC_VERSION) return '';
-    const key = getCryptoKey();
-    const iv = Buffer.from(ivB64, 'base64');
-    const tag = Buffer.from(tagB64, 'base64');
-    const data = Buffer.from(dataB64, 'base64');
-    const dec = crypto.createDecipheriv('aes-256-gcm', key, iv);
-    dec.setAuthTag(tag);
-    const out = Buffer.concat([dec.update(data), dec.final()]);
-    return out.toString('utf8');
-  } catch {
-    return '';
-  }
+/* ------------------------ ctx + IMAP wrappers ----------------------- */
+
+function createContextForInbox(dbPath) {
+  // tylko mapy
+  return createContext(dbPath);
 }
 
-/* ----------------------------- utils ------------------------------ */
+function createInboxCore({dbPath}) {
+  const ctx = createContextForInbox(dbPath);
 
-function toBool(v) {
-  if (typeof v === 'boolean') return v;
-  const s = String(v ?? '').trim().toLowerCase();
-  return s === 'true' || s === '1' || s === 'yes';
-}
+  function resolveImapConfig(uid) {
+    if (!uid) return {host: '', user: '', pass: '', mailbox: 'INBOX', port: 993, secure: true};
+    const stored = readImapConfigForUid(ctx, uid);
 
-function toNum(v, def) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : def;
-}
-
-/* ------------------------ ctx + helpers --------------------------- */
-
-function createContext(dbPath, imapConfigRef) {
-  const routerDb = jsonServer.router(dbPath);
-  const isEmu = !!process.env.FUNCTIONS_EMULATOR;
-
-  function ensureCollection(name) {
-    if (!routerDb.db.has(name).value()) {
-      routerDb.db.set(name, []).write();
-    }
-  }
-
-  function ensureMap(name) {
-    if (!routerDb.db.has(name).value()) {
-      routerDb.db.set(name, {}).write();
-    }
-  }
-
-  function firstHeader(headers, name) {
-    if (!headers) return null;
-    const key = Object.keys(headers).find((k) => k.toLowerCase() === name.toLowerCase());
-    if (!key) return null;
-    const v = headers[key];
-    return Array.isArray(v) ? v[0] : v;
-  }
-
-  function parseContentType(ct) {
-    const res = {mime: null, charset: 'utf-8'};
-    if (!ct) return res;
-    const [mime, ...rest] = String(ct).split(';').map((s) => s.trim());
-    res.mime = mime?.toLowerCase() || null;
-    const cs = rest.find((p) => /^charset=/i.test(p));
-    if (cs) {
-      const val = cs.split('=')[1]?.trim()?.replace(/^"|"$/g, '');
-      if (val) res.charset = val.toLowerCase();
-    }
-    return res;
-  }
-
-  function detectCTE(rawCte, body) {
-    const cte = (rawCte || '').toString().trim().toLowerCase();
-    if (cte) return cte;
-    if (/=[0-9a-f]{2}/i.test(body) || /=\r?\n/.test(body)) return 'quoted-printable';
-    return '7bit';
-  }
-
-  function decodeQPToBuffer(str) {
-    const s = String(str).replace(/\r\n/g, '\n');
-    const out = [];
-    for (let i = 0; i < s.length; i++) {
-      const ch = s[i];
-      if (ch === '=') {
-        if (s[i + 1] === '\n') {
-          i += 1;
-          continue;
-        }
-        if (s[i + 1] === '\r' && s[i + 2] === '\n') {
-          i += 2;
-          continue;
-        }
-        const hex = s.substr(i + 1, 2);
-        if (/^[0-9A-Fa-f]{2}$/.test(hex)) {
-          out.push(parseInt(hex, 16));
-          i += 2;
-          continue;
-        }
-        out.push('='.charCodeAt(0));
-      } else {
-        out.push(ch.charCodeAt(0));
-      }
-    }
-    return Buffer.from(Uint8Array.from(out));
-  }
-
-  function decodeBest(body, rawCte, rawCt) {
-    const cte = detectCTE(rawCte, body);
-    const {charset} = parseContentType(rawCt);
-    let buf;
-    if (cte === 'base64') {
-      const clean = String(body).replace(/\s+/g, '');
-      try {
-        buf = Buffer.from(clean, 'base64');
-      } catch {
-        buf = Buffer.from('');
-      }
-    } else if (cte === 'quoted-printable') {
-      buf = decodeQPToBuffer(body);
-    } else {
-      buf = Buffer.from(String(body), 'binary');
-    }
-    try {
-      return iconv.decode(buf, charset || 'utf-8');
-    } catch {
-      return buf.toString('utf-8');
-    }
-  }
-
-  function chooseBestBody(parts) {
-    const html = parts.find((p) => p.mime?.startsWith('text/html') && p.body);
-    if (html) return {bodyHtml: html.body, bodyText: null};
-    const text = parts.find((p) => p.mime?.startsWith('text/plain') && p.body);
-    if (text) return {bodyHtml: null, bodyText: text.body};
-    if (parts[0]?.body) return {bodyHtml: null, bodyText: parts[0].body};
-    return {bodyHtml: null, bodyText: null};
-  }
-
-  function addrToString(list) {
-    if (!list || !list.length) return '';
-    const a = list[0];
-    const name = a.name ? `${a.name}` : '';
-    const email = a.address ? `${a.address}` : '';
-    return name ? `${name} <${email}>` : email;
-  }
-
-  /* --------------- IMAP: efektywna konfiguracja ---------------- */
-
-  function resolveImapConfig() {
-    ensureMap('imapConfig');
-    const stored = routerDb.db.get('imapConfig').value() || {};
-    const state = imapConfigRef || {};
-
-    const host = String((stored.host || state.host || '')).trim();
-    const user = String((stored.user || state.user || '')).trim();
-
-    // Rozszyfruj passEnc, jeśli brak - legacy pass
-    let pass = '';
-    if (stored.passEnc) pass = decryptSecret(stored.passEnc);
-    else if (state.passEnc) pass = decryptSecret(state.passEnc);
-    else pass = String((stored.pass || state.pass || '')).trim();
-
-    const mailbox = String((stored.mailbox || 'INBOX')).trim();
-    const port = toNum((stored.port != null ? stored.port : (state.port != null ? state.port : 993)), 993);
-    const secure = toBool((stored.secure != null ? stored.secure : (state.secure != null ? state.secure : true)));
+    const host = String(stored.host || '').trim();
+    const user = String(stored.user || '').trim();
+    const pass = decryptSecret(stored.passEnc || '');
+    const mailbox = String(stored.mailbox || 'INBOX').trim();
+    const port = toNum(stored.port != null ? stored.port : 993, 993);
+    const secure = toBool(stored.secure != null ? stored.secure : true);
 
     return {host, user, pass, mailbox, port, secure};
   }
 
-  async function withImap(effectiveCfg, fn) {
+  async function withImap(cfg, fn) {
     const client = new ImapFlow({
-      host: effectiveCfg.host,
-      port: effectiveCfg.port,
-      secure: effectiveCfg.secure,
-      auth: {user: effectiveCfg.user, pass: effectiveCfg.pass},
+      host: cfg.host,
+      port: cfg.port,
+      secure: cfg.secure,
+      auth: {user: cfg.user, pass: cfg.pass},
     });
     try {
       await client.connect();
-      return await fn(client, effectiveCfg);
+      return await fn(client, cfg);
     } finally {
       try {
         await client.logout();
@@ -207,8 +62,8 @@ function createContext(dbPath, imapConfigRef) {
     }
   }
 
-  async function imapList(limit = 50) {
-    const cfg = resolveImapConfig();
+  async function imapList(uid, limit = 50) {
+    const cfg = resolveImapConfig(uid);
     if (!cfg.host || !cfg.user || !cfg.pass) {
       return [];
     }
@@ -258,18 +113,18 @@ function createContext(dbPath, imapConfigRef) {
     });
   }
 
-  async function imapMessage(id) {
-    const cfg = resolveImapConfig();
+  async function imapMessage(uid, id) {
+    const cfg = resolveImapConfig(uid);
     if (!cfg.host || !cfg.user || !cfg.pass) {
       const err = new Error('IMAP not configured');
       err.statusCode = 400;
       throw err;
     }
 
-    const uid = Number(String(id).replace(/^imap:/, ''));
+    const uidNum = Number(String(id).replace(/^imap:/, ''));
     return withImap(cfg, async (client) => {
       await client.mailboxOpen(cfg.mailbox || 'INBOX');
-      const {content} = await client.download(uid, null, {uid: true});
+      const {content} = await client.download(uidNum, null, {uid: true});
       const chunks = [];
       for await (const chunk of content) chunks.push(chunk);
       const raw = Buffer.concat(chunks);
@@ -284,7 +139,7 @@ function createContext(dbPath, imapConfigRef) {
       const bodyText = mail.text || null;
 
       return {
-        id: `imap:${uid}`,
+        id: `imap:${uidNum}`,
         provider: 'imap',
         from,
         to,
@@ -296,57 +151,37 @@ function createContext(dbPath, imapConfigRef) {
     });
   }
 
-  async function imapMarkSeen(id) {
-    const cfg = resolveImapConfig();
+  async function imapMarkSeen(uid, id) {
+    const cfg = resolveImapConfig(uid);
     if (!cfg.host || !cfg.user || !cfg.pass) {
       const err = new Error('IMAP not configured');
       err.statusCode = 400;
       throw err;
     }
 
-    const uid = Number(String(id).replace(/^imap:/, ''));
+    const uidNum = Number(String(id).replace(/^imap:/, ''));
     return withImap(cfg, async (client) => {
       await client.mailboxOpen(cfg.mailbox || 'INBOX');
-      await client.messageFlagsAdd({uid}, ['\\Seen'], {uid: true});
+      await client.messageFlagsAdd({uid: uidNum}, ['\\Seen'], {uid: true});
       return {ok: true};
     });
   }
 
-  /* ------------------------- read-state (MH) ---------------------- */
-
-  function getReadMap() {
-    ensureMap('inboxRead');
-    return routerDb.db.get('inboxRead').value() || {};
-  }
-
-  function setRead(id, v = true) {
-    ensureMap('inboxRead');
-    const map = routerDb.db.get('inboxRead').value() || {};
-    map[id] = !!v;
-    routerDb.db.set('inboxRead', map).write();
-  }
-
-  return {
-    routerDb,
-    isEmu,
-    imapList,
-    imapMessage,
-    imapMarkSeen,
-    getReadMap,
-    setRead,
-  };
+  return {imapList, imapMessage, imapMarkSeen};
 }
 
 /* ----------------------------- handlers --------------------------- */
 
-function createInboxListHandler({dbPath, imapConfig}) {
-  const ctx = createContext(dbPath, imapConfig);
+function createInboxListHandler({dbPath /*, imapConfig */}) {
+  const core = createInboxCore({dbPath});
 
   return async function inboxListHandler(req, res) {
     try {
-      const limit = Math.min(parseInt(String(req.query.limit || '50'), 10) || 50, 200);
+      const uid = req.user?.uid;
+      if (!uid) return res.status(401).json({error: 'unauthenticated'});
 
-      let list = await ctx.imapList(limit);
+      const limit = Math.min(parseInt(String(req.query.limit || '50'), 10) || 50, 200);
+      let list = await core.imapList(uid, limit);
 
       // Filtrowanie
       const q = String(req.query.q || '').trim().toLowerCase();
@@ -389,13 +224,16 @@ function createInboxListHandler({dbPath, imapConfig}) {
   };
 }
 
-function createInboxGetMessageHandler({dbPath, imapConfig}) {
-  const ctx = createContext(dbPath, imapConfig);
+function createInboxGetMessageHandler({dbPath /*, imapConfig */}) {
+  const core = createInboxCore({dbPath});
 
   return async function inboxGetMessageHandler(req, res) {
     try {
+      const uid = req.user?.uid;
+      if (!uid) return res.status(401).json({error: 'unauthenticated'});
       const id = String(req.params.id);
-      const data = await ctx.imapMessage(id);
+
+      const data = await core.imapMessage(uid, id);
       res.json(data);
     } catch (e) {
       const sc = e && e.statusCode ? e.statusCode : 500;
@@ -405,15 +243,18 @@ function createInboxGetMessageHandler({dbPath, imapConfig}) {
   };
 }
 
-function createInboxMarkReadHandler({dbPath, imapConfig}) {
-  const ctx = createContext(dbPath, imapConfig);
+function createInboxMarkReadHandler({dbPath /*, imapConfig */}) {
+  const core = createInboxCore({dbPath});
 
   return async function inboxMarkReadHandler(req, res) {
     try {
+      const uid = req.user?.uid;
+      if (!uid) return res.status(401).json({error: 'unauthenticated'});
+
       const id = String(req.body?.id || '');
       if (!id) return res.status(400).json({error: 'id required'});
 
-      await ctx.imapMarkSeen(id);
+      await core.imapMarkSeen(uid, id);
       res.json({ok: true});
     } catch (e) {
       const sc = e && e.statusCode ? e.statusCode : 500;

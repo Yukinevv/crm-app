@@ -14,10 +14,8 @@ const {conversationsHandlers} = require('./server-api');
 const {inboxHandlers} = require('./server-inbox');
 const {mailHandlers} = require('./server-mail');
 
-const {
-  createImapStateFromEnv,
-  imapConfigHandlers
-} = require('./server-imap-config');
+const {createImapStateFromEnv} = require('./utils');
+const {imapConfigHandlers} = require('./server-imap-config');
 
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
@@ -29,9 +27,6 @@ admin.initializeApp();
 
 // === Secrets ===
 const SENDGRID_KEY = defineSecret('SENDGRID_KEY');
-// Klucz/hasło do szyfrowania IMAP
-const IMAP_ENC_KEY = defineSecret('IMAP_ENC_KEY');
-const IMAP_ENC_PASSWORD = defineSecret('IMAP_ENC_PASSWORD');
 
 // Transport email zależny od środowiska
 async function createMailTransport() {
@@ -50,10 +45,7 @@ async function createMailTransport() {
     return nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
       port: 587,
-      auth: {
-        user: 'apikey',
-        pass: sgKey
-      }
+      auth: {user: 'apikey', pass: sgKey}
     });
   }
 
@@ -63,25 +55,56 @@ async function createMailTransport() {
   return nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass
-    }
+    auth: {user: testAccount.user, pass: testAccount.pass}
   });
 }
 
 const mailTransportPromise = createMailTransport();
 const APP_NAME = 'CRM-APP';
 
-// ========== CALLABLES ==========
+/* ===================== AUTH MIDDLEWARE ===================== */
+
+function getBearerToken(req) {
+  const h = req.get('Authorization') || '';
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  if (m) return m[1];
+  // alternatywnie cookie session
+  const cookie = req.headers.cookie || '';
+  const cm = cookie.match(/(?:^|;\s*)__session=([^;]+)/);
+  return cm ? decodeURIComponent(cm[1]) : null;
+}
+
+const verifyFirebaseAuth = async (req, res, next) => {
+  try {
+    if (req.method === 'OPTIONS') return next(); // preflight CORS
+
+    const token = getBearerToken(req);
+
+    // Dev-bypass w emulatorze
+    if (!token && process.env.FUNCTIONS_EMULATOR && process.env.ALLOW_DEV_AUTH_BYPASS === '1') {
+      req.user = {uid: 'dev-uid'};
+      return next();
+    }
+
+    if (!token) {
+      return res.status(401).json({error: 'unauthenticated'});
+    }
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    req.user = {uid: decoded.uid, email: decoded.email || null};
+    return next();
+  } catch (e) {
+    return res.status(401).json({error: 'unauthenticated'});
+  }
+};
+
+/* ======================= CALLABLES ======================= */
 
 exports.getUserByEmail = onCall(async (request) => {
   const data = request.data || {};
   const email = typeof data.email === 'string' ? data.email : data?.data?.email;
 
-  if (!email) {
-    throw new HttpsError('invalid-argument', 'Brak adresu email');
-  }
+  if (!email) throw new HttpsError('invalid-argument', 'Brak adresu email');
 
   try {
     const user = await admin.auth().getUserByEmail(email);
@@ -92,8 +115,7 @@ exports.getUserByEmail = onCall(async (request) => {
 });
 
 exports.sendBookingConfirmation = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
-  const payload = request.data || {};
-  const {email, start, end} = payload;
+  const {email, start, end} = request.data || {};
 
   if (!email || !start || !end) {
     throw new HttpsError('invalid-argument', 'Brakuje danych do wysłania potwierdzenia');
@@ -130,8 +152,7 @@ Zespół ${APP_NAME}`
 });
 
 exports.sendInvitationEmail = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
-  const payload = request.data || {};
-  const {email, title, start, end, inviterEmail} = payload;
+  const {email, title, start, end, inviterEmail} = request.data || {};
 
   if (!email || !title || !start || !end || !inviterEmail) {
     throw new HttpsError('invalid-argument', 'Brakuje danych do wysłania zaproszenia');
@@ -168,7 +189,17 @@ Zespół ${APP_NAME}`
   }
 });
 
-// --- Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
+/* ======================= Tracking + statystyki ======================= */
+
+function tsToIso(ts) {
+  if (!ts) return null;
+  if (ts.toDate) return ts.toDate().toISOString();
+  try {
+    return new Date(ts).toISOString();
+  } catch {
+    return null;
+  }
+}
 
 const trackingHandler = async (req, res) => {
   try {
@@ -176,14 +207,8 @@ const trackingHandler = async (req, res) => {
     const u = String(req.query.u || '');
     const r = req.query.r ? String(req.query.r) : null;
 
-    console.log('↪️ /t hit', {path: req.path, m, hasU: !!u, r});
-
-    if (!m || !u) {
-      return res.status(400).send('Missing query params: m, u');
-    }
-    if (!/^https?:\/\//i.test(u)) {
-      return res.status(400).send('Invalid target url');
-    }
+    if (!m || !u) return res.status(400).send('Missing query params: m, u');
+    if (!/^https?:\/\//i.test(u)) return res.status(400).send('Invalid target url');
 
     const ua = req.get('user-agent') || '';
     const ipHeader = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '';
@@ -198,25 +223,12 @@ const trackingHandler = async (req, res) => {
       ts: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    console.log('📝 zapisano kliknięcie → redirect 302');
     return res.redirect(302, u);
   } catch (err) {
     console.error('❌ Click tracking error:', err);
     return res.status(500).send('Click tracking failed');
   }
 };
-
-// ====== STATYSTYKI ======
-
-function tsToIso(ts) {
-  if (!ts) return null;
-  if (ts.toDate) return ts.toDate().toISOString();
-  try {
-    return new Date(ts).toISOString();
-  } catch {
-    return null;
-  }
-}
 
 const clicksListHandler = async (req, res) => {
   try {
@@ -354,7 +366,7 @@ const summaryCsvHandler = async (req, res) => {
   }
 };
 
-// ========== HTTP API (Express) ==========
+/* ========================= HTTP API (Express) ========================= */
 
 const app = express();
 const middlewares = jsonServer.defaults();
@@ -363,7 +375,38 @@ const router = jsonServer.router('db.json');
 app.use(middlewares);
 app.use(jsonServer.bodyParser);
 
-// REST przez json-server
+// Ścieżka do bazy e-mail/konwersacji i stan IMAP
+const conversationsDbPath = join(__dirname, 'db-email.json');
+
+// Inicjalizacja stanu IMAP + handlery konfiguracji IMAP
+const imapState = createImapStateFromEnv(process.env);
+const ic = imapConfigHandlers({dbPath: conversationsDbPath, state: imapState});
+
+app.use(['/imap', '/api/imap', '/inbox', '/api/inbox'], verifyFirebaseAuth);
+
+app.get('/imap/config', ic.get);
+app.get('/api/imap/config', ic.get);
+app.post('/imap/config', ic.set);
+app.post('/api/imap/config', ic.set);
+app.post('/imap/test', ic.test);
+app.post('/api/imap/test', ic.test);
+
+const conv = conversationsHandlers({dbPath: conversationsDbPath});
+app.post('/conversations/logEmail', conv.logEmail);
+app.post('/api/conversations/logEmail', conv.logEmail);
+app.get('/conversations', conv.list);
+app.get('/api/conversations', conv.list);
+
+// Inbox (server-inbox)
+const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig: imapState});
+app.get('/inbox/messages', ih.list);
+app.get('/api/inbox/messages', ih.list);
+app.get('/inbox/message/:id', ih.getMessage);
+app.get('/api/inbox/message/:id', ih.getMessage);
+app.post('/inbox/markRead', ih.markRead);
+app.post('/api/inbox/markRead', ih.markRead);
+
+// Tracking/Statystyki
 app.get('/t', trackingHandler);
 app.get('/stats/clicks', clicksListHandler);
 app.get('/stats/clicks/summary', clicksSummaryHandler);
@@ -376,40 +419,6 @@ app.get('/api/stats/clicks/summary', clicksSummaryHandler);
 app.get('/api/stats/clicks/csv', clicksCsvHandler);
 app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
 
-// === Ścieżka do bazy e-mail/konwersacji i stan IMAP ===
-const conversationsDbPath = join(__dirname, 'db-email.json');
-
-// Inicjalizacja stanu IMAP + handlery konfiguracji IMAP
-const imapState = createImapStateFromEnv(process.env);
-const ic = imapConfigHandlers({dbPath: conversationsDbPath, state: imapState});
-app.get('/imap/config', ic.get);
-app.get('/api/imap/config', ic.get);
-app.post('/imap/config', ic.set);
-app.post('/api/imap/config', ic.set);
-app.post('/imap/test', ic.test);
-app.post('/api/imap/test', ic.test);
-
-// Konwersacje (server-api)
-const conv = conversationsHandlers({dbPath: conversationsDbPath});
-app.post('/conversations/logEmail', conv.logEmail);
-app.post('/api/conversations/logEmail', conv.logEmail);
-app.get('/conversations', conv.list);
-app.get('/api/conversations', conv.list);
-
-// Inbox (server-inbox) – korzysta z imapState (mutowalny obiekt)
-const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig: imapState});
-app.get('/inbox/messages', ih.list);
-app.get('/api/inbox/messages', ih.list);
-app.get('/inbox/message/:id', ih.getMessage);
-app.get('/api/inbox/message/:id', ih.getMessage);
-app.post('/inbox/markRead', ih.markRead);
-app.post('/api/inbox/markRead', ih.markRead);
-
-// Wysyłka maili (server-mail)
-const mh = mailHandlers({transportPromise: mailTransportPromise, appName: APP_NAME});
-app.post('/mail/send', mh.send);
-app.post('/api/mail/send', mh.send);
-
 app.use('/api', router);
 
-exports.api = onRequest({secrets: [SENDGRID_KEY, IMAP_ENC_KEY, IMAP_ENC_PASSWORD]}, app);
+exports.api = onRequest({secrets: [SENDGRID_KEY]}, app);
