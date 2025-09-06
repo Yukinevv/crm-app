@@ -18,28 +18,21 @@ export class EmailService {
   ) {
   }
 
+  /**
+   * Zwraca tylko maile wysłane przez zalogowanego użytkownika (po userId)
+   */
   getEmails(): Observable<Email[]> {
     return this.auth.user$.pipe(
       take(1),
       switchMap(user => {
         if (!user) return of([] as Email[]);
-        return this.http.get<Email[]>(`${this.apiUrl}?userId=${encodeURIComponent(user.uid)}`);
+        return this.http.get<Email[]>(this.apiUrl, {params: {userId: user.uid}});
       })
     );
   }
 
   getEmail(id: string): Observable<Email> {
-    return this.auth.user$.pipe(
-      take(1),
-      switchMap(user => this.http.get<Email>(`${this.apiUrl}/${id}`).pipe(
-        map(email => {
-          if (user && email.userId && email.userId !== user.uid) {
-            throw new Error('unauthorized_email_access');
-          }
-          return email;
-        })
-      ))
-    );
+    return this.http.get<Email>(`${this.apiUrl}/${id}`);
   }
 
   /**
@@ -49,7 +42,7 @@ export class EmailService {
    * opts.contactId – jeżeli znany, przekażemy do logów konwersacji (dokładniejsze linkowanie).
    */
   sendEmail(
-    email: Omit<Email, 'id' | 'date' | 'isRead' | 'userId'> & { trackLinks?: boolean },
+    email: Omit<Email, 'id' | 'date' | 'isRead'> & { trackLinks?: boolean },
     opts?: { contactId?: string }
   ): Observable<Email> {
     const messageId = this.generateMessageId();
@@ -67,26 +60,25 @@ export class EmailService {
       ? this.wrapWithTracking(withUtm, messageId, email.to)
       : withUtm;
 
-    // Musimy znać userId zanim zapiszemy maila
+    // Backend: fizyczna wysyłka (MailHog/SendGrid/Ethereal)
+    const send$ = this.http.post<{ ok: boolean }>(this.mailSendUrl, {
+      from: email.from,
+      to: email.to,
+      subject: email.subject,
+      body: withTracking,
+      messageId
+    });
+
+    // Po wysłaniu odczytaj bieżącego usera (do userId) i zapisz wiadomość w db.json
     return this.auth.user$.pipe(
       take(1),
       switchMap(user => {
-        const userId = user?.uid || '';
+        const uid = user?.uid ?? '';
 
-        // Backend wysyłki (MailHog/SendGrid/Ethereal)
-        const send$ = this.http.post<{ ok: boolean }>(this.mailSendUrl, {
-          from: email.from,
-          to: email.to,
-          subject: email.subject,
-          body: withTracking,
-          messageId
-        });
-
-        // Po sukcesie zapiszemy maila w json-server
         return send$.pipe(
           switchMap(() => {
             const payload: Omit<Email, 'id'> = {
-              userId,
+              userId: uid,
               from: email.from,
               to: email.to,
               subject: email.subject,
@@ -98,28 +90,53 @@ export class EmailService {
             };
             return this.http.post<Email>(this.apiUrl, payload);
           }),
-          // Log konwersacji (nie blokuje zwrotu)
-          switchMap(saved =>
-            (user
-                ? this.conversations.logEmail({
-                  userId: userId,
-                  direction: 'out',
-                  subject: saved.subject,
-                  body: saved.body || '',
-                  date: saved.date,
-                  emailId: saved.id,
-                  counterpartEmail: saved.to,
-                  contactId: opts?.contactId || undefined
-                }).pipe(
-                  catchError(err => {
-                    console.warn('Log konwersacji nie zapisany', err);
-                    return of({ok: false} as any);
-                  }),
-                  map(() => saved)
-                )
-                : of(saved)
-            )
-          )
+          // Po zapisaniu - zaloguj konwersację (z contactId lub auto-link)
+          switchMap(saved => {
+            if (!uid) {
+              return of(saved);
+            }
+
+            const base = {
+              userId: uid,
+              direction: 'out' as const,
+              subject: saved.subject,
+              body: saved.body || '',
+              date: saved.date,
+              emailId: saved.id,
+              counterpartEmail: saved.to
+            };
+
+            // Mamy contactId -> loguj bezpośrednio
+            if (opts?.contactId) {
+              return this.conversations.logEmail({
+                ...base,
+                contactId: opts.contactId
+              }).pipe(
+                catchError(err => {
+                  console.warn('Log konwersacji (z contactId) nie zapisany', err);
+                  return of({ok: false} as any);
+                }),
+                map(() => saved)
+              );
+            }
+
+            // Brak contactId -> auto-link po adresie odbiorcy
+            return this.conversations.logEmailAutoLink({
+              userId: base.userId,
+              direction: base.direction,
+              subject: base.subject,
+              body: base.body,
+              date: base.date,
+              emailId: base.emailId,
+              counterpartEmail: base.counterpartEmail
+            }).pipe(
+              catchError(err => {
+                console.warn('Log konwersacji (auto-link) nie zapisany', err);
+                return of({ok: false} as any);
+              }),
+              map(() => saved)
+            );
+          })
         );
       })
     );

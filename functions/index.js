@@ -391,11 +391,17 @@ app.post('/api/imap/config', ic.set);
 app.post('/imap/test', ic.test);
 app.post('/api/imap/test', ic.test);
 
+// Konwersacje
 const conv = conversationsHandlers({dbPath: conversationsDbPath});
 app.post('/conversations/logEmail', conv.logEmail);
 app.post('/api/conversations/logEmail', conv.logEmail);
 app.get('/conversations', conv.list);
 app.get('/api/conversations', conv.list);
+
+// Wysyłanie maili
+const mh = mailHandlers({transportPromise: mailTransportPromise, appName: APP_NAME});
+app.post('/mail/send', mh.send);
+app.post('/api/mail/send', mh.send);
 
 // Inbox (server-inbox)
 const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig: imapState});
