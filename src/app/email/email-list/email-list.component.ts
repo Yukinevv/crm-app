@@ -6,6 +6,7 @@ import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {InboxItem, InboxQuery, InboxService} from '../inbox.service';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
+import {ImapConfigView, ImapSettingsService} from '../imap-settings.service';
 
 type Tab = 'inbox' | 'sent';
 
@@ -39,11 +40,15 @@ export class EmailListComponent implements OnInit {
   sentLoading = false;
   sentError: string | null = null;
 
+  // IMAP state
+  imapConfigured: boolean | null = null; // null = nie sprawdzone, true = ok, false = brak
+
   constructor(
     private emailService: EmailService,
     private inboxService: InboxService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private imapSettings: ImapSettingsService
   ) {
     this.inboxForm = this.fb.group({
       q: [''],
@@ -57,6 +62,7 @@ export class EmailListComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.active === 'inbox') {
+      this.checkImapConfigured();
       this.loadInbox();
     } else {
       this.loadSent();
@@ -73,6 +79,7 @@ export class EmailListComponent implements OnInit {
   setTab(tab: Tab): void {
     this.active = tab;
     if (tab === 'inbox' && !this.inboxLoading) {
+      this.checkImapConfigured();
       this.loadInbox();
     } else if (tab === 'sent' && this.emails.length === 0 && !this.sentLoading) {
       this.loadSent();
@@ -152,5 +159,18 @@ export class EmailListComponent implements OnInit {
 
   compose(): void {
     this.router.navigate(['/email/compose']);
+  }
+
+  // ----- IMAP config check -----
+  private checkImapConfigured(): void {
+    this.imapSettings.get().subscribe({
+      next: (cfg: ImapConfigView | null) => {
+        // Uznaje za skonfigurowane, jeśli są host, user i zapisane hasło
+        this.imapConfigured = !!(cfg && cfg.host && cfg.user && cfg.hasPassword);
+      },
+      error: () => {
+        this.imapConfigured = false;
+      }
+    });
   }
 }

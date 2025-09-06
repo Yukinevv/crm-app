@@ -26,6 +26,17 @@
 
   <!-- INBOX -->
   <ng-container *ngIf="active==='inbox'">
+    <!-- INFO: brak konfiguracji IMAP -->
+    <div *ngIf="imapConfigured === false" class="alert alert-info d-flex align-items-center justify-content-between">
+      <div>
+        <strong>Odebrane nie są dostępne:</strong> brak zapisanej konfiguracji IMAP dla Twojego konta.
+        Skonfiguruj połączenie z serwerem pocztowym, aby pobierać maile.
+      </div>
+      <a class="btn btn-outline-primary ms-3 ml-3" routerLink="/email/settings/imap">
+        Przejdź do ustawień IMAP
+      </a>
+    </div>
+
     <!-- Filtry -->
     <form [formGroup]="inboxForm" class="filters mb-4">
       <div class="row mb-3">
@@ -88,7 +99,13 @@
     </div>
 
     <div *ngIf="!inboxLoading && !inbox.length" class="state state-empty text-center">
-      Brak wiadomości w Odebranych dla zastosowanych filtrów.
+      <ng-container *ngIf="imapConfigured === false; else emptyInbox">
+        Brak wiadomości, ponieważ IMAP nie jest skonfigurowany.
+        <a routerLink="/email/settings/imap">Skonfiguruj IMAP</a>, aby pobierać pocztę.
+      </ng-container>
+      <ng-template #emptyInbox>
+        Brak wiadomości w Odebranych dla zastosowanych filtrów.
+      </ng-template>
     </div>
   </ng-container>
 
