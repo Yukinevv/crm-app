@@ -37,7 +37,19 @@
       </a>
     </div>
 
-    <!-- Filtry -->
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="small text-muted">
+        Lista odbierana z IMAP tylko przy pierwszym wejściu. Użyj <em>Odśwież</em>, aby pobrać ponownie.
+      </div>
+      <button class="btn btn-sm btn-outline-secondary"
+              (click)="refreshInbox()"
+              [disabled]="inboxLoading">
+        Odśwież
+        <span class="spinner-border spinner-border-sm ms-1" *ngIf="inboxLoading"></span>
+      </button>
+    </div>
+
+    <!-- Filtry (client-side) -->
     <form [formGroup]="inboxForm" class="filters mb-4">
       <div class="row mb-3">
         <div class="col">
