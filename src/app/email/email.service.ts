@@ -18,8 +18,17 @@ export class EmailService {
   ) {
   }
 
+  /**
+   * Zwraca tylko maile wysłane przez zalogowanego użytkownika (po userId)
+   */
   getEmails(): Observable<Email[]> {
-    return this.http.get<Email[]>(this.apiUrl);
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap(user => {
+        if (!user) return of([] as Email[]);
+        return this.http.get<Email[]>(this.apiUrl, {params: {userId: user.uid}});
+      })
+    );
   }
 
   getEmail(id: string): Observable<Email> {
@@ -60,46 +69,76 @@ export class EmailService {
       messageId
     });
 
-    // Po sukcesie zapisz maila w json-server
-    return send$.pipe(
-      switchMap(() => {
-        const payload: Omit<Email, 'id'> = {
-          from: email.from,
-          to: email.to,
-          subject: email.subject,
-          body: withTracking,
-          date: new Date().toISOString(),
-          isRead: false,
-          messageId,
-          tags
-        };
-        return this.http.post<Email>(this.apiUrl, payload);
-      }),
-      // Spróbuj zalogować konwersację (nie blokuje zwrotu)
-      switchMap(saved =>
-        this.auth.user$.pipe(
-          take(1),
-          switchMap(user => {
-            if (!user) return of(saved);
-            return this.conversations.logEmail({
-              userId: user.uid,
-              direction: 'out',
+    // Po wysłaniu odczytaj bieżącego usera (do userId) i zapisz wiadomość w db.json
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap(user => {
+        const uid = user?.uid ?? '';
+
+        return send$.pipe(
+          switchMap(() => {
+            const payload: Omit<Email, 'id'> = {
+              userId: uid,
+              from: email.from,
+              to: email.to,
+              subject: email.subject,
+              body: withTracking,
+              date: new Date().toISOString(),
+              isRead: false,
+              messageId,
+              tags
+            };
+            return this.http.post<Email>(this.apiUrl, payload);
+          }),
+          // Po zapisaniu - zaloguj konwersację (z contactId lub auto-link)
+          switchMap(saved => {
+            if (!uid) {
+              return of(saved);
+            }
+
+            const base = {
+              userId: uid,
+              direction: 'out' as const,
               subject: saved.subject,
               body: saved.body || '',
               date: saved.date,
               emailId: saved.id,
-              counterpartEmail: saved.to,
-              contactId: opts?.contactId || undefined
+              counterpartEmail: saved.to
+            };
+
+            // Mamy contactId -> loguj bezpośrednio
+            if (opts?.contactId) {
+              return this.conversations.logEmail({
+                ...base,
+                contactId: opts.contactId
+              }).pipe(
+                catchError(err => {
+                  console.warn('Log konwersacji (z contactId) nie zapisany', err);
+                  return of({ok: false} as any);
+                }),
+                map(() => saved)
+              );
+            }
+
+            // Brak contactId -> auto-link po adresie odbiorcy
+            return this.conversations.logEmailAutoLink({
+              userId: base.userId,
+              direction: base.direction,
+              subject: base.subject,
+              body: base.body,
+              date: base.date,
+              emailId: base.emailId,
+              counterpartEmail: base.counterpartEmail
             }).pipe(
               catchError(err => {
-                console.warn('⚠️ Log konwersacji nie zapisany', err);
+                console.warn('Log konwersacji (auto-link) nie zapisany', err);
                 return of({ok: false} as any);
               }),
               map(() => saved)
             );
           })
-        )
-      )
+        );
+      })
     );
   }
 

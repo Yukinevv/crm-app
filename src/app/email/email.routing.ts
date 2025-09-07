@@ -8,6 +8,7 @@ import {EmailConversationsComponent} from './conversations/email-conversations/e
 import {EmailThreadComponent} from './thread/email-thread/email-thread.component';
 import {InboxDetailComponent} from './inbox-detail/inbox-detail.component';
 import {EmailBulkComponent} from './email-bulk/email-bulk.component';
+import {ImapSettingsComponent} from './imap-settings/imap-settings.component';
 
 const routes: Routes = [
   {path: '', component: EmailListComponent},
@@ -17,7 +18,8 @@ const routes: Routes = [
   {path: 'bulk', component: EmailBulkComponent},
   {path: 'stats', component: EmailStatsComponent},
   {path: 'conversations', component: EmailConversationsComponent},
-  {path: 'thread', component: EmailThreadComponent}
+  {path: 'thread', component: EmailThreadComponent},
+  {path: 'settings/imap', component: ImapSettingsComponent}
 ];
 
 @NgModule({

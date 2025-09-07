@@ -1,0 +1,68 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Ustawienia IMAP</h2>
+    <a routerLink="/email" class="btn btn-outline-secondary">← Skrzynka</a>
+  </div>
+
+  <div *ngIf="loading">Ładowanie…</div>
+  <div *ngIf="error" class="text-danger">{{ error }}</div>
+
+  <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="save()">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="mb-3">
+          <label>Host</label>
+          <input class="form-control" formControlName="host" placeholder="imap.example.com">
+        </div>
+        <div class="mb-3">
+          <label>Port</label>
+          <input type="number" class="form-control" formControlName="port" placeholder="993">
+        </div>
+        <div class="mb-3 form-check">
+          <input id="secure" type="checkbox" class="form-check-input" formControlName="secure">
+          <label class="form-check-label" for="secure">SSL/TLS</label>
+        </div>
+        <div class="mb-3">
+          <label>Użytkownik (login)</label>
+          <input class="form-control" formControlName="user" placeholder="user@example.com">
+        </div>
+        <div class="mb-3">
+          <label>Hasło</label>
+          <input type="password" class="form-control" formControlName="pass"
+                 [placeholder]="hasPasswordOnServer ? '(niezmienione)' : ''">
+          <small class="text-muted">Pozostaw puste, aby nie zmieniać zapisanego hasła.</small>
+        </div>
+        <div class="mb-3">
+          <label>Folder</label>
+          <input class="form-control" formControlName="mailbox" placeholder="INBOX">
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving">
+        Zapisz
+        <span class="spinner-border spinner-border-sm ms-1" *ngIf="saving"></span>
+      </button>
+      <button class="btn btn-outline-secondary ms-2 ml-2" type="button" (click)="test()"
+              [disabled]="form.invalid || testing">
+        Test połączenia
+        <span class="spinner-border spinner-border-sm ms-1" *ngIf="testing"></span>
+      </button>
+    </div>
+
+    <div class="card mt-3" *ngIf="testResult">
+      <div class="card-header">Wynik testu</div>
+      <div class="card-body">
+        <div class="mb-2"><strong>Status:</strong> OK</div>
+        <div class="mb-2"><strong>Dostępne foldery:</strong> {{ testResult.mailboxes.join(', ') || '—' }}</div>
+        <div *ngIf="testResult.sample?.length">
+          <strong>Przykładowe wiadomości (ostatnie):</strong>
+          <ul class="mb-0">
+            <li *ngFor="let s of testResult.sample">{{ s.subject }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

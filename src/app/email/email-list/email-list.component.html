@@ -6,6 +6,7 @@
       <a class="btn btn-outline-secondary ml-2" routerLink="/email/bulk">Wyślij do kontaktów</a>
       <a class="btn btn-primary ml-2" routerLink="/email/stats">Statystyki kliknięć</a>
       <a class="btn btn-outline-primary ml-2" routerLink="/email/conversations">Logi konwersacji</a>
+      <a class="btn btn-outline-secondary ml-2" routerLink="/email/settings/imap">Ustawienia IMAP</a>
     </div>
   </div>
 
@@ -25,7 +26,30 @@
 
   <!-- INBOX -->
   <ng-container *ngIf="active==='inbox'">
-    <!-- Filtry -->
+    <!-- INFO: brak konfiguracji IMAP -->
+    <div *ngIf="imapConfigured === false" class="alert alert-info d-flex align-items-center justify-content-between">
+      <div>
+        <strong>Odebrane nie są dostępne:</strong> brak zapisanej konfiguracji IMAP dla Twojego konta.
+        Skonfiguruj połączenie z serwerem pocztowym, aby pobierać maile.
+      </div>
+      <a class="btn btn-outline-primary ms-3 ml-3" routerLink="/email/settings/imap">
+        Przejdź do ustawień IMAP
+      </a>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="small text-muted">
+        Lista odbierana z IMAP tylko przy pierwszym wejściu. Użyj <em>Odśwież</em>, aby pobrać ponownie.
+      </div>
+      <button class="btn btn-sm btn-outline-secondary"
+              (click)="refreshInbox()"
+              [disabled]="inboxLoading">
+        Odśwież
+        <span class="spinner-border spinner-border-sm ms-1" *ngIf="inboxLoading"></span>
+      </button>
+    </div>
+
+    <!-- Filtry (client-side) -->
     <form [formGroup]="inboxForm" class="filters mb-4">
       <div class="row mb-3">
         <div class="col">
@@ -87,7 +111,13 @@
     </div>
 
     <div *ngIf="!inboxLoading && !inbox.length" class="state state-empty text-center">
-      Brak wiadomości w Odebranych dla zastosowanych filtrów.
+      <ng-container *ngIf="imapConfigured === false; else emptyInbox">
+        Brak wiadomości, ponieważ IMAP nie jest skonfigurowany.
+        <a routerLink="/email/settings/imap">Skonfiguruj IMAP</a>, aby pobierać pocztę.
+      </ng-container>
+      <ng-template #emptyInbox>
+        Brak wiadomości w Odebranych dla zastosowanych filtrów.
+      </ng-template>
     </div>
   </ng-container>
 

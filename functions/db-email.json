@@ -95,6 +95,30 @@
       "emailId": 9,
       "contactId": "ct_003",
       "counterpartEmail": "marek.lewandowski@acme.pl"
+    },
+    {
+      "id": "conv_mf5nww7b_hyg4g298",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "in",
+      "subject": "Trent Alexander-Arnold w stylizacjach Calvin Klein",
+      "preview": "\n",
+      "date": "2025-09-03T13:55:42.000Z",
+      "emailId": "imap:1768",
+      "leadId": "lead_mf5nww7a_7dg7czle",
+      "counterpartEmail": "news@mailing.calvinklein.com"
+    },
+    {
+      "id": "conv_mf6tsz88_dulra57q",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "type": "email",
+      "direction": "in",
+      "subject": "Alert bezpieczeństwa",
+      "preview": "[image: Google]\nUtworzono hasło do aplikacji, które pozwala logować się na Twoje konto\n\n\nadrianrodzicsh@gmail.com\nJeśli to nie Ty wygenerowałeś to hasło do aplikacji CRM-APP, może to\noznaczać, że ktoś używa Twojego konta. Jak najszybciej je sprawdź\ni zabezpiecz.\nSprawdź aktywność\n<https://accounts.g",
+      "date": "2025-09-04T14:44:26.000Z",
+      "emailId": "imap:1776",
+      "leadId": "lead_mf6tsz87_jafkxm05",
+      "counterpartEmail": "no-reply@accounts.google.com"
     }
   ],
   "leadsEmail": [
@@ -133,10 +157,39 @@
       "status": "Nowy",
       "source": "E-mail",
       "createdAt": "2025-08-26T12:28:11.760Z"
+    },
+    {
+      "id": "lead_mf5nww7a_7dg7czle",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "news@mailing.calvinklein.com",
+      "name": "news",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-09-04T17:10:41.926Z"
+    },
+    {
+      "id": "lead_mf6tsz87_jafkxm05",
+      "userId": "l5b4gNGQ67dY7mH6L3kyXWvwpVe2",
+      "email": "no-reply@accounts.google.com",
+      "name": "no-reply",
+      "status": "Nowy",
+      "source": "E-mail",
+      "createdAt": "2025-09-05T12:43:23.095Z"
     }
   ],
   "inboxRead": {
     "mh:Cx7eyyqvr_OyLK8JqfDyw1SC4TEGgqL5aas-6VD1-dw=@mailhog.example": true,
     "mh:XhXeQlzQBwKcWmVMHB0GWlqk05qkFmdfaNssNVZXhtI=@mailhog.example": true
+  },
+  "imapConfigsByUid": {
+    "l5b4gNGQ67dY7mH6L3kyXWvwpVe2": {
+      "host": "imap.gmail.com",
+      "port": "993",
+      "secure": "true",
+      "user": "adrianrodzicsh@gmail.com",
+      "passEnc": "v1.vCz/7iLI1MovoT8Z.IWGbKj78pOMf8Aj6DxBYAg==.QHITDWxLq6oCkOOEq4+Ahw==",
+      "mailbox": "[Gmail]/Wszystkie",
+      "updatedAt": "2025-09-05T12:42:44.684Z"
+    }
   }
 }

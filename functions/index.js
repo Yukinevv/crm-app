@@ -1,3 +1,5 @@
+'use strict';
+
 const {onRequest, onCall, HttpsError} = require('firebase-functions/v2/https');
 const {defineSecret} = require('firebase-functions/params');
 const {setGlobalOptions} = require('firebase-functions/v2');
@@ -6,12 +8,14 @@ const admin = require('firebase-admin');
 const express = require('express');
 const jsonServer = require('json-server');
 const nodemailer = require('nodemailer');
-const {FieldValue} = require('firebase-admin/firestore');
 
-const {join} = require("node:path");
+const {join} = require('node:path');
 const {conversationsHandlers} = require('./server-api');
 const {inboxHandlers} = require('./server-inbox');
 const {mailHandlers} = require('./server-mail');
+
+const {createImapStateFromEnv} = require('./utils');
+const {imapConfigHandlers} = require('./server-imap-config');
 
 if (process.env.FORCE_PROD_DB === '1') {
   delete process.env.FIRESTORE_EMULATOR_HOST;
@@ -24,18 +28,8 @@ admin.initializeApp();
 // === Secrets ===
 const SENDGRID_KEY = defineSecret('SENDGRID_KEY');
 
-const imapConfig = {
-  host: process.env.IMAP_HOST || '',
-  port: process.env.IMAP_PORT || '993',
-  secure: process.env.IMAP_SECURE || 'true',
-  user: process.env.IMAP_USER || '',
-  pass: process.env.IMAP_PASS || ''
-};
-
-// Transport email zależny od środowiska (MailHog w emulatorze, SendGrid na produkcji,
-// Ethereal jako fallback).
+// Transport email zależny od środowiska
 async function createMailTransport() {
-  // Emulator: MailHog na localhost:1025
   if (process.env.FUNCTIONS_EMULATOR) {
     console.log('⚙️ Używam lokalnego MailHog na porcie 1025');
     return nodemailer.createTransport({
@@ -45,47 +39,72 @@ async function createMailTransport() {
     });
   }
 
-  // Produkcja: SendGrid przez sekret
   const sgKey = process.env.SENDGRID_KEY;
   if (sgKey) {
     console.log('⚙️ Używam SendGrid SMTP (sekret SENDGRID_KEY obecny)');
     return nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
       port: 587,
-      auth: {
-        user: 'apikey',
-        pass: sgKey
-      }
+      auth: {user: 'apikey', pass: sgKey}
     });
   }
 
-  // Fallback: Ethereal test account (tylko do podglądu)
   console.log('⚙️ Brak SENDGRID_KEY – tworzę konto Ethereal (test)');
   const testAccount = await nodemailer.createTestAccount();
   console.log('ℹ️ Ethereal user/pass:', testAccount.user, testAccount.pass);
   return nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass
-    }
+    auth: {user: testAccount.user, pass: testAccount.pass}
   });
 }
 
 const mailTransportPromise = createMailTransport();
 const APP_NAME = 'CRM-APP';
 
-// ========== CALLABLES ==========
+/* ===================== AUTH MIDDLEWARE ===================== */
 
-// getUserByEmail (by powiązać kontakt po emailu z Firebase Auth UID)
+function getBearerToken(req) {
+  const h = req.get('Authorization') || '';
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  if (m) return m[1];
+  // alternatywnie cookie session
+  const cookie = req.headers.cookie || '';
+  const cm = cookie.match(/(?:^|;\s*)__session=([^;]+)/);
+  return cm ? decodeURIComponent(cm[1]) : null;
+}
+
+const verifyFirebaseAuth = async (req, res, next) => {
+  try {
+    if (req.method === 'OPTIONS') return next(); // preflight CORS
+
+    const token = getBearerToken(req);
+
+    // Dev-bypass w emulatorze
+    if (!token && process.env.FUNCTIONS_EMULATOR && process.env.ALLOW_DEV_AUTH_BYPASS === '1') {
+      req.user = {uid: 'dev-uid'};
+      return next();
+    }
+
+    if (!token) {
+      return res.status(401).json({error: 'unauthenticated'});
+    }
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    req.user = {uid: decoded.uid, email: decoded.email || null};
+    return next();
+  } catch (e) {
+    return res.status(401).json({error: 'unauthenticated'});
+  }
+};
+
+/* ======================= CALLABLES ======================= */
+
 exports.getUserByEmail = onCall(async (request) => {
   const data = request.data || {};
   const email = typeof data.email === 'string' ? data.email : data?.data?.email;
 
-  if (!email) {
-    throw new HttpsError('invalid-argument', 'Brak adresu email');
-  }
+  if (!email) throw new HttpsError('invalid-argument', 'Brak adresu email');
 
   try {
     const user = await admin.auth().getUserByEmail(email);
@@ -95,10 +114,8 @@ exports.getUserByEmail = onCall(async (request) => {
   }
 });
 
-// sendBookingConfirmation – potwierdzenie rezerwacji
 exports.sendBookingConfirmation = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
-  const payload = request.data || {};
-  const {email, start, end} = payload;
+  const {email, start, end} = request.data || {};
 
   if (!email || !start || !end) {
     throw new HttpsError('invalid-argument', 'Brakuje danych do wysłania potwierdzenia');
@@ -134,10 +151,8 @@ Zespół ${APP_NAME}`
   }
 });
 
-// sendInvitationEmail – powiadomienie dla zaproszonego użytkownika
 exports.sendInvitationEmail = onCall({secrets: [SENDGRID_KEY]}, async (request) => {
-  const payload = request.data || {};
-  const {email, title, start, end, inviterEmail} = payload;
+  const {email, title, start, end, inviterEmail} = request.data || {};
 
   if (!email || !title || !start || !end || !inviterEmail) {
     throw new HttpsError('invalid-argument', 'Brakuje danych do wysłania zaproszenia');
@@ -174,45 +189,7 @@ Zespół ${APP_NAME}`
   }
 });
 
-// --- Tracking kliknięć: GET /api/t?m=<messageId>&u=<encodedTarget>&r=<recipientEmail>
-
-const trackingHandler = async (req, res) => {
-  try {
-    const m = String(req.query.m || '');
-    const u = String(req.query.u || '');
-    const r = req.query.r ? String(req.query.r) : null;
-
-    console.log('↪️ /t hit', {path: req.path, m, hasU: !!u, r});
-
-    if (!m || !u) {
-      return res.status(400).send('Missing query params: m, u');
-    }
-    if (!/^https?:\/\//i.test(u)) {
-      return res.status(400).send('Invalid target url');
-    }
-
-    const ua = req.get('user-agent') || '';
-    const ipHeader = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '';
-    const ip = Array.isArray(ipHeader) ? ipHeader[0] : String(ipHeader).split(',')[0].trim();
-
-    await admin.firestore().collection('clicks').add({
-      messageId: m,
-      recipient: r,
-      url: u,
-      userAgent: ua,
-      ip,
-      ts: FieldValue.serverTimestamp()
-    });
-
-    console.log('📝 zapisano kliknięcie → redirect 302');
-    return res.redirect(302, u);
-  } catch (err) {
-    console.error('❌ Click tracking error:', err);
-    return res.status(500).send('Click tracking failed');
-  }
-};
-
-// ====== STATYSTYKI: LISTA KLIKÓW, PODSUMOWANIA, CSV ======
+/* ======================= Tracking + statystyki ======================= */
 
 function tsToIso(ts) {
   if (!ts) return null;
@@ -224,7 +201,35 @@ function tsToIso(ts) {
   }
 }
 
-// Lista kliknięć dla messageId
+const trackingHandler = async (req, res) => {
+  try {
+    const m = String(req.query.m || '');
+    const u = String(req.query.u || '');
+    const r = req.query.r ? String(req.query.r) : null;
+
+    if (!m || !u) return res.status(400).send('Missing query params: m, u');
+    if (!/^https?:\/\//i.test(u)) return res.status(400).send('Invalid target url');
+
+    const ua = req.get('user-agent') || '';
+    const ipHeader = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '';
+    const ip = Array.isArray(ipHeader) ? ipHeader[0] : String(ipHeader).split(',')[0].trim();
+
+    await admin.firestore().collection('clicks').add({
+      messageId: m,
+      recipient: r,
+      url: u,
+      userAgent: ua,
+      ip,
+      ts: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    return res.redirect(302, u);
+  } catch (err) {
+    console.error('❌ Click tracking error:', err);
+    return res.status(500).send('Click tracking failed');
+  }
+};
+
 const clicksListHandler = async (req, res) => {
   try {
     const messageId = String(req.query.messageId || '');
@@ -361,7 +366,7 @@ const summaryCsvHandler = async (req, res) => {
   }
 };
 
-// ========== HTTP API (Express) ==========
+/* ========================= HTTP API (Express) ========================= */
 
 const app = express();
 const middlewares = jsonServer.defaults();
@@ -370,7 +375,44 @@ const router = jsonServer.router('db.json');
 app.use(middlewares);
 app.use(jsonServer.bodyParser);
 
-// REST przez json-server
+// Ścieżka do bazy e-mail/konwersacji i stan IMAP
+const conversationsDbPath = join(__dirname, 'db-email.json');
+
+// Inicjalizacja stanu IMAP + handlery konfiguracji IMAP
+const imapState = createImapStateFromEnv(process.env);
+const ic = imapConfigHandlers({dbPath: conversationsDbPath, state: imapState});
+
+app.use(['/imap', '/api/imap', '/inbox', '/api/inbox'], verifyFirebaseAuth);
+
+app.get('/imap/config', ic.get);
+app.get('/api/imap/config', ic.get);
+app.post('/imap/config', ic.set);
+app.post('/api/imap/config', ic.set);
+app.post('/imap/test', ic.test);
+app.post('/api/imap/test', ic.test);
+
+// Konwersacje
+const conv = conversationsHandlers({dbPath: conversationsDbPath});
+app.post('/conversations/logEmail', conv.logEmail);
+app.post('/api/conversations/logEmail', conv.logEmail);
+app.get('/conversations', conv.list);
+app.get('/api/conversations', conv.list);
+
+// Wysyłanie maili
+const mh = mailHandlers({transportPromise: mailTransportPromise, appName: APP_NAME});
+app.post('/mail/send', mh.send);
+app.post('/api/mail/send', mh.send);
+
+// Inbox (server-inbox)
+const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig: imapState});
+app.get('/inbox/messages', ih.list);
+app.get('/api/inbox/messages', ih.list);
+app.get('/inbox/message/:id', ih.getMessage);
+app.get('/api/inbox/message/:id', ih.getMessage);
+app.post('/inbox/markRead', ih.markRead);
+app.post('/api/inbox/markRead', ih.markRead);
+
+// Tracking/Statystyki
 app.get('/t', trackingHandler);
 app.get('/stats/clicks', clicksListHandler);
 app.get('/stats/clicks/summary', clicksSummaryHandler);
@@ -382,25 +424,6 @@ app.get('/api/stats/clicks', clicksListHandler);
 app.get('/api/stats/clicks/summary', clicksSummaryHandler);
 app.get('/api/stats/clicks/csv', clicksCsvHandler);
 app.get('/api/stats/clicks/summary.csv', summaryCsvHandler);
-
-const conversationsDbPath = join(__dirname, 'db-email.json');
-const conv = conversationsHandlers({dbPath: conversationsDbPath});
-app.post('/conversations/logEmail', conv.logEmail);
-app.post('/api/conversations/logEmail', conv.logEmail);
-app.get('/conversations', conv.list);
-app.get('/api/conversations', conv.list);
-
-const ih = inboxHandlers({dbPath: conversationsDbPath, imapConfig});
-app.get('/inbox/messages', ih.list);
-app.get('/api/inbox/messages', ih.list);
-app.get('/inbox/message/:id', ih.getMessage);
-app.get('/api/inbox/message/:id', ih.getMessage);
-app.post('/inbox/markRead', ih.markRead);
-app.post('/api/inbox/markRead', ih.markRead);
-
-const mh = mailHandlers({transportPromise: mailTransportPromise, appName: APP_NAME});
-app.post('/mail/send', mh.send);
-app.post('/api/mail/send', mh.send);
 
 app.use('/api', router);
 
