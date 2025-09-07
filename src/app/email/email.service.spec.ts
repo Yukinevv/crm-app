@@ -15,13 +15,20 @@ class MockAuthService {
 }
 
 class MockConversationService {
-  logEmail = jasmine.createSpy('logEmail').and.returnValue(of({ok: true, conversation: {} as any}));
+  // obie metody używane przez EmailService
+  logEmail = jasmine.createSpy('logEmail').and.returnValue(
+    of({ok: true, conversation: {} as any})
+  );
+  logEmailAutoLink = jasmine.createSpy('logEmailAutoLink').and.returnValue(
+    of({ok: true, conversation: {} as any})
+  );
 }
 
 describe('EmailService', () => {
   let service: EmailService;
   let http: HttpTestingController;
   let conv: MockConversationService;
+  let auth: MockAuthService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -36,10 +43,43 @@ describe('EmailService', () => {
     service = TestBed.inject(EmailService);
     http = TestBed.inject(HttpTestingController);
     conv = TestBed.inject(ConversationService) as unknown as MockConversationService;
+    auth = TestBed.inject(AuthService) as unknown as MockAuthService;
   });
 
   afterEach(() => {
     http.verify();
+  });
+
+  it('getEmails(): pobiera tylko maile zalogowanego usera (param userId)', (done) => {
+    service.getEmails().subscribe(list => {
+      expect(list.length).toBe(2);
+      done();
+    });
+
+    const req = http.expectOne(r => r.url === '/api/emails' && r.params.get('userId') === 'u1');
+    expect(req.request.method).toBe('GET');
+    req.flush([
+      {
+        id: 'e1',
+        from: 'me',
+        to: 'a',
+        subject: 'S1',
+        body: '',
+        date: '2025-01-01T10:00:00.000Z',
+        isRead: false,
+        userId: 'u1'
+      },
+      {
+        id: 'e2',
+        from: 'me',
+        to: 'b',
+        subject: 'S2',
+        body: '',
+        date: '2025-01-02T10:00:00.000Z',
+        isRead: true,
+        userId: 'u1'
+      }
+    ]);
   });
 
   it('powinien wysłać mail (backend), zapisać w /api/emails i zalogować konwersację z contactId', (done) => {
@@ -57,41 +97,76 @@ describe('EmailService', () => {
       {contactId: 'c1'}
     ).subscribe(saved => {
       expect(saved).toBeTruthy();
-      // conv.logEmail wywołane z contactId
+
+      // logEmail z contactId
       expect(conv.logEmail).toHaveBeenCalled();
       const payload = conv.logEmail.calls.mostRecent().args[0];
       expect(payload.contactId).toBe('c1');
       expect(payload.direction).toBe('out');
       expect(payload.counterpartEmail).toBe('wiktor@testowa.pl');
+
+      // i nie wywołuje auto-link w tym wariancie
+      expect(conv.logEmailAutoLink).not.toHaveBeenCalled();
       done();
     });
 
-    // 1) wysyłka fizyczna
+    // wysyłka fizyczna
     const sendReq = http.expectOne('/api/mail/send');
     expect(sendReq.request.method).toBe('POST');
     const sendBody = sendReq.request.body as any;
     expect(sendBody.messageId).toBe('m_test');
-    // body powinno być opakowane trackingiem /api/t?m=m_test&u=...
     expect(sendBody.body).toContain('/api/t?');
     expect(sendBody.body).toContain('m=m_test');
     sendReq.flush({ok: true});
 
-    // 2) zapis w skrzynce (json-server)
+    // zapis w skrzynce (json-server)
     const saveReq = http.expectOne('/api/emails');
     expect(saveReq.request.method).toBe('POST');
     const mailPayload = saveReq.request.body as any;
+    expect(mailPayload.userId).toBe('u1');
     expect(mailPayload.tags?.utm_content).toBe('m_test');
-    expect(mailPayload.body).toContain('/api/t?'); // dalej z trackingiem
-    saveReq.flush({
-      id: 'e1',
-      ...mailPayload
-    });
+    expect(mailPayload.body).toContain('/api/t?');
+    saveReq.flush({id: 'e1', ...mailPayload});
   });
 
-  it('powinien przeżyć błąd logowania konwersacji (mail zapisany OK)', (done) => {
+  it('powinien zalogować konwersację przez auto-link gdy brak contactId', (done) => {
+    spyOn<any>(service as any, 'generateMessageId').and.returnValue('m_auto');
+
+    service.sendEmail(
+      {
+        from: 'sender@crm-app.test',
+        to: 'auto@link.pl',
+        subject: 'S',
+        body: 'B',
+        trackLinks: false
+      }
+    ).subscribe(saved => {
+      expect(saved).toBeTruthy();
+
+      // powinno polecieć auto-link
+      expect(conv.logEmailAutoLink).toHaveBeenCalled();
+      const payload = conv.logEmailAutoLink.calls.mostRecent().args[0];
+      expect(payload.userId).toBe('u1');
+      expect(payload.counterpartEmail).toBe('auto@link.pl');
+
+      // i nie wywołuje logEmail w tym wariancie
+      expect(conv.logEmail).not.toHaveBeenCalled();
+
+      done();
+    });
+
+    const sendReq = http.expectOne('/api/mail/send');
+    sendReq.flush({ok: true});
+
+    const saveReq = http.expectOne('/api/emails');
+    saveReq.flush({id: 'eA', ...saveReq.request.body});
+  });
+
+  it('powinien przeżyć błąd logowania konwersacji (auto-link) – mail zapisany OK', (done) => {
     spyOn<any>(service as any, 'generateMessageId').and.returnValue('m_x');
-    // symuluj błąd logEmail
-    conv.logEmail.and.returnValue(throwError(() => new Error('fail')));
+
+    // symuluj błąd logEmailAutoLink (bo brak contactId)
+    conv.logEmailAutoLink.and.returnValue(throwError(() => new Error('fail')));
 
     service.sendEmail(
       {
@@ -102,8 +177,8 @@ describe('EmailService', () => {
         trackLinks: false
       }
     ).subscribe(saved => {
-      expect(saved).toBeTruthy();     // mimo erroru w logEmail
-      expect(conv.logEmail).toHaveBeenCalled();
+      expect(saved).toBeTruthy();     // mimo erroru w logEmailAutoLink
+      expect(conv.logEmailAutoLink).toHaveBeenCalled();
       done();
     });
 
@@ -160,6 +235,7 @@ describe('EmailService', () => {
 
     const saveReq = http.expectOne('/api/emails');
     const mailPayload = saveReq.request.body as any;
+    expect(mailPayload.userId).toBe('u1');
     expect(mailPayload.body).toBe('http://example.com/plain');
     saveReq.flush({id: 'e3', ...mailPayload});
   });
